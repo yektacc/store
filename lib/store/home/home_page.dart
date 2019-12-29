@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/landing_page.dart';
@@ -24,11 +25,12 @@ import 'package:store/store/products/product/products_bloc.dart';
 import 'package:store/store/products/search/search_delegate.dart';
 import 'package:store/store/products/special/special_products_page.dart';
 import 'package:store/store/products/special/special_products_repository.dart';
+import 'package:store/store/shop_management/seller_list_page.dart';
 import 'package:store/store/shop_management/seller_login_page.dart';
+import 'package:store/store/shop_management/shop_management_bloc.dart';
 import 'package:store/store/structure/model.dart';
 import 'package:store/store/structure/structure_bloc.dart';
 import 'package:store/store/structure/structure_event_state.dart';
-import 'package:provider/provider.dart';
 
 import '../../app.dart';
 import 'info_page.dart';
@@ -351,16 +353,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             BlocBuilder(
                 bloc: widget._loginStatusBloc,
                 builder: (context, LoginStatusState state) {
+                  var shopBloc = Provider.of<ShopManagementBloc>(context);
+
+                  print('askljflaksdjflaksjdflksadjf' +
+                      (state is IsLoggedIn).toString());
+
                   return new Container(
                     padding: EdgeInsets.only(right: 4, top: 20),
                     child: Column(
                       children: <Widget>[
-                        _buildDrawerItem(() {
+                        state is IsLoggedIn
+                            ? _buildDrawerItem(() {
                           Navigator.of(context)
                               .push(MaterialPageRoute(builder: (context) {
                             return ProfilePage();
                           }));
-                        }, Icons.person, "پروفایل کاربری"),
+                        }, Icons.person, "پروفایل کاربری")
+                            : Container(),
                         _buildDrawerItem(() {
                           Navigator.of(context).pushNamed(CartPage.routeName);
                         }, Icons.shopping_cart, "سبد خرید"),
@@ -370,14 +379,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             return InfoPage();
                           }));
                         }, Icons.info, "حقوق و قوانین"),
-                        _buildDrawerItem(() {
+                        state is IsLoggedIn
+                            ? _buildDrawerItem(() {
                           Navigator.of(context).push(MaterialPageRoute(
                               builder: (context) => OrderPage()));
-                        }, Icons.history, "سفارش های قبلی"),
-                        _buildDrawerItem(() {
+                        }, Icons.history, "سفارش های قبلی")
+                            : Container(),
+                        state is IsLoggedIn
+                            ? _buildDrawerItem(() {
                           Navigator.of(context).push(MaterialPageRoute(
                               builder: (context) => FavoritesPage()));
-                        }, Icons.favorite, "علاقه‌مندی ها"),
+                        }, Icons.favorite, "علاقه‌مندی ها")
+                            : Container(),
                         Divider(),
                         _buildDrawerItem(() {
                           Navigator.of(context).push(MaterialPageRoute(
@@ -390,10 +403,73 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   SpecialProductType.NEWEST)));
                         }, Icons.new_releases, "جدید‌ترین محصولات"),
                         Divider(),
-                        _buildDrawerItem(() {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => SellerLoginPage()));
-                        }, Icons.store, "ورود به قسمت فروشندگان"),
+                        shopBloc.user == null
+                            ? _buildDrawerItem(() {
+                          if (shopBloc.user == null) {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => SellerLoginPage()));
+                          }
+                        }, Icons.store, "ورود به قسمت فروشندگان")
+                            : GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => SellersListPage()));
+                          },
+                          child: Card(
+                            color: Colors.blueGrey[50],
+                            margin: EdgeInsets.only(right: 12, left: 55),
+                            child: Container(
+                              alignment: Alignment.centerRight,
+                              height: 75,
+                              width: double.infinity,
+                              child: Column(
+                                children: <Widget>[
+                                  Expanded(
+                                    flex: 3,
+                                    child: Row(
+                                      children: <Widget>[
+                                        Container(
+                                          child: Icon(
+                                            Icons.store,
+                                            color: Colors.grey[800],
+                                            size: 22,
+                                          ),
+                                          margin: EdgeInsets.symmetric(
+                                              horizontal: 10),
+                                        ),
+                                        Text(
+                                          "ورود به قسمت فروشندگان",
+                                          style: TextStyle(
+                                              color: Colors.grey[800]),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Container(
+                                      child: Text(
+                                        shopBloc.user.email,
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11),
+                                      ),
+                                      decoration: BoxDecoration(
+                                          color: AppColors.main_color,
+                                          borderRadius: BorderRadius.only(
+                                              bottomLeft:
+                                              Radius.circular(4),
+                                              bottomRight:
+                                              Radius.circular(4))),
+                                      alignment: Alignment.centerRight,
+                                      padding: EdgeInsets.only(right: 12),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
                       ],
                     ),
                   );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/data_layer/centers/centers_repository.dart';
 import 'package:store/data_layer/centers/service_repository.dart';
@@ -39,9 +40,10 @@ import 'package:store/store/products/search/search_bloc.dart';
 import 'package:store/store/products/special/special_products_repository.dart';
 import 'package:store/store/shop_management/create_product_page.dart';
 import 'package:store/store/shop_management/seller_add_product_page.dart';
+import 'package:store/store/shop_management/seller_list_page.dart';
+import 'package:store/store/shop_management/shop_management_bloc.dart';
 import 'package:store/store/structure/repository.dart';
 import 'package:store/store/structure/structure_bloc.dart';
-import 'package:provider/provider.dart';
 
 import 'data_layer/ads/ads_repository.dart';
 import 'data_layer/brands/brands_repository.dart';
@@ -50,7 +52,7 @@ import 'data_layer/order/save_order_repository.dart';
 import 'data_layer/payment/delivery/delivery_price_repository.dart';
 import 'data_layer/products/product_pictures_repository.dart';
 import 'data_layer/products/products_count_in_category.dart';
-import 'data_layer/shop_management/seller_repository.dart';
+import 'data_layer/shop_management/shop_repository.dart';
 import 'landing_page.dart';
 
 class App extends StatefulWidget {
@@ -90,11 +92,12 @@ class App extends StatefulWidget {
   final ProductPicturesRepository _picturesRepo;
   final BrandsRepository _brandsRepo;
   final CentersRepository _centersRepo;
-  final PreviousOrdersRepository _prvOrderRepository;
+  final OrdersRepository _prvOrderRepository;
   final SiteInfoRepository _siteInfoRepository;
   final ProductsRepository _productsRepository;
   final FavoriteBloc _favoriteBloc;
   final CommentsRepository _commentsRepo;
+  final ShopManagementBloc _shopBloc;
 
   App(
       this._productsBloc,
@@ -135,7 +138,8 @@ class App extends StatefulWidget {
       this._siteInfoRepository,
       this._productsRepository,
       this._favoriteBloc,
-      this._commentsRepo);
+      this._commentsRepo,
+      this._shopBloc);
 
   @override
   _AppState createState() => _AppState();
@@ -179,7 +183,8 @@ class _AppState extends State<App> {
           Provider<ShopRepository>.value(value: widget._sellerRepo),
           Provider<ProductsCountRepository>.value(value: widget._countRepo),
           Provider<ProvinceRepository>.value(value: widget._provinceRepo),
-          Provider<SpecialProductsRepository>.value(value: widget._bestSellerRepo),
+          Provider<SpecialProductsRepository>.value(
+              value: widget._bestSellerRepo),
           Provider<ServicesRepository>.value(value: widget._servicesRepo),
           Provider<LostPetsRepository>.value(value: widget._lostPetsRepo),
           Provider<AdsRepository>.value(
@@ -199,12 +204,13 @@ class _AppState extends State<App> {
               value: widget._picturesRepo),
           Provider<BrandsRepository>.value(value: widget._brandsRepo),
           Provider<CentersRepository>.value(value: widget._centersRepo),
-          Provider<PreviousOrdersRepository>.value(
+          Provider<OrdersRepository>.value(
               value: widget._prvOrderRepository),
           Provider<SiteInfoRepository>.value(value: widget._siteInfoRepository),
           Provider<ProductsRepository>.value(value: widget._productsRepository),
           Provider<FavoriteBloc>.value(value: widget._favoriteBloc),
           Provider<CommentsRepository>.value(value: widget._commentsRepo),
+          Provider<ShopManagementBloc>.value(value: widget._shopBloc),
         ],
         child: MaterialApp(
           title: 'epet24',
@@ -257,8 +263,13 @@ class _AppState extends State<App> {
                 return MaterialPageRoute(builder: (context) => ProductsPage());
                 break;
 
+              case SellersListPage.routeName:
+                return MaterialPageRoute(
+                    builder: (context) => SellersListPage());
+                break;
+
               case CreateProductPage.routeName:
-                final Shop arg = settings.arguments;
+                final ShopIdentifier arg = settings.arguments;
                 return MaterialPageRoute(
                   builder: (context) {
                     return CreateProductPage(
@@ -269,7 +280,7 @@ class _AppState extends State<App> {
                 break;
 
               case SellerAddProductsPage.routeName:
-                final Shop arg = settings.arguments;
+                final ShopIdentifier arg = settings.arguments;
                 return MaterialPageRoute(
                   builder: (context) {
                     return SellerAddProductsPage(

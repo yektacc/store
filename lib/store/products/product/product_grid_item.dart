@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/data_layer/products/product_pictures_repository.dart';
 import 'package:store/store/products/detail/product_detail_page.dart';
 import 'package:store/store/products/filter/filter.dart';
 import 'package:store/store/products/product/product.dart';
-import 'package:provider/provider.dart';
 
 class ProductGridItem extends StatelessWidget {
   final Product _product;
@@ -52,7 +52,8 @@ class ProductGridItem extends StatelessWidget {
                                       context)
                                   .fetch(int.parse(_product.id)),
                               builder: (context, snapshot) {
-                                if (snapshot != null && snapshot.data != null) {
+                                if (snapshot != null && snapshot.data != null &&
+                                    snapshot.data.isNotEmpty) {
                                   return Helpers.image(
                                       snapshot.data[0].imageURL);
                                 } else {

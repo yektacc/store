@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
-import 'package:store/data_layer/shop_management/seller_repository.dart';
+import 'package:store/data_layer/shop_management/shop_repository.dart';
 import 'package:store/store/products/product/product.dart';
 import 'package:store/store/products/product/products_bloc.dart';
 import 'package:store/store/products/product/products_bloc_event.dart';
-import 'package:provider/provider.dart';
 
 class SellerAddProductsPage extends StatefulWidget {
   static const String routeName = 'selleraddproduct';
 
-  final Shop shop;
+  final ShopIdentifier shop;
 
   SellerAddProductsPage({@required this.shop});
 

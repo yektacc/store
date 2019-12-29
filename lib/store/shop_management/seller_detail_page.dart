@@ -1,15 +1,18 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-import 'package:store/common/constants.dart';
-import 'package:store/common/loading_widget.dart';
-import 'package:store/data_layer/shop_management/seller_repository.dart';
-import 'package:store/store/products/filter/filter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:store/common/constants.dart';
+import 'package:store/common/loading_widget.dart';
+import 'package:store/data_layer/shop_management/shop_repository.dart';
+import 'package:store/store/products/filter/filter.dart';
+import 'package:store/store/shop_management/shop_management_bloc.dart';
+import 'package:store/store/shop_management/shop_management_event_state.dart';
 
 class SellerDetailPage extends StatefulWidget {
-  final Shop seller;
+  final ShopIdentifier seller;
 
   SellerDetailPage(this.seller);
 
@@ -18,22 +21,23 @@ class SellerDetailPage extends StatefulWidget {
 }
 
 class _SellerDetailPageState extends State<SellerDetailPage> {
-  ShopRepository _repo;
   BehaviorSubject<List<PrdItem>> editedPrdItems = BehaviorSubject.seeded([]);
-  Map<String, List<SellerPrd>> categoryTabsPrds = HashMap();
-  final BehaviorSubject<bool> loading = BehaviorSubject.seeded(false);
+  Map<String, List<ShopProduct>> categoryTabsPrds = HashMap();
+  ShopManagementBloc _shopBloc;
+
+//  final BehaviorSubject<bool> loading = BehaviorSubject.seeded(false);
 
   @override
   void dispose() {
     editedPrdItems.close();
-    loading.close();
+//    loading.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_repo == null) {
-      _repo = Provider.of<ShopRepository>(context);
+    if (_shopBloc == null) {
+      _shopBloc = Provider.of<ShopManagementBloc>(context);
     }
 
     editedPrdItems.listen((edited) {
@@ -49,13 +53,36 @@ class _SellerDetailPageState extends State<SellerDetailPage> {
           : Container();
     });
 
-    return FutureBuilder(
-        future: _repo.getProductsOfSeller(widget.seller.id),
-        builder: (context, AsyncSnapshot<List<SellerPrd>> prdSnapshot) {
-          if (prdSnapshot.data != null) {
+    return BlocBuilder<ShopManagementBloc, ShopManagementState>(
+      bloc: _shopBloc,
+      builder: (context, state) {
+        if (state is LoadingSMData) {
+          return Scaffold(body: Center(child: LoadingIndicator(),),);
+        } else if (state is SMDataLoaded) {
+          editedPrdItems.add([]);
+          if (state.shops
+              .map((s) => s.identifier.id)
+              .toList()
+              .contains(widget.seller.id)) {
+            var shop = state.shops
+                .firstWhere((s) => s.identifier.id == widget.seller.id);
+
             if (categoryTabsPrds.isEmpty) {
-              prdSnapshot.data.forEach((prd) {
+              shop.products.forEach((prd) {
                 var catName = prd.petName + ' ,' + prd.categoryName;
+                if (categoryTabsPrds.containsKey(catName)) {
+                  categoryTabsPrds.update(
+                      catName, (oldList) => oldList + [prd]);
+                } else {
+                  categoryTabsPrds.putIfAbsent(catName, () => [prd]);
+                }
+              });
+            }
+
+            if (categoryTabsPrds.isEmpty) {
+              shop.products.forEach((prd) {
+                var catName = prd.petName + ' ,' + prd.categoryName;
+
                 if (categoryTabsPrds.containsKey(catName)) {
                   categoryTabsPrds.update(
                       catName, (oldList) => oldList + [prd]);
@@ -102,56 +129,18 @@ class _SellerDetailPageState extends State<SellerDetailPage> {
                           .toList(),
                     ),
                   ),
-                  body: StreamBuilder<bool>(
-                    stream: loading,
-                    builder: (context, loadingSnp) {
-                      if (loadingSnp != null &&
-                          loadingSnp.data != null &&
-                          !loadingSnp.data) {
-                        return Column(
-                          children: <Widget>[
-                            Expanded(
-                              child: Container(
-                                child: FutureBuilder(
-                                  future: _repo
-                                      .getProductsOfSeller(widget.seller.id),
-                                  builder: (context,
-                                      AsyncSnapshot<List<SellerPrd>>
-                                          prdSnapshot) {
-                                    if (prdSnapshot.data != null) {
-                                      if (categoryTabsPrds.isEmpty) {
-                                        prdSnapshot.data.forEach((prd) {
-                                          var catName = prd.petName +
-                                              ' ,' +
-                                              prd.categoryName;
-
-                                          if (categoryTabsPrds
-                                              .containsKey(catName)) {
-                                            categoryTabsPrds.update(catName,
-                                                (oldList) => oldList + [prd]);
-                                          } else {
-                                            categoryTabsPrds.putIfAbsent(
-                                                catName, () => [prd]);
-                                          }
-                                        });
-                                      }
-
-                                      return Column(
-                                        children: <Widget>[
-                                          Expanded(
-                                            child: TabBarView(
-                                              children: categoryTabsPrds.keys
-                                                  .map((key) {
-                                                return ListView(
-                                                  children:
-                                                      categoryTabsPrds[key]
-                                                          .map((sp) {
-                                                    return PrdItem(
-                                                        sp, editedPrdItems);
-                                                  }).toList(),
-                                                );
-                                              }).toList()
-                                              /*<Widget>[
+                  body: Column(
+                    children: <Widget>[
+                      Expanded(
+                        child: TabBarView(
+                          children: categoryTabsPrds.keys.map((key) {
+                            return ListView(
+                              children: categoryTabsPrds[key].map((sp) {
+                                return PrdItem(sp, editedPrdItems);
+                              }).toList(),
+                            );
+                          }).toList()
+                          /*<Widget>[
                                 ,
                                 */ /*ListView(
                                   children: snapshot.data.map((sp) {
@@ -164,159 +153,152 @@ class _SellerDetailPageState extends State<SellerDetailPage> {
                                   }).toList(),
                                 )*/ /*
                               ]*/
-                                              ,
+                          ,
+                        ),
+                      ),
+                      StreamBuilder<List<PrdItem>>(
+                        stream: editedPrdItems,
+                        builder: (context, editedSnapshot) {
+                          if (editedSnapshot.data != null) {
+                            if (editedSnapshot.data.isNotEmpty) {
+                              return Container(
+                                height: 64,
+                                color: Colors.grey[200],
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    /*   var res = await (Provider.of<ShopRepository>(context))
+                                        .editProductOfSeller(editedSnapshot.data
+                                        .map((item) => item.prd)
+                                        .toList());*/
+
+                                    _shopBloc.dispatch(EditShopProduct(
+                                        editedSnapshot.data
+                                            .map((item) => item.prd)
+                                            .toList()));
+                                  },
+                                  child: Container(
+                                    child: Row(
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: Card(
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                BorderRadius.circular(40)),
+                                            margin: EdgeInsets.only(
+                                                left: 6,
+                                                right: 10,
+                                                top: 7,
+                                                bottom: 7),
+                                            elevation: 7,
+                                            child: Row(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                Icon(
+                                                  Icons.check,
+                                                  color: AppColors.main_color,
+                                                  size: 24,
+                                                ),
+                                                Container(
+                                                  alignment: Alignment.center,
+                                                  height: 56,
+                                                  padding: EdgeInsets.only(),
+                                                  child: Text(
+                                                    '  ثبت تغییرات',
+                                                    style:
+                                                    TextStyle(fontSize: 14),
+                                                  ),
+                                                )
+                                              ],
                                             ),
                                           ),
-                                          StreamBuilder<List<PrdItem>>(
-                                            stream: editedPrdItems,
-                                            builder: (context, editedSnapshot) {
-                                              if (editedSnapshot.data != null) {
-                                                if (editedSnapshot
-                                                    .data.isNotEmpty) {
-                                                  return Container(
-                                                    height: 64,
-                                                    color: Colors.grey[200],
-                                                    child: GestureDetector(
-                                                      onTap: () async {
-                                                        loading.add(true);
-                                                        var shopRepo = Provider
-                                                            .of<ShopRepository>(
-                                                                context);
-
-                                                        var res = await shopRepo
-                                                            .editProductOfSeller(
-                                                                editedSnapshot
-                                                                    .data);
-                                                        loading.add(false);
-
-                                                        if (res) {
-                                                          Future.delayed(Duration.zero,() {
-                                                            Navigator.pop(context);
-                                                          });
-                                                          Helpers.showToast(
-                                                              'تغییرات با موفقیت انجام گرفت');
-                                                        } else {
-                                                          Helpers
-                                                              .showDefaultErr();
-                                                        }
-                                                      },
-                                                      child: Container(
-                                                        child: Row(
-                                                          children: <Widget>[
-                                                            Expanded(
-                                                              child: Card(
-                                                                shape: RoundedRectangleBorder(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            40)),
-                                                                margin: EdgeInsets
-                                                                    .only(
-                                                                        left: 6,
-                                                                        right:
-                                                                            10,
-                                                                        top: 7,
-                                                                        bottom:
-                                                                            7),
-                                                                elevation: 7,
-                                                                child: Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .center,
-                                                                  children: <
-                                                                      Widget>[
-                                                                    Icon(
-                                                                      Icons
-                                                                          .check,
-                                                                      color: AppColors
-                                                                          .main_color,
-                                                                      size: 24,
-                                                                    ),
-                                                                    Container(
-                                                                      alignment:
-                                                                          Alignment
-                                                                              .center,
-                                                                      height:
-                                                                          56,
-                                                                      padding:
-                                                                          EdgeInsets
-                                                                              .only(),
-                                                                      child:
-                                                                          Text(
-                                                                        '  ثبت تغییرات',
-                                                                        style: TextStyle(
-                                                                            fontSize:
-                                                                                14),
-                                                                      ),
-                                                                    )
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            Container(
-                                                              height: 56,
-                                                              child: Card(
-                                                                shape: RoundedRectangleBorder(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            40)),
-                                                                color: AppColors
-                                                                    .main_color,
-                                                                child:
-                                                                    Container(
-                                                                  margin: EdgeInsets
-                                                                      .symmetric(
-                                                                          horizontal:
-                                                                              20),
-                                                                  child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .center,
-                                                                    children: <
-                                                                        Widget>[
-                                                                      Container(
-                                                                        alignment:
-                                                                            Alignment.center,
-                                                                        child:
-                                                                            Text(
-                                                                          editedPrdItems
-                                                                              .value
-                                                                              .length
-                                                                              .toString(),
-                                                                          style: TextStyle(
-                                                                              color: Colors.white,
-                                                                              fontSize: 15,
-                                                                              fontWeight: FontWeight.bold),
-                                                                        ),
-                                                                      ),
-                                                                      Container(
-                                                                        child:
-                                                                            Text(
-                                                                          '  کالا',
-                                                                          style: TextStyle(
-                                                                              color: Colors.white,
-                                                                              fontSize: 13),
-                                                                        ),
-                                                                      )
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
+                                        ),
+                                        Container(
+                                          height: 56,
+                                          child: Card(
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                BorderRadius.circular(40)),
+                                            color: AppColors.main_color,
+                                            child: Container(
+                                              margin: EdgeInsets.symmetric(
+                                                  horizontal: 20),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                                children: <Widget>[
+                                                  Container(
+                                                    alignment: Alignment.center,
+                                                    child: Text(
+                                                      editedPrdItems
+                                                          .value.length
+                                                          .toString(),
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 15,
+                                                          fontWeight:
+                                                          FontWeight.bold),
                                                     ),
-                                                  );
-                                                } else {
-                                                  return Container();
-                                                }
-                                              } else {
-                                                return Container();
-                                              }
-                                            },
-                                          )
-                                        ],
-                                      );
+                                                  ),
+                                                  Container(
+                                                    child: Text(
+                                                      '  کالا',
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 13),
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return Container();
+                            }
+                          } else {
+                            return Container();
+                          }
+                        },
+                      )
+                    ],
+                  ) /*StreamBuilder<bool>(
+                    stream: loading,
+                    builder: (context, loadingSnp) {
+                      if (loadingSnp != null &&
+                          loadingSnp.data != null &&
+                          !loadingSnp.data) {
+                        return Column(
+                          children: <Widget>[
+                            Expanded(
+                              child: Container(
+                                child: FutureBuilder(
+                                  future: _repo.getFullShop(widget.seller),
+                                  builder: (context,
+                                      AsyncSnapshot<Shop> prdSnapshot) {
+                                    if (prdSnapshot.data != null) {
+                                      */ /*  if (categoryTabsPrds.isEmpty) {
+                                        prdSnapshot.data.forEach((prd) {
+                                          var catName = prd.petName +
+                                              ' ,' +
+                                              prd.categoryName;
+
+                                          if (categoryTabsPrds
+                                              .containsKey(catName)) {
+                                            categoryTabsPrds.update(catName,
+                                                    (oldList) => oldList + [prd]);
+                                          } else {
+                                            categoryTabsPrds.putIfAbsent(
+                                                catName, () => [prd]);
+                                          }
+                                        });
+                                      }*/ /*
+                                      return ;
                                     } else {
                                       return LoadingIndicator();
                                     }
@@ -330,25 +312,46 @@ class _SellerDetailPageState extends State<SellerDetailPage> {
                         return LoadingIndicator();
                       }
                     },
-                  )),
+                  )*/
+              ),
             );
           } else {
-            return Container();
+            return Scaffold();
           }
-        });
+        } else {
+          return Container(
+            height: 100,
+            width: 100,
+            color: Colors.red,
+          );
+        }
+      },
+    );
+
+    /* return FutureBuilder(
+        future: _repo.getFullShop(widget.seller.id),
+        builder: (context, AsyncSnapshot<List<ShopProduct>> prdSnapshot) {
+
+        });*/
   }
 }
 
 class PrdItem extends StatefulWidget {
-  final SellerPrd prd;
+  final ShopProduct prd;
   final BehaviorSubject<List<PrdItem>> editedPrdItems;
-  bool hasChanged;
-  var newPrice;
+  bool hasChanged = false;
+
+/*  var newPrice;
   var newCount;
   var deliveryHour;
-  var maxOrder;
+  var maxOrder;*/
 
-  PrdItem(this.prd, this.editedPrdItems);
+  PrdItem(this.prd, this.editedPrdItems) {
+/*    this.newPrice = prd.salePrice;
+    this.newCount = prd.stockQuantity;
+    this.deliveryHour = prd.shippingTime;
+    this.maxOrder = prd.maximumOrderable;*/
+  }
 
   @override
   bool operator ==(other) {
@@ -462,7 +465,7 @@ class _PrdItemState extends State<PrdItem> {
                                     onChanged: (price) {
                                       setState(() {
                                         _isChanged();
-                                        widget.newPrice = price;
+                                        widget.prd.salePrice = int.parse(price);
                                       });
                                     },
                                     textAlign: TextAlign.center,
@@ -483,11 +486,14 @@ class _PrdItemState extends State<PrdItem> {
                                 height: 60,
                                 child: Container(
                                   child: TextFormField(
+                                    initialValue:
+                                    widget.prd.stockQuantity.toString(),
                                     keyboardType: TextInputType.number,
-                                    onChanged: (count) {
+                                    onChanged: (quantity) {
                                       setState(() {
                                         _isChanged();
-                                        widget.newCount = count;
+                                        widget.prd.stockQuantity =
+                                            int.parse(quantity);
                                       });
                                     },
                                     textAlign: TextAlign.center,
@@ -512,10 +518,13 @@ class _PrdItemState extends State<PrdItem> {
                                 child: Container(
                                   child: TextFormField(
                                     keyboardType: TextInputType.number,
+                                    initialValue:
+                                    widget.prd.shippingTime.toString(),
                                     onChanged: (hour) {
                                       setState(() {
                                         _isChanged();
-                                        widget.deliveryHour = hour;
+                                        widget.prd.shippingTime =
+                                            int.parse(hour);
                                       });
                                     },
                                     textAlign: TextAlign.center,
@@ -536,11 +545,14 @@ class _PrdItemState extends State<PrdItem> {
                                 height: 60,
                                 child: Container(
                                   child: TextFormField(
+                                    initialValue:
+                                    widget.prd.maximumOrderable.toString(),
                                     keyboardType: TextInputType.number,
                                     onChanged: (max) {
                                       setState(() {
                                         _isChanged();
-                                        widget.maxOrder = max;
+                                        widget.prd.maximumOrderable =
+                                            int.parse(max);
                                       });
                                     },
                                     textAlign: TextAlign.center,

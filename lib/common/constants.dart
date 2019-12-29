@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:persian_datepicker/persian_datetime.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AppColors {
@@ -42,7 +43,8 @@ class Helpers {
   }
 
   static openMap(double latitude, double longitude) async {
-    String googleUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    String googleUrl =
+        'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
     if (await canLaunch(googleUrl)) {
       await launch(googleUrl);
     } else {
@@ -50,13 +52,19 @@ class Helpers {
     }
   }
 
-  static Widget image(String url, {Widget placeHolder, double height, double width}) {
+  static Widget image(String url,
+      {Widget placeHolder, double height, double width}) {
     return CachedNetworkImage(
       height: height,
       width: width,
       imageUrl: url,
       placeholder: (context, _) => placeHolder,
     );
+  }
+
+  static String getPersianDate(String gregorianDateTime) {
+    return PersianDateTime.fromGregorian(gregorianDateTime: gregorianDateTime)
+        .toString();
   }
 }
 
@@ -86,7 +94,6 @@ class AppIcons {
     semanticsLabel: 'show on map',
     width: size,
     height: size,
-
   );
 
   static final mapPin = SvgPicture.asset(

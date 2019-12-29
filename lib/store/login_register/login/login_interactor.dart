@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
+import 'package:get_ip/get_ip.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:store/data_layer/netclient.dart';
 import 'package:store/store/login_register/login/user.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginResponse extends Equatable {}
 
@@ -41,8 +42,9 @@ class LoginInteractor {
   }
 
   Future<LoginResponse> attemptLogin(String phoneNo, String password) async {
+    var ip = await GetIp.ipAddress;
     var response = await net.post(EndPoint.LOG_IN,
-        body: {'mobile_number': phoneNo, 'password': password},
+        body: {'mobile_number': phoneNo, 'password': password, 'client_ip': ip},
         cacheEnabled: false);
 
     if (response is SuccessResponse) {
@@ -55,7 +57,7 @@ class LoginInteractor {
 
         if (responseCode == 0) {
           var _user =
-              User(phoneNo, password, loginData["session_id"].toString());
+          User(phoneNo, password, loginData["session_id"].toString());
           await _saveUser(_user);
           return LoginSuccessfulResponse(_user);
         } else if (responseCode == 3) {

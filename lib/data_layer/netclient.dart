@@ -3,8 +3,8 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
-import 'package:store/common/constants.dart';
 import 'package:quiver/core.dart';
+import 'package:store/common/constants.dart';
 
 class PostResponse extends Equatable {}
 
@@ -221,7 +221,8 @@ enum EndPoint {
   SEND_PRODUCT_SCORE,
   EDIT_SELLER_PRODUCT,
   GET_COMMENTS,
-  SEND_COMMENT
+  SEND_COMMENT,
+  SEND_FCM_TOKEN
 }
 
 String getSubUrl(EndPoint endPoint) {
@@ -394,6 +395,9 @@ String getSubUrl(EndPoint endPoint) {
       break;
     case EndPoint.SEND_COMMENT:
       subUrl = 'sendprdproductcomment';
+      break;
+    case EndPoint.SEND_FCM_TOKEN:
+      subUrl = 'updateuserfcmtoken';
       break;
   }
   return subUrl;

@@ -5,13 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/data_layer/centers/centers_repository.dart';
 import 'package:store/data_layer/centers/service_repository.dart';
 import 'package:store/store/login_register/login/login_page.dart';
 import 'package:store/store/login_register/login_status/login_status_bloc.dart';
 import 'package:store/store/login_register/login_status/login_status_event_state.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'model.dart';
@@ -406,7 +406,7 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
             ),
             StreamBuilder(
                 stream: Provider.of<ServicesRepository>(context)
-                    .getCenterServices(widget.center.departmentId),
+                    .getCenterServices(widget.center.id),
                 builder: (context, AsyncSnapshot<List<Service>> snapshot) {
                   if (snapshot.data != null && snapshot.data.isNotEmpty) {
                     return Container(
@@ -416,7 +416,7 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                       margin: EdgeInsets.only(top: 10),
                       child: ListView(
                         scrollDirection: Axis.horizontal,
-                        children: snapshot.data[1].serviceName
+                        children: snapshot.data[0].serviceName
                             .split(';')
                             .map((serviceName) => _buildService(serviceName))
                             .toList(),

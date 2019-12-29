@@ -5,10 +5,10 @@ class ServicesRepository {
 
   ServicesRepository(this.net);
 
-  Stream<List<Service>> getCenterServices(int departmentId) async* {
+  Stream<List<Service>> getCenterServices(int centerId) async* {
     PostResponse response = await net.post(
       EndPoint.GET_CENTER_SERVICES,
-      /*body: {'department_id': departmentId}*/
+        body: {'center_department_id': centerId}
     );
 
     print(response);

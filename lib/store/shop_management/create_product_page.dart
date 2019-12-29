@@ -2,17 +2,17 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:store/common/constants.dart';
-import 'package:store/data_layer/brands/brands_repository.dart';
-import 'package:store/data_layer/create_product/create_product_repo.dart';
-import 'package:store/data_layer/shop_management/seller_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:store/common/constants.dart';
+import 'package:store/data_layer/brands/brands_repository.dart';
+import 'package:store/data_layer/shop_management/create_product_repo.dart';
+import 'package:store/data_layer/shop_management/shop_repository.dart';
 
 class CreateProductPage extends StatefulWidget {
   static const String routeName = 'createproduct';
 
-  final Shop shop;
+  final ShopIdentifier shop;
 
   CreateProductPage({@required this.shop});
 

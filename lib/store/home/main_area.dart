@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/data_layer/ads/ads_repository.dart';
@@ -12,7 +13,6 @@ import 'package:store/store/products/favorites/favorite_event_state.dart';
 import 'package:store/store/products/favorites/favorites_bloc.dart';
 import 'package:store/store/products/product/product_grid_item.dart';
 import 'package:store/store/products/special/special_products_repository.dart';
-import 'package:provider/provider.dart';
 
 import 'ad_item_wgt.dart';
 
@@ -35,8 +35,12 @@ class _MainAreaState extends State<MainArea> {
                   if (state is FavoritesLoading) {
                     return Container();
                   } else if (state is FavoritesLoaded) {
-                    return ProductGridList(
-                        'علاقه‌مندی های شما', Future.value(state.products));
+                    if (state.products.isEmpty) {
+                      return Container();
+                    } else {
+                      return ProductGridList(
+                          'علاقه‌مندی های شما', Future.value(state.products));
+                    }
                   } else {
                     return Container();
                   }

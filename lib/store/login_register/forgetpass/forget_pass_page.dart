@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/store/home/home_page.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_bloc.dart';
 import 'package:store/store/login_register/login/login_bloc.dart';
 import 'package:store/store/login_register/login/login_event_state.dart';
-import 'package:provider/provider.dart';
 
 import 'forget_pass_event_state.dart';
 
@@ -259,6 +259,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
     loginBlocSubscription = loginBloc.state.listen((state) {
       if(state is LoginSuccessful) {
         Navigator.popAndPushNamed(context, HomePage.routeName);
+        Navigator.pop(context);
         loginBlocSubscription.cancel();
       }
     });

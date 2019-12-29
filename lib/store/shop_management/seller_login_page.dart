@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:store/common/constants.dart';
-import 'package:store/data_layer/shop_management/seller_repository.dart';
-import 'package:store/store/shop_management/seller_list_page.dart';
 import 'package:provider/provider.dart';
+import 'package:store/common/constants.dart';
+import 'package:store/store/shop_management/seller_list_page.dart';
+import 'package:store/store/shop_management/shop_management_bloc.dart';
+import 'package:store/store/shop_management/shop_management_event_state.dart';
 
 class SellerLoginPage extends StatefulWidget {
   @override
@@ -11,17 +12,26 @@ class SellerLoginPage extends StatefulWidget {
 
 class _SellerLoginPageState extends State<SellerLoginPage> {
   final _formKey = GlobalKey<FormState>();
-  ShopRepository _sellerRepo;
+  ShopManagementBloc _shopBloc;
   bool error = false;
 
-  /*final*/ String phoneController = /*TextEditingController()*/ '';
+  /*final*/
+  String phoneController = /*TextEditingController()*/ '';
   final passController = TextEditingController();
+  var loggedIn = false;
 
   @override
   Widget build(BuildContext context) {
-    if (_sellerRepo == null) {
-      _sellerRepo = Provider.of<ShopRepository>(context);
+    if (_shopBloc == null) {
+      _shopBloc = Provider.of<ShopManagementBloc>(context);
     }
+
+    _shopBloc.state.listen((state) {
+      if (state is SMDataLoaded && !loggedIn) {
+        loggedIn = true;
+        Navigator.of(context).popAndPushNamed(SellersListPage.routeName);
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(
@@ -101,10 +111,12 @@ class _SellerLoginPageState extends State<SellerLoginPage> {
                             textColor: Colors.white,
                             onPressed: () {
                               if (_formKey.currentState.validate()) {
-                                _sellerRepo
-                                    .loginSeller(phoneController,
-                                        passController.text)
-                                    .then((List<Shop> response) {
+                                _shopBloc.dispatch(ShopManagerLogin(
+                                    phoneController,
+                                    passController.text.toString()));
+                                /*  loginSeller(phoneController,
+                                        )
+                                    .then((List<ShopIdentifier> response) {
                                   if (response.isEmpty) {
                                     setState(() {
                                       error = true;
@@ -117,7 +129,7 @@ class _SellerLoginPageState extends State<SellerLoginPage> {
                                             builder: (context) =>
                                                 SellersListPage(response)));
                                   }
-                                });
+                                });*/
                               }
                             },
                             child: Container(

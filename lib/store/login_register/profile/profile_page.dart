@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_bloc.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_event_state.dart';
@@ -10,7 +11,6 @@ import 'package:store/store/login_register/login_status/login_status_bloc.dart';
 import 'package:store/store/login_register/login_status/login_status_event_state.dart';
 import 'package:store/store/login_register/profile/profile_bloc.dart';
 import 'package:store/store/login_register/profile/profile_bloc_event_state.dart';
-import 'package:provider/provider.dart';
 
 import 'credit_card_page.dart';
 import 'edit_profile_page.dart';
@@ -58,16 +58,14 @@ class _ProfilePageState extends State<ProfilePage> {
                       color: Colors.grey[200],
                       child: Align(
                         alignment: Alignment.centerRight,
-                        child: Column(
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Container(
-                              height: 7,
-                            ),
-                            Expanded(
+                              margin: EdgeInsets.only(right: 2, left: 5),
                               child: Text(state.profile.firstName),
                             ),
-                            Expanded(
+                            Container(
                               child: Text(state.profile.lastName),
                             )
                           ],
