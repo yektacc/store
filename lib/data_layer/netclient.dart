@@ -222,7 +222,11 @@ enum EndPoint {
   EDIT_SELLER_PRODUCT,
   GET_COMMENTS,
   SEND_COMMENT,
-  SEND_FCM_TOKEN
+  SEND_FCM_TOKEN,
+  GET_USER_PET,
+  SEND_USER_PET,
+  EDIT_USER_PET,
+  DELETE_USER_PET
 }
 
 String getSubUrl(EndPoint endPoint) {
@@ -398,6 +402,18 @@ String getSubUrl(EndPoint endPoint) {
       break;
     case EndPoint.SEND_FCM_TOKEN:
       subUrl = 'updateuserfcmtoken';
+      break;
+    case EndPoint.GET_USER_PET:
+      subUrl = 'getamlanimals';
+      break;
+    case EndPoint.SEND_USER_PET:
+      subUrl = 'sendamlanimals';
+      break;
+    case EndPoint.EDIT_USER_PET:
+      subUrl = 'editamlanimals';
+      break;
+    case EndPoint.DELETE_USER_PET:
+      subUrl = 'deleteamlanimals';
       break;
   }
   return subUrl;

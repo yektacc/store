@@ -10,9 +10,6 @@ import 'package:store/data_layer/tags/tag_item_repository.dart';
 import 'package:store/services/adoption/adoption_bloc.dart';
 import 'package:store/services/adoption/adoption_repository.dart';
 import 'package:store/services/centers/centers_bloc.dart';
-import 'package:store/services/chat/chat_bloc.dart';
-import 'package:store/services/chat/chat_page.dart';
-import 'package:store/services/chat/model.dart';
 import 'package:store/services/lost_pets/lost_pets_bloc.dart';
 import 'package:store/services/lost_pets/lost_pets_repository.dart';
 import 'package:store/store/info/info_client.dart';
@@ -47,6 +44,7 @@ import 'package:store/store/shop_management/shop_management_bloc.dart';
 import 'package:store/store/structure/repository.dart';
 import 'package:store/store/structure/structure_bloc.dart';
 
+import 'app.dart';
 import 'data_layer/ads/ads_repository.dart';
 import 'data_layer/brands/brands_repository.dart';
 import 'data_layer/cart/cart_repository.dart';
@@ -84,7 +82,7 @@ Future main() async {
   final ProductsRepository _productRepo = ProductsRepository(net);
   final SearchInteractor _searchInteractor = SearchInteractor();
   final StructureRepository _structureRepo = StructureRepository(net);
-  final LoginInteractor _loginInteractor = LoginInteractor(net);
+  final LoginRepository _loginInteractor = LoginRepository(net);
   final RegisterInteractor _registerInteractor = RegisterInteractor(net);
   final ProfileRepository _profileRepo = ProfileRepository(net);
   final ProductDetailRepository _detailRepo = ProductDetailRepository(net);
@@ -149,8 +147,7 @@ Future main() async {
   bool initResult = await init(_provinceRepo);
 
   if (initResult == true) {
-    runApp(
-      /*App(
+    runApp(App(
         _productsBloc,
         _filteredProductsBloc,
         _searchBloc,
@@ -189,9 +186,11 @@ Future main() async {
         _siteInfoRepository,
         _productRepo,
         _favoriteBloc,
-        _commentsRepo,_shopBloc)*/
-        MaterialApp(home: ChatPage(
-            ChatBloc(ClientChatUser('09359236524'), ClinicChatUser('20'))),));
+        _commentsRepo,
+        _shopBloc)
+      /*MaterialApp(home: ChatPage(
+            ChatBloc(ClientChatUser('09359236524'), ClinicChatUser('20'))),)*/
+    );
   }
 }
 

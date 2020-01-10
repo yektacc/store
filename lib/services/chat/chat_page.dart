@@ -9,21 +9,24 @@ import 'chat_event_state.dart';
 
 class ChatPage extends StatefulWidget {
   final ChatBloc _bloc;
+  final String title;
 
-  ChatPage(this._bloc);
+  ChatPage(this._bloc, this.title);
 
   @override
   _ChatPageState createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
-  String message = '';
+//  String message = '';
+  final TextEditingController message = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text(widget.title, style: TextStyle(fontSize: 16),),),
       body: Container(
         child: ListView(
           children: <Widget>[
@@ -44,7 +47,7 @@ class _ChatPageState extends State<ChatPage> {
                           .toList(),
                     );
                   } else if (state is ChatsLoadingFailed) {
-                    Helpers.showDefaultErr();
+                    Helpers.errorToast();
                     return Center(
                       child: Text('err'),
                     );
@@ -62,27 +65,32 @@ class _ChatPageState extends State<ChatPage> {
                 height: 55,
                 color: Colors.grey[100],
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(left: 10),
+                      child: IconButton(
+                        onPressed: () {
+                          widget._bloc
+                              .dispatch(SendMessage(Message(message.text, 1)));
+                          message.text = '';
+                        },
+                        icon: Icon(
+                          Icons.send,
+                          color: AppColors.main_color,
+                          size: 20,
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ),
+                    ),
                     Expanded(
                       child: TextField(
-                        onChanged: (newText) {
-                          message = newText;
-                        },
+                        controller: message,
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: 'پیام شما',
                         ),
                         textAlign: TextAlign.right,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 20),
-                      child: IconButton(
-                        onPressed: () {
-                          widget._bloc
-                              .dispatch(SendMessage(Message(message, 1)));
-                        },
-                        icon: Icon(Icons.send),
                       ),
                     ),
                   ],
@@ -103,7 +111,7 @@ class MessageTextWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         Container(
           margin: EdgeInsets.symmetric(horizontal: 4, vertical: 3),
@@ -111,7 +119,9 @@ class MessageTextWidget extends StatelessWidget {
               color: Colors.blue[100],
               borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(10),
-                  topRight: Radius.circular(3))),
+                  topRight: Radius.circular(4),
+                  topLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10))),
           padding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
           alignment: Alignment.centerRight,
           child: Text(

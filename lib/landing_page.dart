@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:store/data_layer/centers/centers_repository.dart';
-import 'package:store/services/centers/centers_page.dart';
+import 'package:store/services/centers/centers_list_page.dart';
 import 'package:store/services/lost_pets/lost_pets_page.dart';
 import 'package:store/services/lost_pets/lost_pets_repository.dart';
 import 'package:store/store/home/home_page.dart';
@@ -8,7 +9,6 @@ import 'package:store/store/login_register/login/login_bloc.dart';
 import 'package:store/store/login_register/login/login_event_state.dart';
 import 'package:store/store/login_register/login_status/login_status_bloc.dart';
 import 'package:store/store/login_register/login_status/login_status_event_state.dart';
-import 'package:provider/provider.dart';
 
 class LandingPage extends StatefulWidget {
   LoginBloc _loginBloc;
@@ -238,7 +238,7 @@ class _LandingPageState extends State<LandingPage> {
                 color: Colors.grey[100],
                 child: new GestureDetector(
                   onTap: () {
-                    Navigator.of(context).popAndPushNamed(HomePage.routeName);
+                    Navigator.of(context).pushNamed(HomePage.routeName);
                   },
                   child: new Container(
                       margin: EdgeInsets.only(top: 7, bottom: 7),

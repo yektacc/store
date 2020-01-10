@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:persian_datepicker/persian_datetime.dart';
+import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/data_layer/centers/centers_repository.dart';
@@ -9,7 +11,6 @@ import 'package:store/data_layer/order/save_order_repository.dart';
 import 'package:store/data_layer/payment/delivery/delivery_price_repository.dart';
 import 'package:store/data_layer/payment/delivery/delivery_time.dart';
 import 'package:store/services/centers/centers_bloc.dart';
-import 'package:store/services/centers/centers_event_state.dart';
 import 'package:store/services/centers/model.dart';
 import 'package:store/store/location/address/model.dart';
 import 'package:store/store/location/provinces/model.dart';
@@ -19,8 +20,6 @@ import 'package:store/store/products/cart/cart_product.dart';
 import 'package:store/store/products/detail/product_detail_model.dart';
 import 'package:store/store/products/detail/product_detail_repository.dart';
 import 'package:store/store/products/filter/filter.dart';
-import 'package:provider/provider.dart';
-import 'package:rxdart/rxdart.dart';
 
 import '../payment_page.dart';
 
@@ -192,7 +191,7 @@ class _DeliveryPageState extends State<DeliveryPage> {
                                       widget.orderCode,
                                       widget.sessionId)));
                             } else {
-                              Helpers.showDefaultErr();
+                              Helpers.errorToast();
                             }
                           });
                         });
@@ -214,6 +213,9 @@ class _DeliveryPageState extends State<DeliveryPage> {
   }
 
   List getCityProvinceByShopId(int shopId, List<CenterItem> shops) {
+    print('shops: ${shops.map((s) => s.id).toList().toString()}');
+    print('shopId: $shopId');
+
     if (shops.map((s) => s.id).contains(shopId)) {
       return [
         shops.firstWhere((shop) => shop.id == shopId).city,
@@ -253,17 +255,22 @@ class _DeliveryPageState extends State<DeliveryPage> {
 
     print('weighted products: ' + weightedProducts.toString());
 
+/*
     _centersBloc.dispatch(FetchCenters(CenterFetchType.STORE));
+*/
 
-    await for (final state in _centersBloc.state) {
-      if (deliveryItems.isEmpty) {
-        if (state is CentersLoaded) {
-          if (state.centers.isNotEmpty && state.centers[0].typeId == 4) {
-            List<CenterItem> shops = state.centers;
+    var _centersRepo = Provider.of<CentersRepository>(context);
 
-            City tmpCity;
+    var stores = await _centersRepo.getCenters(CenterFetchType.STORE);
 
-            /*   weightedProducts.forEach((product) {
+    if (deliveryItems.isEmpty) {
+      if (stores != null) {
+        if (stores.isNotEmpty && stores[0].typeId == 4) {
+          List<CenterItem> shops = stores;
+
+          City tmpCity;
+
+          /*   weightedProducts.forEach((product) {
               tmpCity = getCityProvinceByShopId(
                   int.parse(product.product.storeThumbnail.id), shops)[0];
 
@@ -280,48 +287,51 @@ class _DeliveryPageState extends State<DeliveryPage> {
               }
             });*/
 
-            int tmpShopId;
+          int tmpShopId;
 
-            weightedProducts.forEach((product) {
-              tmpCity = getCityProvinceByShopId(
-                  int.parse(product.product.storeThumbnail.id), shops)[0];
+          weightedProducts.forEach((product) {
+            tmpCity = getCityProvinceByShopId(
+                int.parse(product.product.storeThumbnail.id), shops)[0];
 
-              Province province = getCityProvinceByShopId(
-                  int.parse(product.product.storeThumbnail.id), shops)[1];
+            Province province = getCityProvinceByShopId(
+                int.parse(product.product.storeThumbnail.id), shops)[1];
 
-              if (deliveryItems
-                  .map((di) => di.sellerId)
-                  .contains(int.parse(product.product.storeThumbnail.id))) {
-                var availableDi = deliveryItems
-                    .firstWhere((DeliveryItem di) =>
-                        di.sellerId ==
-                        int.parse(product.product.storeThumbnail.id))
-                    .products
-                    .add(product);
-              } else {
-                deliveryItems.add(DeliveryItem(tmpCity, province, [product],
-                    int.parse(product.product.storeThumbnail.id)));
-              }
-            });
+            if (deliveryItems
+                .map((di) => di.sellerId)
+                .contains(int.parse(product.product.storeThumbnail.id))) {
+              var availableDi = deliveryItems
+                  .firstWhere((DeliveryItem di) =>
+              di.sellerId ==
+                  int.parse(product.product.storeThumbnail.id))
+                  .products
+                  .add(product);
+            } else {
+              deliveryItems.add(DeliveryItem(tmpCity, province, [product],
+                  int.parse(product.product.storeThumbnail.id)));
+            }
+          });
 
-            totalPrice.add(await getTotalPrice(deliveryItems));
+          totalPrice.add(await getTotalPrice(deliveryItems));
 
-            yield ListView(
-              children: [
-                    Padding(
-                      padding: EdgeInsets.only(top: 12),
-                    ) as Widget
-                  ] +
-                  deliveryItems.map((di) => DeliveryItemWgt(di)).toList(),
-            );
-          }
-        } else {
-          yield Center(
-            child: LoadingIndicator(),
+          yield ListView(
+            children: [
+              Padding(
+                padding: EdgeInsets.only(top: 12),
+              ) as Widget
+            ] +
+                deliveryItems.map((di) => DeliveryItemWgt(di)).toList(),
           );
         }
+      } else {
+        yield Center(
+          child: LoadingIndicator(),
+        );
       }
     }
+
+    /* await for (final state in _centersBloc.state) {
+
+    }*/
   }
 
   Future<List<WeightProduct>> getWeightedProducts(
@@ -605,7 +615,8 @@ class _DeliveryItemWgtState extends State<DeliveryItemWgt> {
                 children: <Widget>[
                   Expanded(
                     child: Container(
-                      child: Text("وزن: ${product.weight}  ${product.unitName}"),
+                      child:
+                      Text("وزن: ${product.weight}  ${product.unitName}"),
                     ),
                   ),
                   Expanded(

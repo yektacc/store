@@ -9,6 +9,9 @@ import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/data_layer/centers/centers_repository.dart';
 import 'package:store/data_layer/centers/service_repository.dart';
+import 'package:store/services/chat/chat_bloc.dart';
+import 'package:store/services/chat/chat_page.dart';
+import 'package:store/services/chat/model.dart';
 import 'package:store/store/login_register/login/login_page.dart';
 import 'package:store/store/login_register/login_status/login_status_bloc.dart';
 import 'package:store/store/login_register/login_status/login_status_event_state.dart';
@@ -328,6 +331,59 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                             bottomRight: Radius.circular(4),
                             bottomLeft: Radius.circular(4))),
                   ),
+            Container(
+              alignment: Alignment.center,
+              child: GestureDetector(
+                onTap: () {
+                  var state =
+                      Provider
+                          .of<LoginStatusBloc>(context)
+                          .currentState;
+                  if (state is IsLoggedIn) {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) =>
+                            ChatPage(
+                                ChatBloc(ClientChatUser(state.user.phoneNo),
+                                    CenterChatUser(
+                                        widget.center.id.toString())),
+                                widget.center.name)));
+                  } else {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => LoginPage()));
+                  }
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Card(
+                      margin: EdgeInsets.only(top: 10),
+                      elevation: 6,
+                      child: Container(
+                        padding:
+                        EdgeInsets.symmetric(vertical: 9, horizontal: 28),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              'پیام به این مرکز',
+                              style: TextStyle(fontSize: 13),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(right: 18),
+                              child: Icon(
+                                Icons.chat,
+                                color: AppColors.main_color,
+                                size: 18,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
             new Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
@@ -341,7 +397,7 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                     child: Wrap(
                       children: widget.center.workingDay1.days
                           .map((d) => Container(
-                                child: Text(d),
+                        child: Text(d.toString()),
                                 margin: EdgeInsets.only(right: 1, top: 1),
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 10, vertical: 8),
@@ -414,13 +470,13 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                       height: 56,
                       padding: EdgeInsets.only(right: 6),
                       margin: EdgeInsets.only(top: 10),
-                      child: ListView(
+                      /* child: ListView(
                         scrollDirection: Axis.horizontal,
                         children: snapshot.data[0].serviceName
                             .split(';')
                             .map((serviceName) => _buildService(serviceName))
                             .toList(),
-                      ),
+                      ),*/
                     );
                   } else {
                     return Container();
@@ -564,7 +620,7 @@ class _MapWgtState extends State<MapWgt> {
               initialCameraPosition:
                   CameraPosition(target: widget.latLng, zoom: 15),
             ),
-          /*  Positioned(
+            /*  Positioned(
               bottom: 10,
               right: 10,
               child: Container(

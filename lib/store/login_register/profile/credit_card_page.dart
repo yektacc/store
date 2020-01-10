@@ -180,7 +180,7 @@ class _CreditCardPageState extends State<CreditCardPage> {
                       mergedNumbers = merged;
                     });
                   } else {
-                    Helpers.showDefaultErr();
+                    Helpers.errorToast();
                   }
                 });
               } else {

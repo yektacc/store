@@ -51,7 +51,7 @@ class _SellerAddProductsPageState extends State<SellerAddProductsPage> {
               Helpers.showToast('تغییرات با موفقیت ثبت شد');
               Navigator.pop(context);
             } else {
-              Helpers.showDefaultErr();
+              Helpers.errorToast();
             }
           }
         },

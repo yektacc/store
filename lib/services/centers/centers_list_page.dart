@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
-import 'package:store/services/centers/centers_detail_page.dart';
+import 'package:store/services/centers/center_detail_page.dart';
 import 'package:store/services/centers/centers_event_state.dart';
-import 'package:provider/provider.dart';
 
 import '../../data_layer/centers/centers_repository.dart';
 import 'centers_bloc.dart';

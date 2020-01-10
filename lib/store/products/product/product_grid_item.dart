@@ -18,6 +18,7 @@ class ProductGridItem extends StatelessWidget {
       onTap: () {
         /*Navigator.of(context)
             .push(AppRoutes.productDetailPage(context, _product));*/
+        print(" store id: " + _product.storeThumbnail.id);
         Navigator.pushNamed(
           context,
           ProductDetailPage.routeName,

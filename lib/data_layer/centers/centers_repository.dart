@@ -61,10 +61,17 @@ class CentersRepository {
         CenterType type =
             types.firstWhere((type) => type.id == centerRaw.typeId);
 
-        var latLng = centerRaw.location == ""
-            ? LatLng(36.6830, 48.5087)
-            : LatLng(double.parse(centerRaw.location.split(',')[0]),
-                double.parse(centerRaw.location.split(',')[1]));
+        var latLng = LatLng(36.6830, 48.5087);
+
+        try {
+          latLng = centerRaw.location == ""
+              ? LatLng(36.6830, 48.5087)
+              : LatLng(double.parse(centerRaw.location.split(',')[0]),
+              double.parse(centerRaw.location.split(',')[1]));
+        } catch (e) {
+          print('Error parsing center location : ${centerRaw.location} \n $e');
+          latLng = LatLng(36.6830, 48.5087);
+        }
 
         return CenterItem(
             centerRaw.name ?? "",
@@ -176,7 +183,11 @@ class WorkingDay {
   WorkingDay(this._days, this.from, this.to);
 
   List<String> get days {
-    return _days.split(';').map((s) => s.substring(2)).toList();
+    List<String> result = [];
+    try {
+      result = _days.split(';').map((s) => s.substring(2)).toList();
+    } catch (e) {}
+    return result;
   }
 }
 

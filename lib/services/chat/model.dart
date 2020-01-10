@@ -20,10 +20,10 @@ class ClientChatUser extends ChatUser {
   String get id => "1_$phoneNumber";
 }
 
-class ClinicChatUser extends ChatUser {
+class CenterChatUser extends ChatUser {
   final String clinicId;
 
-  ClinicChatUser(this.clinicId);
+  CenterChatUser(this.clinicId);
 
   @override
   String get id => "2_$clinicId";

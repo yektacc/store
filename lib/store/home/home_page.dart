@@ -5,8 +5,6 @@ import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/landing_page.dart';
 import 'package:store/store/location/map/map_page.dart';
-import 'package:store/store/location/my_location/my_location_bloc.dart';
-import 'package:store/store/location/my_location/my_location_bloc_event.dart';
 import 'package:store/store/login_register/login/login_bloc.dart';
 import 'package:store/store/login_register/login/login_event_state.dart';
 import 'package:store/store/login_register/login_status/login_status_bloc.dart';
@@ -19,7 +17,6 @@ import 'package:store/store/products/cart/cart_bloc.dart';
 import 'package:store/store/products/cart/cart_bloc_event.dart';
 import 'package:store/store/products/cart/cart_page.dart';
 import 'package:store/store/products/detail/product_detail_page.dart';
-import 'package:store/store/products/favorites/favorites_page.dart';
 import 'package:store/store/products/filter/filtered_products_bloc.dart';
 import 'package:store/store/products/product/products_bloc.dart';
 import 'package:store/store/products/search/search_delegate.dart';
@@ -31,6 +28,7 @@ import 'package:store/store/shop_management/shop_management_bloc.dart';
 import 'package:store/store/structure/model.dart';
 import 'package:store/store/structure/structure_bloc.dart';
 import 'package:store/store/structure/structure_event_state.dart';
+import 'package:store/store/userpet/user_pet_page.dart';
 
 import '../../app.dart';
 import 'info_page.dart';
@@ -153,7 +151,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   AppBar _buildAppBar(BuildContext context) {
     return new AppBar(
-      title: FlatButton(
+      title: Text(
+        'فروشگاه',
+        style: TextStyle(fontSize: 15),
+      ),
+      /*title: FlatButton(
         child: Row(
           children: <Widget>[
             Icon(
@@ -181,7 +183,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         onPressed: () {
           _updateOverlay(PageChangeEvent.MAP_SHOW);
         },
-      ),
+      ),*/
       actions: <Widget>[
         Container(
           width: 70,
@@ -387,8 +389,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             : Container(),
                         state is IsLoggedIn
                             ? _buildDrawerItem(() {
+                          Navigator.of(context)
+                              .pushNamed(CartPage.routeName);
+                        }, Icons.shopping_cart, "حیوان خانگی شما")
+                            : Container(),
+                        state is IsLoggedIn
+                            ? _buildDrawerItem(() {
                           Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => FavoritesPage()));
+                              builder: (context) => UserPetPage()));
                         }, Icons.favorite, "علاقه‌مندی ها")
                             : Container(),
                         Divider(),
@@ -482,7 +490,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   Widget _buildDrawerItem(VoidCallback onPressed, IconData icon, String title) {
     return Container(
-      height: 50,
+      height: 45,
       child: FlatButton(
           onPressed: onPressed,
           child: Row(
@@ -490,13 +498,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               Icon(
                 icon,
                 color: Colors.grey[600],
+                size: 22,
               ),
               Padding(
                 padding: EdgeInsets.only(right: 20),
               ),
               Text(
                 title,
-                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
               )
             ],
           )),

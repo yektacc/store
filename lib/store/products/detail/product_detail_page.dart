@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/data_layer/products/product_pictures_repository.dart';
@@ -24,8 +26,6 @@ import 'package:store/store/products/favorites/favorite_widget.dart';
 import 'package:store/store/products/product/product.dart';
 import 'package:store/store/products/product/product_item_wgt.dart';
 import 'package:store/store/products/product/products_repository.dart';
-import 'package:provider/provider.dart';
-import 'package:rxdart/rxdart.dart';
 
 class DetailPageArgs {
   final String productId;
@@ -174,26 +174,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               allSellers.addAll(variant.sellers);
                             }
 
-                            if (allSellers.contains(
-                                (sp) => sp.shopId == widget.initialSellerId)) {
-                              _currentSeller = allSellers.firstWhere(
-                                  (sp) => sp.shopId == widget.initialSellerId);
-                            } else {
-                              _currentSeller = allSellers[0];
-                            }
 
-                            /*if (variant.id ==
-                                widget.exProduct.getCheapest().variantId) {
-                              variant.sellers.forEach((seller) {
-                                if (seller.shopId ==
-                                    widget.exProduct
-                                        .getCheapest()
-                                        .storeThumbnail
-                                        .id) {
-                                  currentSeller = seller;
-                                }
-                              });
-                            }*/
+                            print('all sellers: ' +
+                                allSellers.map((s) => s.shopId.toString())
+                                    .toList()
+                                    .toString() +
+                                '\n initial seller Id: ${widget
+                                    .initialSellerId}');
+
+                            _currentSeller = allSellers[0];
+                            allSellers.forEach((sp) {
+                              if (sp.shopId == widget.initialSellerId) {
+                                _currentSeller = allSellers.firstWhere(
+                                        (sp) =>
+                                    sp.shopId == widget.initialSellerId);
+                              }
+                            });
                           });
 
                           if (allSellers.isEmpty) {
@@ -306,61 +302,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                       ),
                                     ),
                                     Divider(),
-                                    /*        Container(
-                                      padding: EdgeInsets.only(right: 8),
-                                      child: Row(
-                                        children: <Widget>[
-                                          Container(
-                                            child: Text("قیمت با تخفیف:"),
-                                          ),
-                                          Expanded(
-                                            child: Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: Text(
-                                                _currentSeller.salePrice
-                                                    .formatted(),
-                                                style: TextStyle(
-                                                    color: Colors.green,
-                                                    fontSize: 16),
-                                              ),
-                                            ),
-                                          ),
-                                          Container(
-                                            width: 20,
-                                          )
-                                        ],
-                                      ),
-                                    ),*/
-//                                    Divider(),
-                                    /*Container(
-                                      padding: EdgeInsets.only(right: 20),
-                                      alignment: Alignment.centerRight,
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: <Widget>[
-                                          Container(
-                                            alignment: Alignment.centerRight,
-                                            child: Text("فروشنده:",textAlign: TextAlign.center,),
-                                          ),
-                                          Expanded(
-                                            child: Align(
-                                              alignment: Alignment.centerLeft,
-                                              child: Text(
-                                                _currentSeller.name,
-                                                style: TextStyle(
-                                                    color:
-                                                        AppColors.second_color,
-                                                    fontSize: 12),
-                                              ),
-                                            ),
-                                          ),
-                                          Container(
-                                            width: 20,
-                                          )
-                                        ],
-                                      ),
-                                    ),*/
 
                                     Row(
                                       mainAxisAlignment:

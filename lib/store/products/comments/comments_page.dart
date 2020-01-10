@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/store/login_register/login/login_page.dart';
 import 'package:store/store/login_register/login_status/login_status_bloc.dart';
 import 'package:store/store/login_register/login_status/login_status_event_state.dart';
 import 'package:store/store/products/comments/comments_repository.dart';
-import 'package:provider/provider.dart';
 
 import 'new_comment.dart';
 
@@ -49,7 +49,7 @@ class _CommentsPageState extends State<CommentsPage> {
                         setState(() {});
                         Helpers.showToast('نظر شما ارسال شد.');
                       } else {
-                        Helpers.showDefaultErr();
+                        Helpers.errorToast();
                       }
                     }));
           } else {

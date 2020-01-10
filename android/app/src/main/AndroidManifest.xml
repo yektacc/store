@@ -8,7 +8,7 @@
     <application
         android:name="com.epet24.store.App"
         android:label="store"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

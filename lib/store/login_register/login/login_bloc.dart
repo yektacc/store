@@ -8,7 +8,7 @@ import 'login_event_state.dart';
 import 'login_interactor.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  final LoginInteractor _interactor;
+  final LoginRepository _interactor;
   final RegisterBloc _registerBloc;
   StreamSubscription _streamSubscription;
 
@@ -46,7 +46,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   Stream<LoginState> _mapAttemptLastLoginToState(
       AttemptLastLogin event) async* {
     yield (LoadingLoginAttempt());
-    var res = await _interactor.attempLastLogin();
+    var res = await _interactor.attemptLastLogin();
     print("last login bloc: $res");
 
   /*  if(user != null) {

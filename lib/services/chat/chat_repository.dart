@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:store/services/chat/model.dart';
 
 class ChatRepository {
@@ -10,7 +9,7 @@ class ChatRepository {
       : chatId = "${receiver.id}_${sender.id}";
 
   sendMessage(Message message) {
-    var documentReference = Firestore.instance
+    /*var documentReference = Firestore.instance
         .collection('messages')
         .document(chatId)
         .collection(chatId)
@@ -26,11 +25,11 @@ class ChatRepository {
           'content': message.text,
         },
       );
-    });
+    });*/
   }
 
   Stream<List<Message>> getMessages() async* {
-    yield* Firestore.instance
+    /* yield* Firestore.instance
         .collection('messages')
         .document(chatId)
         .collection(chatId)
@@ -39,7 +38,8 @@ class ChatRepository {
         .snapshots()
         .map((qs) => qs.documents
             .map((msg) => Message(msg.data['content'].toString(), 0))
-            .toList());
+            .toList());*/
+
 /*
     ;
     await for (var docs in Firestore.instance

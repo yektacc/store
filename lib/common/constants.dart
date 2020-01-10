@@ -31,7 +31,11 @@ class Helpers {
         fontSize: 13.0);
   }
 
-  static showDefaultErr() {
+  static changeSuccessfulToast([String message = 'تغییرات با موفقیت ثبت شد!']) {
+    showToast(message);
+  }
+
+  static errorToast() {
     Fluttertoast.showToast(
         msg: 'خطا! لطفا مجددا تلاش کنید',
         toastLength: Toast.LENGTH_SHORT,

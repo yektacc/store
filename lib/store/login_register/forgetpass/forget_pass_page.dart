@@ -199,7 +199,6 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
         Container(
             color: Colors.white,
             child: TextFormField(
-              keyboardType: TextInputType.number,
               controller: newPassController,
               textAlign: TextAlign.center,
               obscureText: true,
