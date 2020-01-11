@@ -389,8 +389,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             : Container(),
                         state is IsLoggedIn
                             ? _buildDrawerItem(() {
-                          Navigator.of(context)
-                              .pushNamed(CartPage.routeName);
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => UserPetPage()));
                         }, Icons.shopping_cart, "حیوان خانگی شما")
                             : Container(),
                         state is IsLoggedIn

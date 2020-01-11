@@ -7,6 +7,7 @@ import 'package:store/data_layer/order/paid_orders_repository.dart';
 import 'package:store/data_layer/province/province_repository.dart';
 import 'package:store/data_layer/shop_management/create_product_repo.dart';
 import 'package:store/data_layer/tags/tag_item_repository.dart';
+import 'package:store/data_layer/userpet/user_pet_repository.dart';
 import 'package:store/services/adoption/adoption_bloc.dart';
 import 'package:store/services/adoption/adoption_repository.dart';
 import 'package:store/services/centers/centers_bloc.dart';
@@ -43,6 +44,7 @@ import 'package:store/store/products/special/special_products_repository.dart';
 import 'package:store/store/shop_management/shop_management_bloc.dart';
 import 'package:store/store/structure/repository.dart';
 import 'package:store/store/structure/structure_bloc.dart';
+import 'package:store/store/userpet/user_pet_bloc.dart';
 
 import 'app.dart';
 import 'data_layer/ads/ads_repository.dart';
@@ -143,6 +145,9 @@ Future main() async {
   final FavoriteBloc _favoriteBloc = FavoriteBloc(
       _loginStatusBloc, FavoriteRepository(_detailRepo), _detailRepo);
   final CommentsRepository _commentsRepo = CommentsRepository(net);
+  final UserPetRepository _userPetRepository = UserPetRepository(net);
+  final UserPetBloc _userPetBloc = UserPetBloc(
+      _userPetRepository, _loginStatusBloc);
 
   bool initResult = await init(_provinceRepo);
 
@@ -187,7 +192,8 @@ Future main() async {
         _productRepo,
         _favoriteBloc,
         _commentsRepo,
-        _shopBloc)
+        _shopBloc,
+        _userPetBloc)
       /*MaterialApp(home: ChatPage(
             ChatBloc(ClientChatUser('09359236524'), ClinicChatUser('20'))),)*/
     );

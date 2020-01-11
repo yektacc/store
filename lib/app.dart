@@ -44,6 +44,7 @@ import 'package:store/store/shop_management/seller_list_page.dart';
 import 'package:store/store/shop_management/shop_management_bloc.dart';
 import 'package:store/store/structure/repository.dart';
 import 'package:store/store/structure/structure_bloc.dart';
+import 'package:store/store/userpet/user_pet_bloc.dart';
 
 import 'data_layer/ads/ads_repository.dart';
 import 'data_layer/brands/brands_repository.dart';
@@ -98,6 +99,7 @@ class App extends StatefulWidget {
   final FavoriteBloc _favoriteBloc;
   final CommentsRepository _commentsRepo;
   final ShopManagementBloc _shopBloc;
+  final UserPetBloc _userPetBloc;
 
   App(
       this._productsBloc,
@@ -139,7 +141,8 @@ class App extends StatefulWidget {
       this._productsRepository,
       this._favoriteBloc,
       this._commentsRepo,
-      this._shopBloc);
+      this._shopBloc,
+      this._userPetBloc);
 
   @override
   _AppState createState() => _AppState();
@@ -204,13 +207,13 @@ class _AppState extends State<App> {
               value: widget._picturesRepo),
           Provider<BrandsRepository>.value(value: widget._brandsRepo),
           Provider<CentersRepository>.value(value: widget._centersRepo),
-          Provider<OrdersRepository>.value(
-              value: widget._prvOrderRepository),
+          Provider<OrdersRepository>.value(value: widget._prvOrderRepository),
           Provider<SiteInfoRepository>.value(value: widget._siteInfoRepository),
           Provider<ProductsRepository>.value(value: widget._productsRepository),
           Provider<FavoriteBloc>.value(value: widget._favoriteBloc),
           Provider<CommentsRepository>.value(value: widget._commentsRepo),
           Provider<ShopManagementBloc>.value(value: widget._shopBloc),
+          Provider<UserPetBloc>.value(value: widget._userPetBloc),
         ],
         child: MaterialApp(
           title: 'epet24',
