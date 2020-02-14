@@ -60,7 +60,7 @@ class LoginRepository {
               phoneNo,
               password,
               loginData["session_id"].toString(),
-              loginData['app_user_id'].toString());
+              loginData['app_user_id']);
           await _saveUser(_user);
           return LoginSuccessfulResponse(_user);
         } else if (responseCode == 3) {
@@ -93,12 +93,12 @@ class LoginRepository {
       prefs.getString(key1) ?? "err",
       prefs.getString(key2) ?? "err",
       prefs.getString(key3) ?? "err",
-      prefs.getString(key4) ?? "err",
+      prefs.getInt(key4) ?? -1,
     );
     if (user.phoneNo == "err" ||
         user.password == "err" ||
         user.sessionId == "err" ||
-        user.appUserId == "err") {
+        user.appUserId == -1) {
       return null;
     }
     return user;
@@ -109,7 +109,7 @@ class LoginRepository {
     prefs.setString(key1, user.phoneNo);
     prefs.setString(key2, user.password);
     prefs.setString(key3, user.sessionId);
-    prefs.setString(key4, user.appUserId);
+    prefs.setInt(key4, user.appUserId);
     print(
         'saved  phone: ${user.phoneNo}  pass: ${user
             .password} session id: ${user.sessionId}  app_user_id: ${user

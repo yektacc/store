@@ -113,4 +113,5 @@ class AppUrls {
   static const String base_url = 'http://79.143.85.121';
   static const String image_url = '$base_url/epet24/public/';
   static const String api_url = "$base_url/epet24/public/api/";
+  static const String alt_api_url = "$base_url/epet24-upload/public/api/";
 }

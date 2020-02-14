@@ -53,7 +53,16 @@ class Net {
     if (cacheEnabled && _cache.containsKey(initRequest.toString())) {
       return _cache[initRequest.toString()];
     } else {
-      String url = AppUrls.api_url + getSubUrl(endPoint);
+      String url = '';
+      if (endPoint == EndPoint.START_CHAT ||
+          endPoint == EndPoint.SEND_MESSAGE ||
+          endPoint == EndPoint.GET_ALL_CHATS ||
+          endPoint == EndPoint.SEEN_CHAT ||
+          endPoint == EndPoint.GET_CHAT_WITH) {
+        url = AppUrls.alt_api_url + getSubUrl(endPoint);
+      } else {
+        url = AppUrls.api_url + getSubUrl(endPoint);
+      }
 
       print("\n>>>>>>>>>>>>>>>>>>>>>>>$endPoint>>>>>>>>>>>>>>>>>>>>>>>>>>>\n"
           "sending request: \n"
@@ -78,7 +87,7 @@ class Net {
         if (e.response.statusCode == 429) {
           nextRetryAfter = int.parse(e.response.headers['retry-after'].first,
               onError: (_) => 0);
-          print('retryyaff for ${e.response.realUri}:' +
+          print('retry afterr ${e.response.realUri}:' +
               nextRetryAfter.toString());
         }
         err = true;
@@ -106,13 +115,14 @@ class Net {
             print(
                 "STATUS ERROR LOADING URL: status: ${res.statusCode} $endPoint $body remaind tries: $remainedTries  ");
           }
-        } catch (e) {
+        } catch (e, stacktrace) {
           await Future.delayed(Duration(seconds: nextRetryAfter));
           err = true;
           remainedTries--;
           print(
               "ERROR LOADING URL: $endPoint $body remaind tries: $remainedTries" +
                   e.toString());
+          print(stacktrace);
         }
 
         if (!err) {
@@ -226,7 +236,13 @@ enum EndPoint {
   GET_USER_PET,
   SEND_USER_PET,
   EDIT_USER_PET,
-  DELETE_USER_PET
+  DELETE_USER_PET,
+  SEND_SELLER_REQUEST,
+  START_CHAT,
+  SEND_MESSAGE,
+  GET_ALL_CHATS,
+  GET_CHAT_WITH,
+  SEEN_CHAT
 }
 
 String getSubUrl(EndPoint endPoint) {
@@ -414,6 +430,24 @@ String getSubUrl(EndPoint endPoint) {
       break;
     case EndPoint.DELETE_USER_PET:
       subUrl = 'deleteamlanimals';
+      break;
+    case EndPoint.SEND_SELLER_REQUEST:
+      subUrl = 'sendnewsellerprofile';
+      break;
+    case EndPoint.START_CHAT:
+      subUrl = 'startchat';
+      break;
+    case EndPoint.SEND_MESSAGE:
+      subUrl = 'sendchat';
+      break;
+    case EndPoint.GET_ALL_CHATS:
+      subUrl = 'getallchats';
+      break;
+    case EndPoint.SEEN_CHAT:
+      subUrl = 'setseen';
+      break;
+    case EndPoint.GET_CHAT_WITH:
+      subUrl = 'getappuserchats';
       break;
   }
   return subUrl;

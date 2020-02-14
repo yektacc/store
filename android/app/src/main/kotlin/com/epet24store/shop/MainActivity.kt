@@ -1,4 +1,4 @@
-package com.epet24.store
+package com.epet24store.shop
 
 import android.os.Bundle
 import io.flutter.app.FlutterActivity

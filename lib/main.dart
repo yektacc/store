@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:persian_datepicker/persian_datetime.dart';
+import 'package:provider/provider.dart';
 import 'package:store/data_layer/centers/centers_repository.dart';
 import 'package:store/data_layer/centers/service_repository.dart';
 import 'package:store/data_layer/fcm/fcm_token_repository.dart';
+import 'package:store/data_layer/management/create_product_repo.dart';
+import 'package:store/data_layer/management/seller_request_repository.dart';
 import 'package:store/data_layer/order/paid_orders_repository.dart';
 import 'package:store/data_layer/province/province_repository.dart';
-import 'package:store/data_layer/shop_management/create_product_repo.dart';
 import 'package:store/data_layer/tags/tag_item_repository.dart';
 import 'package:store/data_layer/userpet/user_pet_repository.dart';
 import 'package:store/services/adoption/adoption_bloc.dart';
 import 'package:store/services/adoption/adoption_repository.dart';
 import 'package:store/services/centers/centers_bloc.dart';
+import 'package:store/services/chat/inbox_manager.dart';
 import 'package:store/services/lost_pets/lost_pets_bloc.dart';
 import 'package:store/services/lost_pets/lost_pets_repository.dart';
 import 'package:store/store/info/info_client.dart';
+import 'package:store/store/landing/landing_bloc.dart';
 import 'package:store/store/location/address/address_bloc.dart';
 import 'package:store/store/location/address/address_repository.dart';
 import 'package:store/store/location/my_location/my_location_bloc.dart';
-import 'package:store/store/location/provinces/model.dart';
 import 'package:store/store/location/provinces/provinces_bloc.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_bloc.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_interactor.dart';
@@ -28,6 +30,9 @@ import 'package:store/store/login_register/profile/profile_bloc.dart';
 import 'package:store/store/login_register/profile/profile_repository.dart';
 import 'package:store/store/login_register/register/register_bloc.dart';
 import 'package:store/store/login_register/register/register_interactor.dart';
+import 'package:store/store/management/management_bloc.dart';
+import 'package:store/store/payment/coupon/coupon_bloc.dart';
+import 'package:store/store/payment/coupon/coupon_repository.dart';
 import 'package:store/store/products/brands/brands_bloc.dart';
 import 'package:store/store/products/cart/cart_bloc.dart';
 import 'package:store/store/products/comments/comments_repository.dart';
@@ -41,7 +46,6 @@ import 'package:store/store/products/product/products_repository.dart';
 import 'package:store/store/products/search/search_bloc.dart';
 import 'package:store/store/products/search/search_interactor.dart';
 import 'package:store/store/products/special/special_products_repository.dart';
-import 'package:store/store/shop_management/shop_management_bloc.dart';
 import 'package:store/store/structure/repository.dart';
 import 'package:store/store/structure/structure_bloc.dart';
 import 'package:store/store/userpet/user_pet_bloc.dart';
@@ -50,37 +54,17 @@ import 'app.dart';
 import 'data_layer/ads/ads_repository.dart';
 import 'data_layer/brands/brands_repository.dart';
 import 'data_layer/cart/cart_repository.dart';
+import 'data_layer/management/management_repository.dart';
 import 'data_layer/netclient.dart';
 import 'data_layer/order/save_order_repository.dart';
 import 'data_layer/payment/delivery/delivery_price_repository.dart';
 import 'data_layer/products/product_pictures_repository.dart';
 import 'data_layer/products/products_count_in_category.dart';
-import 'data_layer/shop_management/shop_repository.dart';
 
 Future main() async {
-  print(PersianDateTime()
-      .add(Duration(days: 1))
-      .jalaaliDay); //  var res = await repo.fetch();
-
-/*  ProductPicturesRepo repo = ProductPicturesRepo(net);
-  var res = await repo.fetch(1);*/
-
-/*
-
-  runApp(MaterialApp(
-    title: 'Flutter Demo',
-    theme: ThemeData(
-        primaryColor: Colors.red,
-        fontFamily: "IranSans",
-        textTheme: TextTheme(body1: TextStyle(fontSize: 13))),
-    supportedLocales: [
-      Locale("fa", "IR"),
-    ],
-    locale: Locale("fa", "IR"),
-    home: Text("adsf"),
-  ));*/
   Net net = Net();
 
+  // repositories
   final ProductsRepository _productRepo = ProductsRepository(net);
   final SearchInteractor _searchInteractor = SearchInteractor();
   final StructureRepository _structureRepo = StructureRepository(net);
@@ -120,10 +104,10 @@ Future main() async {
   final AddressBloc _addressBloc = AddressBloc(_addressRepo);
   final CentersRepository _centersRepo = CentersRepository(_provinceRepo, net);
   final CentersBloc _centersBloc = CentersBloc(_centersRepo);
-  final ShopRepository _sellerRepo = ShopRepository(net);
-  final OrdersRepository _ordersRepo = OrdersRepository(net);
-  final ShopManagementBloc _shopBloc =
-  ShopManagementBloc(_sellerRepo, CreateProductRepository(), _ordersRepo);
+  final ManagementRepository _sellerRepo = ManagementRepository(net);
+  final PreviousOrdersRepository _ordersRepo = PreviousOrdersRepository(net);
+  final ManagementBloc _managementBloc =
+  ManagementBloc(_sellerRepo, CreateProductRepository(), _ordersRepo);
 
   final ProductsCountRepository _countRepo =
       ProductsCountRepository(_productRepo, _structureBloc);
@@ -146,61 +130,66 @@ Future main() async {
       _loginStatusBloc, FavoriteRepository(_detailRepo), _detailRepo);
   final CommentsRepository _commentsRepo = CommentsRepository(net);
   final UserPetRepository _userPetRepository = UserPetRepository(net);
-  final UserPetBloc _userPetBloc = UserPetBloc(
-      _userPetRepository, _loginStatusBloc);
+  final UserPetBloc _userPetBloc =
+  UserPetBloc(_userPetRepository, _loginStatusBloc);
+  final LandingBloc _landingBloc = LandingBloc(_provinceBloc, _structureBloc);
+  final CouponRepository _couponRepo = CouponRepository();
+  final CouponBloc _couponBloc = CouponBloc(_couponRepo);
 
-  bool initResult = await init(_provinceRepo);
+  final SellerRequestRepository _sellerRequestRepo =
+  SellerRequestRepository(net);
 
-  if (initResult == true) {
-    runApp(App(
-        _productsBloc,
-        _filteredProductsBloc,
-        _searchBloc,
-        _structureBloc,
-        _loginBloc,
-        _loginStatusBloc,
-        _forgetPassBloc,
-        _profileBloc,
-        _registerBloc,
-        _cartBloc,
-        _productDetailBloc,
-        _addressBloc,
-        _provinceBloc,
-        _myLocationBloc,
-        _lostPetsBloc,
-        _adoptionPetsBloc,
-        _centersBloc,
-        _brandsBloc,
-        _sellerRepo,
-        _countRepo,
-        _provinceRepo,
-        _bestSellerRepo,
-        _servicesRepository,
-        _lostPetsRepo,
-        _adsRepo,
-        _detailRepo,
-        _deliveryPostRepo,
-        _structureRepo,
-        _tagsRepository,
-        _cartRepo,
-        _orderRepo,
-        _picturesRepo,
-        _brandsRepository,
-        _centersRepo,
-        _ordersRepo,
-        _siteInfoRepository,
-        _productRepo,
-        _favoriteBloc,
-        _commentsRepo,
-        _shopBloc,
-        _userPetBloc)
-      /*MaterialApp(home: ChatPage(
-            ChatBloc(ClientChatUser('09359236524'), ClinicChatUser('20'))),)*/
-    );
-  }
-}
+  final InboxManager _inboxManager =
+  InboxManager(_loginStatusBloc, _managementBloc, net);
 
-Future<bool> init(ProvinceRepository _provinceRepo) async {
-  List<Province> prvs = await _provinceRepo.getAllAsync();
-  return prvs.isNotEmpty;
+  runApp(App([
+    Provider<Net>.value(value: net),
+    Provider<ProductsBloc>.value(value: _productsBloc),
+    Provider<FilteredProductsBloc>.value(value: _filteredProductsBloc),
+    Provider<SearchBloc>.value(value: _searchBloc),
+    Provider<StructureBloc>.value(value: _structureBloc),
+    Provider<LoginBloc>.value(value: _loginBloc),
+    Provider<LoginStatusBloc>.value(value: _loginStatusBloc),
+    Provider<ForgetPassBloc>.value(value: _forgetPassBloc),
+    Provider<ProfileBloc>.value(value: _profileBloc),
+    Provider<RegisterBloc>.value(value: _registerBloc),
+    Provider<CartBloc>.value(value: _cartBloc),
+    Provider<ProductDetailBloc>.value(value: _productDetailBloc),
+    Provider<AddressBloc>.value(value: _addressBloc),
+    Provider<ProvinceBloc>.value(value: _provinceBloc),
+    Provider<MyLocationBloc>.value(value: _myLocationBloc),
+    Provider<LostPetsBloc>.value(value: _lostPetsBloc),
+    Provider<AdoptionPetsBloc>.value(value: _adoptionPetsBloc),
+    Provider<CentersBloc>.value(value: _centersBloc),
+    Provider<AddressBloc>.value(value: _addressBloc),
+    Provider<BrandsBloc>.value(value: _brandsBloc),
+    Provider<ManagementRepository>.value(value: _sellerRepo),
+    Provider<ProductsCountRepository>.value(value: _countRepo),
+    Provider<ProvinceRepository>.value(value: _provinceRepo),
+    Provider<SpecialProductsRepository>.value(value: _bestSellerRepo),
+    Provider<ServicesRepository>.value(value: _servicesRepository),
+    Provider<LostPetsRepository>.value(value: _lostPetsRepo),
+    Provider<AdsRepository>.value(value: _adsRepo),
+    Provider<ProductDetailRepository>.value(value: _detailRepo),
+    Provider<DeliveryPriceRepository>.value(value: _deliveryPostRepo),
+    Provider<StructureRepository>.value(value: _structureRepo),
+    Provider<TagsRepository>.value(value: _tagsRepository),
+    Provider<CartRepository>.value(value: _cartRepo),
+    Provider<OrderRepository>.value(value: _orderRepo),
+    Provider<ProductPicturesRepository>.value(value: _picturesRepo),
+    Provider<BrandsRepository>.value(value: _brandsRepository),
+    Provider<CentersRepository>.value(value: _centersRepo),
+    Provider<PreviousOrdersRepository>.value(value: _ordersRepo),
+    Provider<SiteInfoRepository>.value(value: _siteInfoRepository),
+    Provider<ProductsRepository>.value(value: _productRepo),
+    Provider<FavoriteBloc>.value(value: _favoriteBloc),
+    Provider<CommentsRepository>.value(value: _commentsRepo),
+    Provider<ManagementBloc>.value(value: _managementBloc),
+    Provider<UserPetBloc>.value(value: _userPetBloc),
+    Provider<LandingBloc>.value(value: _landingBloc),
+    Provider<CouponBloc>.value(value: _couponBloc),
+    Provider<SellerRequestRepository>.value(value: _sellerRequestRepo),
+    Provider<FcmTokenRepository>.value(value: _fcmRepo),
+    Provider<InboxManager>.value(value: _inboxManager),
+  ]));
 }

@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
-import 'package:store/store/shop_management/seller_list_page.dart';
-import 'package:store/store/shop_management/shop_management_bloc.dart';
-import 'package:store/store/shop_management/shop_management_event_state.dart';
+import 'package:store/store/management/management_bloc.dart';
+import 'package:store/store/management/management_event_state.dart';
+import 'package:store/store/management/service/service_management_page.dart';
+import 'package:store/store/management/shop/shop_management_page.dart';
 
-class SellerLoginPage extends StatefulWidget {
+class ManagerLoginPage extends StatefulWidget {
   @override
-  _SellerLoginPageState createState() => _SellerLoginPageState();
+  _ManagerLoginPageState createState() => _ManagerLoginPageState();
 }
 
-class _SellerLoginPageState extends State<SellerLoginPage> {
+class _ManagerLoginPageState extends State<ManagerLoginPage> {
   final _formKey = GlobalKey<FormState>();
-  ShopManagementBloc _shopBloc;
+  ManagementBloc _managementBloc;
   bool error = false;
 
   /*final*/
@@ -22,14 +23,21 @@ class _SellerLoginPageState extends State<SellerLoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_shopBloc == null) {
-      _shopBloc = Provider.of<ShopManagementBloc>(context);
+    if (_managementBloc == null) {
+      _managementBloc = Provider.of<ManagementBloc>(context);
     }
 
-    _shopBloc.state.listen((state) {
+    _managementBloc.state.listen((state) {
+      print('management login state: $state $loggedIn');
       if (state is SMDataLoaded && !loggedIn) {
         loggedIn = true;
-        Navigator.of(context).popAndPushNamed(SellersListPage.routeName);
+
+        if (state.services.isNotEmpty) {
+          Navigator.of(context)
+              .popAndPushNamed(ServiceManagementPage.routeName);
+        } else if (state.shops.isNotEmpty) {
+          Navigator.of(context).popAndPushNamed(ShopManagementPage.routeName);
+        }
       }
     });
 
@@ -59,9 +67,6 @@ class _SellerLoginPageState extends State<SellerLoginPage> {
                             onChanged: (newText) {
                               phoneController = newText;
                             },
-/*
-                            controller: phoneController,
-*/
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
                                 icon: Icon(
@@ -111,7 +116,7 @@ class _SellerLoginPageState extends State<SellerLoginPage> {
                             textColor: Colors.white,
                             onPressed: () {
                               if (_formKey.currentState.validate()) {
-                                _shopBloc.dispatch(ShopManagerLogin(
+                                _managementBloc.dispatch(ShopManagerLogin(
                                     phoneController,
                                     passController.text.toString()));
                                 /*  loginSeller(phoneController,

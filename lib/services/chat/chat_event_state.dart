@@ -11,8 +11,8 @@ abstract class ChatState extends BlocState {}
 
 // STATES *******************************
 
-class MessagesLoading extends ChatState {
-  MessagesLoading();
+class ChatLoading extends ChatState {
+  ChatLoading();
 
   @override
   String toString() {
@@ -20,10 +20,10 @@ class MessagesLoading extends ChatState {
   }
 }
 
-class MessagesLoaded extends ChatState {
-  final List<Message> messages;
+class ChatLoaded extends ChatState {
+  final Chat chat;
 
-  MessagesLoaded(this.messages);
+  ChatLoaded(this.chat);
 
   @override
   String toString() {
@@ -31,7 +31,7 @@ class MessagesLoaded extends ChatState {
   }
 }
 
-class ChatsLoadingFailed extends ChatState {
+class FailedLoadingChat extends ChatState {
   @override
   String toString() {
     return "STATE: failed";
@@ -41,13 +41,15 @@ class ChatsLoadingFailed extends ChatState {
 // EVENTS *******************************
 
 class SendMessage extends ChatEvent {
-  final Message message;
+  final SimpleMessage message;
 
   SendMessage(this.message);
 }
 
-class UpdateMessages extends ChatEvent {
-  final List<Message> messages;
+class UpdateChat extends ChatEvent {}
 
-  UpdateMessages(this.messages);
+class SeenChat extends ChatEvent {
+  final Chat chat;
+
+  SeenChat(this.chat);
 }

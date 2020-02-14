@@ -6,8 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/data_layer/brands/brands_repository.dart';
-import 'package:store/data_layer/shop_management/create_product_repo.dart';
-import 'package:store/data_layer/shop_management/shop_repository.dart';
+import 'package:store/data_layer/management/create_product_repo.dart';
+
+import '../model.dart';
 
 class CreateProductPage extends StatefulWidget {
   static const String routeName = 'createproduct';
@@ -110,49 +111,54 @@ class _CreateProductPageState extends State<CreateProductPage> {
                 },
               ),
             ),
-            StreamBuilder<List<Brand>>(
-              stream: Provider.of<BrandsRepository>(context).fetch(),
-              builder: (context, allBrandsSnp) {
-                List<Brand> brandsToShow;
+            Container(
+              child: StreamBuilder<List<Brand>>(
+                stream: Provider.of<BrandsRepository>(context).fetch(),
+                builder: (context, allBrandsSnp) {
+                  List<Brand> brandsToShow;
 
-                if (allBrands.isNotEmpty) {
-                  brandsToShow = allBrands;
-                } else if (allBrandsSnp != null &&
-                    allBrandsSnp.data != null &&
-                    allBrandsSnp.data.isNotEmpty) {
-                  brandsToShow = allBrandsSnp.data;
-                  allBrands.addAll(allBrandsSnp.data);
-                } else {
-                  brandsToShow = [];
-                }
+                  if (allBrands.isNotEmpty) {
+                    brandsToShow = allBrands;
+                  } else if (allBrandsSnp != null &&
+                      allBrandsSnp.data != null &&
+                      allBrandsSnp.data.isNotEmpty) {
+                    brandsToShow = allBrandsSnp.data;
+                    allBrands.addAll(allBrandsSnp.data);
+                  } else {
+                    brandsToShow = [];
+                  }
 
-                return StreamBuilder<Brand>(
-                  stream: brandStream,
-                  builder: (context, snapshot) {
-                    return Container(
-                      margin: EdgeInsets.symmetric(horizontal: 9, vertical: 9),
-                      child: DropdownButtonFormField<Brand>(
-                        onChanged: brandStream.add,
-                        decoration: InputDecoration(labelText: 'برند '),
-                        value: snapshot.data,
-                        validator: (value) {
-                          if (value == null) {
-                            return 'این فیلد نباید خالی باشد';
-                          }
-                          return null;
-                        },
-                        items: brandsToShow
-                            .map<DropdownMenuItem<Brand>>(
-                                (br) => DropdownMenuItem<Brand>(
-                                      child: Text(br.nameFa),
-                                      value: br,
-                                    ))
-                            .toList(),
-                      ),
-                    );
-                  },
-                );
-              },
+                  return StreamBuilder<Brand>(
+                    stream: brandStream,
+                    builder: (context, snapshot) {
+                      return Container(
+                        height: 100,
+                        margin:
+                        EdgeInsets.symmetric(horizontal: 9, vertical: 9),
+                        child: DropdownButtonFormField<Brand>(
+                          onChanged: brandStream.add,
+                          decoration: InputDecoration(labelText: 'برند '),
+                          value: snapshot.data,
+                          validator: (value) {
+                            if (value == null) {
+                              return 'این فیلد نباید خالی باشد';
+                            }
+                            return null;
+                          },
+                          items: brandsToShow
+                              .map<DropdownMenuItem<Brand>>(
+                                  (br) =>
+                                  DropdownMenuItem<Brand>(
+                                    child: Text(br.nameFa),
+                                    value: br,
+                                  ))
+                              .toList(),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
             new Row(
               children: <Widget>[
@@ -375,26 +381,25 @@ class _CreateProductPageState extends State<CreateProductPage> {
                 onPressed: () async {
                   // Validate returns true if the form is valid, or false
                   // otherwise.
-/*                  if (_formKey.currentState.validate()) {
+                  if (_formKey.currentState.validate()) {
                     // If the form is valid, display a Snackbar.
-                    Scaffold.of(context).showSnackBar(
-                        SnackBar(content: Text('Processing Data')));
-                  }*/
-
-                  await CreateProductRepository().sendNewProduct(
-                      imageStream.value,
-                      nameFaStream.value,
-                      brandStream.value.id,
-                      'variantCode',
-                      'prop',
-                      1,
-                      descriptionStream.value,
-                      widget.shop.sellerId,
-                      int.parse(shippingTimeStream.value),
-                      int.parse(originalPriceStream.value),
-                      int.parse(salePriceStream.value),
-                      int.parse(maximumOrderStream.value),
-                      int.parse(stockQuantityStream.value));
+                    /* Scaffold.of(context).showSnackBar(
+                        SnackBar(content: Text('Processing Data')));*/
+                    await CreateProductRepository().sendNewProduct(
+                        imageStream.value,
+                        nameFaStream.value,
+                        brandStream.value.id,
+                        'variantCode',
+                        'prop',
+                        1,
+                        descriptionStream.value,
+                        widget.shop.id,
+                        int.parse(shippingTimeStream.value),
+                        int.parse(originalPriceStream.value),
+                        int.parse(salePriceStream.value),
+                        int.parse(maximumOrderStream.value),
+                        int.parse(stockQuantityStream.value));
+                  }
                 },
                 child: Text(
                   'ثبت اطلاعات',

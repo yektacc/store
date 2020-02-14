@@ -2,10 +2,10 @@ import 'package:store/store/products/filter/filter.dart';
 
 import '../netclient.dart';
 
-class OrdersRepository {
+class PreviousOrdersRepository {
   final Net _net;
 
-  OrdersRepository(this._net);
+  PreviousOrdersRepository(this._net);
 
   Stream<List<PaidOrder>> getPaidOrders(String sellerId) async* {
     PostResponse response = await _net.post(EndPoint.GET_PAID_ORDERS, body: {

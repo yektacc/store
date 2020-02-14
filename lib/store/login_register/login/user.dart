@@ -1,6 +1,6 @@
 class User {
   final String phoneNo;
-  final String appUserId;
+  final int appUserId;
   final String password;
   final String sessionId;
 

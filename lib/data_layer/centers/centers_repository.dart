@@ -96,7 +96,7 @@ class CentersRepository {
       if (fetchType == CenterFetchType.CLINICS) {
         List<CenterItem> clinics =
             allCenters.where((center) => center.typeId == 1).toList();
-        print("clinics: $clinics");
+        print("Center Repo response clinics: $clinics");
         return clinics;
       } else if (fetchType == CenterFetchType.ALL) {
         return allCenters;
@@ -107,7 +107,7 @@ class CentersRepository {
       } else if (fetchType == CenterFetchType.STORE) {
         List<CenterItem> stores =
             allCenters.where((center) => center.typeId == 4).toList();
-        print("stores: $stores");
+        print("Centers Repo stores: $stores");
         return stores;
       } else {
         throw Exception('fetch type not found');

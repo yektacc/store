@@ -27,7 +27,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   @override
   void onError(Object error, StackTrace stacktrace) {
-    print("LOGIN BLOC ERROR: $error");
+    print("LOGIN BLOC ERROR: $error $stacktrace");
   }
 
   @override

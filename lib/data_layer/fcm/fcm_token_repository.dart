@@ -3,17 +3,24 @@ import 'package:store/data_layer/netclient.dart';
 
 class FcmTokenRepository {
   final Net _net;
+  final firebaseMessaging = FirebaseMessaging();
 
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  /*
+  // firebase
+
+
+//  var fcmHandler = FcmHandler();
+
+  */
 
   FcmTokenRepository(this._net);
 
   Future<bool> updateToken(String sessionId) async {
-    var token = await _firebaseMessaging.getToken();
+    var token = await firebaseMessaging.getToken();
     if (token == null) {
       return false;
     } else {
-      return _sendTokenToServer(token, sessionId);
+      return await _sendTokenToServer(token, sessionId);
     }
   }
 

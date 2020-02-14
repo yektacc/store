@@ -4,38 +4,38 @@ import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/data_layer/province/province_repository.dart';
-import 'package:store/data_layer/shop_management/shop_repository.dart';
 import 'package:store/store/home/category_page.dart';
+import 'package:store/store/management/management_bloc.dart';
+import 'package:store/store/management/management_event_state.dart';
+import 'package:store/store/management/shop/seller_add_product_page.dart';
+import 'package:store/store/management/shop/seller_detail_page.dart';
 import 'package:store/store/order/order_page.dart';
-import 'package:store/store/shop_management/seller_add_product_page.dart';
-import 'package:store/store/shop_management/seller_detail_page.dart';
-import 'package:store/store/shop_management/shop_management_bloc.dart';
-import 'package:store/store/shop_management/shop_management_event_state.dart';
 import 'package:store/store/structure/model.dart';
 import 'package:store/store/structure/repository.dart';
 
+import '../model.dart';
 import 'create_product_page.dart';
 
-class SellersListPage extends StatefulWidget {
+class ShopManagementPage extends StatefulWidget {
   static const String routeName = 'sellerpage';
 
 /*
   final List<ShopIdentifier> _sellers = [];
 */
 
-  SellersListPage(/*this.sellers*/);
+  ShopManagementPage(/*this.sellers*/);
 
   @override
-  _SellersListPageState createState() => _SellersListPageState();
+  _ShopManagementPageState createState() => _ShopManagementPageState();
 }
 
-class _SellersListPageState extends State<SellersListPage> {
-  ShopManagementBloc _shopBloc;
+class _ShopManagementPageState extends State<ShopManagementPage> {
+  ManagementBloc _managementBloc;
 
   @override
   Widget build(BuildContext context) {
-    if (_shopBloc != null) {
-      _shopBloc = Provider.of<ShopManagementBloc>(context);
+    if (_managementBloc != null) {
+      _managementBloc = Provider.of<ManagementBloc>(context);
     }
 
     return Container(
@@ -49,8 +49,8 @@ class _SellersListPageState extends State<SellersListPage> {
               style: TextStyle(color: Colors.white, fontSize: 14),
             ),
           ),
-          body: BlocBuilder<ShopManagementBloc, ShopManagementState>(
-            bloc: _shopBloc,
+          body: BlocBuilder<ManagementBloc, ManagementState>(
+            bloc: _managementBloc,
             builder: (context, state) {
               if (state is SMDataLoaded) {
                 return Column(
@@ -251,8 +251,7 @@ class _SellersListPageState extends State<SellersListPage> {
                                     alignment: Alignment.centerLeft,
                                     child: Card(
                                       child: Row(
-                                        children: <Widget>[
-                                        ],
+                                        children: <Widget>[],
                                       ),
                                     ),
                                   ),

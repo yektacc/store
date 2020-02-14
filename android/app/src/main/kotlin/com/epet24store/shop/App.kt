@@ -1,4 +1,4 @@
-package com.epet24.store
+package com.epet24store.shop
 
 import android.content.Context
 import androidx.multidex.MultiDex

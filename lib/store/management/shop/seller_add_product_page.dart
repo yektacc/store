@@ -3,10 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
-import 'package:store/data_layer/shop_management/shop_repository.dart';
+import 'package:store/data_layer/management/management_repository.dart';
 import 'package:store/store/products/product/product.dart';
 import 'package:store/store/products/product/products_bloc.dart';
 import 'package:store/store/products/product/products_bloc_event.dart';
+
+import '../model.dart';
 
 class SellerAddProductsPage extends StatefulWidget {
   static const String routeName = 'selleraddproduct';
@@ -26,7 +28,7 @@ class SellerAddProductsPage extends StatefulWidget {
 
 class _SellerAddProductsPageState extends State<SellerAddProductsPage> {
   ProductsBloc _productsBloc;
-  ShopRepository _shopRepository;
+  ManagementRepository _shopRepository;
 
   final _formKey = GlobalKey<FormState>();
   final List<PricingProduct> selectedProducts = [];
@@ -38,7 +40,7 @@ class _SellerAddProductsPageState extends State<SellerAddProductsPage> {
     }
 
     if (_shopRepository == null) {
-      _shopRepository = Provider.of<ShopRepository>(context);
+      _shopRepository = Provider.of<ManagementRepository>(context);
     }
 
     return Scaffold(

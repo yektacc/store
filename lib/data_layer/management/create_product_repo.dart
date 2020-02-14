@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:store/common/constants.dart';
 
 class CreateProductRepository {
@@ -21,14 +20,21 @@ class CreateProductRepository {
     int maximumOrder,
     int stockQuantity,
   ) async {
-    final Directory directory = await getApplicationDocumentsDirectory();
+    /*final Directory directory = await getApplicationDocumentsDirectory();
     final String path = directory.path;
 
-    final File newImage = await image.copy('$path/image1.jpg');
+    new Directory(path).create(recursive: true)
+    // The created directory is returned as a Future.
+        .then((Directory directory) {
+      print(directory.path);
+    });
+
+    final File newImage = await image.copy('$path/image1.jpg');*/
     var request = new http.MultipartRequest(
         "POST",
         Uri.parse(
             '${AppUrls.base_url}/epet24-upload/public/api/sendnewproductbyseller'));
+    print('image path:' + image.path);
 
     var rng = new Random();
     var code = rng.nextInt(1000);
@@ -58,8 +64,12 @@ class CreateProductRepository {
     request.fields['product_code'] = 'user_created_product_$code';
     request.files.add(await http.MultipartFile.fromPath(
       'product_main_image',
-      '$path/image1.jpg',
+      /*'$path/image1.jpg'*/ image.path,
     ));
+
+    print(request.fields.toString());
+
+    print(request.toString());
 
     request.send().then((response) async {
       final resStr = await response.stream.bytesToString();

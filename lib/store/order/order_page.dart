@@ -30,7 +30,7 @@ class _OrdersListWidgetState extends State<OrdersListWidget> {
       builder: (context, LoginStatusState state) {
         if (state is IsLoggedIn) {
           return StreamBuilder<List<PaidOrder>>(
-            stream: Provider.of<OrdersRepository>(context)
+            stream: Provider.of<PreviousOrdersRepository>(context)
                 .getPaidOrders(state.user.sessionId),
             builder: (context, snapshot) {
               if (snapshot != null && snapshot.data != null) {

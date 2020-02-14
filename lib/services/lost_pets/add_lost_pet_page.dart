@@ -3,10 +3,10 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:grouped_buttons/grouped_buttons.dart';
 import 'package:persian_datepicker/persian_datepicker.dart';
 import 'package:persian_datepicker/persian_datetime.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/store/location/provinces/model.dart';
 import 'package:store/store/payment/zarin_pal/client.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'lost_pets_bloc.dart';
@@ -499,7 +499,7 @@ class _FCRequestPageState extends State<FCRequestPage> {
                         child: Text("اعمال بدون پرداخت (تستی)"),
                         color: Colors.blue,
                         onPressed: () {
-                          print("daateee:" + dateController.text);
+                          print("date:" + dateController.text);
 
                           /* PersianDate pDate =
                               PersianDate();*/
@@ -514,7 +514,7 @@ class _FCRequestPageState extends State<FCRequestPage> {
 
                           PersianDateTime persianDT = PersianDateTime(jalaaliDateTime: dateController.text);
                           String finalDate =  persianDT.toGregorian() + " ${currentTime.hour}:${currentTime.minute}:${currentTime.second}";
-                          print('address iss: ' + finalDate);
+                          print('final date: ' + finalDate);
 
                           _bloc.dispatch(RegisterLostPet(LostPet(
                               city: currentCity,

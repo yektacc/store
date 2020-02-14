@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/store/products/product/products_bloc.dart';
 import 'package:store/store/products/search/search_delegate.dart';
-import 'package:provider/provider.dart';
-import 'package:rxdart/rxdart.dart';
 
 import 'filter_page.dart';
 
@@ -271,7 +271,7 @@ class _FilterSortAreaState extends State<FilterSortArea> {
     return StreamBuilder(
       stream: widget._isShown,
       builder: (context, AsyncSnapshot<FilterTabState> snapshot) {
-        print("state: " + snapshot.data.toString());
+        print("FILTER_SORT state: " + snapshot.data.toString());
         return DefaultTabController(
           initialIndex: snapshot.data == FilterTabState.SORT ? 1 : 0,
           length: 2,

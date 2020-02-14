@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/store/location/address/model.dart';
@@ -8,7 +10,6 @@ import 'package:store/store/products/cart/cart_bloc.dart';
 import 'package:store/store/products/cart/cart_bloc_event.dart';
 import 'package:store/store/products/cart/cart_product.dart';
 import 'package:store/store/products/filter/filter.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PaymentPage extends StatefulWidget {
@@ -81,22 +82,69 @@ class _PaymentPageState extends State<PaymentPage> {
                       children: <Widget>[
                         Align(
                             alignment: Alignment.centerRight,
-                            child: Container(
-                                margin: EdgeInsets.only(top: 10, bottom: 8),
-                                padding:
-                                    EdgeInsets.only(top: 7, left: 12, right: 9),
-                                height: 38,
-                                child: Text(
-                                  "جزییات فاکتور",
-                                  style: TextStyle(
-                                      color: Colors.black45,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(15),
-                                        bottomLeft: Radius.circular(15))))),
+                            child: Row(
+                              children: <Widget>[
+                                Container(
+                                    margin: EdgeInsets.only(top: 10, bottom: 8),
+                                    padding: EdgeInsets.only(
+                                        top: 7, left: 12, right: 9),
+                                    height: 38,
+                                    child: Text(
+                                      "جزییات فاکتور",
+                                      style: TextStyle(
+                                          color: Colors.black45,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            bottomLeft: Radius.circular(15)))),
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: <Widget>[
+                                      Container(
+                                        alignment: Alignment.centerLeft,
+                                        child: GestureDetector(
+                                          onTap: () {},
+                                          child: Container(
+                                              alignment: Alignment.centerLeft,
+                                              margin: EdgeInsets.only(left: 10),
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 12, vertical: 7),
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                      color: Colors.red,
+                                                      width: 1),
+                                                  borderRadius:
+                                                  BorderRadius.all(
+                                                      Radius.circular(8))),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                                children: <Widget>[
+                                                  Text(
+                                                    'کپن تخفیف',
+                                                    style: TextStyle(
+                                                        color: Colors.red),
+                                                  ),
+                                                  Container(
+                                                    padding: EdgeInsets.only(
+                                                        right: 8, left: 4),
+                                                    child:
+                                                    Icon(Icons.local_offer,
+                                                      color: Colors.red,),
+                                                  )
+                                                ],
+                                              )),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                )
+                              ],
+                            )),
                         Expanded(
                           child: BlocBuilder(
                             bloc: Provider.of<CartBloc>(context),
@@ -108,7 +156,7 @@ class _PaymentPageState extends State<PaymentPage> {
                               } else if (state is CartLoaded) {
                                 return BillDetail(state.products
                                     .map((oldcp) => CartProductAlt.fromProduct(
-                                        oldcp.product, oldcp.count))
+                                    oldcp.product, oldcp.count))
                                     .toList());
                               } else {
                                 return Container(
@@ -214,16 +262,15 @@ class _PaymentPageState extends State<PaymentPage> {
 
               ZarinPalClient()
                   .getPaymentURL(
-                      ZPPaymentRequest((getTotalWithTax()).toString()))
+                  ZPPaymentRequest((getTotalWithTax()).toString()))
                   .then((res) {
                 if (res is ZPPaymentSuccessResponse) {
                   launch(res.getURL());
                   ZarinPalClient()
                       .verifyPayment(ZPVerifyRequest(
-                          res.authority, getTotalWithTax().toString()))
+                      res.authority, getTotalWithTax().toString()))
                       .then((zpresponse) {
-                    if (zpresponse is ZPVerifySuccessResponse) {
-                    } else {}
+                    if (zpresponse is ZPVerifySuccessResponse) {} else {}
                   });
                 } else {}
               });
@@ -287,8 +334,8 @@ class BillDetail extends StatelessWidget {
   Column _buildCartItemsList(List<CartProductAlt> products) {
     return Column(
         children: List.generate(products.length, (index) {
-      return _cartItem(products[index]);
-    }));
+          return _cartItem(products[index]);
+        }));
   }
 
   Widget _cartItem(CartProductAlt cartProduct) {
@@ -410,8 +457,8 @@ class _PaymentTypeItemState extends State<PaymentTypeItem> {
           child: Container(
             decoration: widget.isSelected
                 ? BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    border: Border.all(color: AppColors.main_color))
+                borderRadius: BorderRadius.circular(3),
+                border: Border.all(color: AppColors.main_color))
                 : null,
             child: new Column(
               children: <Widget>[

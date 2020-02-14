@@ -18,7 +18,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   @override
   void onError(Object error, StackTrace stacktrace) {
-    print(error);
+    print('PRODUCT BLOC ERROR' + error.toString());
     print(stacktrace);
   }
 

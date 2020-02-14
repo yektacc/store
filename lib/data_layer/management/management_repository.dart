@@ -4,20 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:quiver/core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:store/common/constants.dart';
-import 'package:store/data_layer/province/province_repository.dart';
-import 'package:store/store/shop_management/seller_add_product_page.dart';
+import 'package:store/store/management/model.dart';
+import 'package:store/store/management/shop/seller_add_product_page.dart';
 
 import '../netclient.dart';
 
-class ShopRepository {
+class ManagementRepository {
   final Net _client;
 
-  ShopRepository(this._client);
+  ManagementRepository(this._client);
 
-  Future<List<ShopIdentifier>> loginSeller(String userName,
+  Future<List<CenterIdentifier>> loginSeller(String email,
       String password) async {
     PostResponse response = await _client.post(EndPoint.SELLER_LOGIN,
-        body: {'email': userName, 'password': password}, cacheEnabled: false);
+        body: {'email': email, 'password': password}, cacheEnabled: false);
     if (response is SuccessResponse) {
       var list = List<Map<String, dynamic>>.from(response.data);
       return list.map(_parseLogin).toList();
@@ -29,7 +29,6 @@ class ShopRepository {
   Future<Shop> getFullShop(ShopIdentifier identifier) async {
     PostResponse response = await _client.post(EndPoint.GET_PRODUCT_OF_SELLER,
         body: {'seller_id': identifier.id.toString()}, cacheEnabled: false);
-
     if (response is SuccessResponse) {
       var list = List<Map<String, dynamic>>.from(response.data);
       return Shop(identifier, list.map(_parseProduct).toList());
@@ -125,9 +124,19 @@ class ShopRepository {
     return resultBool;
   }
 
-  ShopIdentifier _parseLogin(Map<String, dynamic> json) {
-    return ShopIdentifier(
-        json['id'], json['seller_id'], json['center_name'], json['city_id']);
+  CenterIdentifier _parseLogin(Map<String, dynamic> json) {
+    switch (json['center_type']) {
+      case 1:
+        return ServiceIdentifier(json['id'] /*, json['seller_id']*/,
+            json['center_name'], json['city_id'], json['chat_is_active'] == 1);
+        break;
+      case 4:
+        return ShopIdentifier(json['id'] /*, json['seller_id']*/,
+            json['center_name'], json['city_id']);
+        break;
+      default:
+        throw (Exception('center type not valid :  $json'));
+    }
   }
 
   ShopProduct _parseProduct(Map<String, dynamic> json) {
@@ -169,17 +178,37 @@ class ShopRepository {
 
   final key1 = 'sm_mail';
   final key2 = 'sm_password';
+  final key3 = 'sm_type';
 
   Future<ManagerUser> readManagerUser() async {
+    print('this function was called');
     WidgetsFlutterBinding.ensureInitialized();
 
     final prefs = await SharedPreferences.getInstance();
+
+    ManagerType type;
+
+    try {
+      var index = int.parse(prefs.getString(key3));
+      type = ManagerType.values[index];
+    } catch (e, stacktrace) {
+      print(e);
+      print(stacktrace);
+      return null;
+    }
+
     final user = ManagerUser(
       prefs.getString(key1) ?? "err",
       prefs.getString(key2) ?? "err",
+      type,
     );
 
-    if (user.email == "err" || user.password == "err") {
+    print('read user from shared prefs:' + user.toString());
+
+    if (user.email == "err" || user.password == "err" || type == null) {
+      print(
+          'failed reading manager user ${user.email} ${user.password} ${user
+              .type}');
       return null;
     }
     return user;
@@ -190,13 +219,18 @@ class ShopRepository {
 
     prefs.setString(key1, user.email);
     prefs.setString(key2, user.password);
-    print('saved manager user email: ${user.email}  pass: ${user.password}');
+    prefs.setString(key3, user.type.index.toString());
+
+    print(
+        'saved manager user email: ${user.email}  pass: ${user
+            .password} type: ${user.type}');
   }
 
   _removeUser() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(key1);
     prefs.remove(key2);
+    prefs.remove(key3);
   }
 }
 
@@ -270,51 +304,6 @@ class ShopProduct {
   int get hashCode {
     return hash3(this.id, this.variantId, this.sellerId);
   }
-}
-
-class ShopIdentifier {
-  final int id;
-  final int sellerId;
-  final String centerName;
-  final int cityId;
-
-  ShopIdentifier(this.id, this.sellerId, this.centerName, this.cityId);
-
-  @override
-  bool operator ==(other) {
-    return other is ShopIdentifier && this.sellerId == other.sellerId;
-  }
-
-  @override
-  int get hashCode {
-    return hash2(sellerId, 'seller_id');
-  }
-}
-
-class Shop {
-  final ShopIdentifier identifier;
-  final List<ShopProduct> products;
-
-  Shop(this.identifier, this.products);
-}
-
-class ManagerUser {
-  final String email;
-  final String password;
-
-  ManagerUser(this.email, this.password);
-}
-
-class ShopOrder {
-  final int quantity;
-  final String address;
-  final ProvinceCity _provinceCity;
-  final ShopProduct product;
-
-  ShopOrder(this.quantity,
-      this._provinceCity,
-      this.address,
-      this.product,);
 }
 
 //  Future<bool> editProductOfSeller(List<PrdItem> items) async {

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
-import 'package:store/landing_page.dart';
+import 'package:store/store/landing/landing_page.dart';
 import 'package:store/store/location/map/map_page.dart';
 import 'package:store/store/login_register/login/login_bloc.dart';
 import 'package:store/store/login_register/login/login_event_state.dart';
@@ -12,19 +12,18 @@ import 'package:store/store/login_register/login_status/login_status_event_state
 import 'package:store/store/login_register/profile/profile_bloc.dart';
 import 'package:store/store/login_register/profile/profile_bloc_event_state.dart';
 import 'package:store/store/login_register/profile/profile_page.dart';
+import 'package:store/store/management/management_bloc.dart';
+import 'package:store/store/management/manager_login_page.dart';
+import 'package:store/store/management/service/service_management_page.dart';
+import 'package:store/store/management/shop/seller_request_form.dart';
+import 'package:store/store/management/shop/shop_management_page.dart';
 import 'package:store/store/order/order_page.dart';
-import 'package:store/store/products/cart/cart_bloc.dart';
-import 'package:store/store/products/cart/cart_bloc_event.dart';
 import 'package:store/store/products/cart/cart_page.dart';
-import 'package:store/store/products/detail/product_detail_page.dart';
 import 'package:store/store/products/filter/filtered_products_bloc.dart';
 import 'package:store/store/products/product/products_bloc.dart';
 import 'package:store/store/products/search/search_delegate.dart';
 import 'package:store/store/products/special/special_products_page.dart';
 import 'package:store/store/products/special/special_products_repository.dart';
-import 'package:store/store/shop_management/seller_list_page.dart';
-import 'package:store/store/shop_management/seller_login_page.dart';
-import 'package:store/store/shop_management/shop_management_bloc.dart';
 import 'package:store/store/structure/model.dart';
 import 'package:store/store/structure/structure_bloc.dart';
 import 'package:store/store/structure/structure_event_state.dart';
@@ -88,25 +87,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _showSearch() {
-    /*searchAnimController.forward();*/
-    /*setState(() {
-      _controller = _scaffoldKey.currentState.showBottomSheet((_) => Container(
-            child: new Container(
-              child: SizedBox(
-                height: double.infinity,
-                width: double.infinity,
-                child: Container(
-                  color: Colors.grey[300],
-                  child: SearchPage(() {
-                    _updateOverlay(PageChangeEvent.SEARCH_HIDE);
-                  }, () {
-                    _updateOverlay(PageChangeEvent.SEARCH_SHOW);
-                  }),
-                ),
-              ),
-            ),
-          ));
-    });*/
     showSearch(context: context, delegate: CustomSearchDelegate(AllItems()));
   }
 
@@ -185,7 +165,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         },
       ),*/
       actions: <Widget>[
-        Container(
+        IconButton(
+          onPressed: () {
+            Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => LandingPage()));
+          },
+          icon: (Icon(Icons.assignment)),
+        )
+        /*Container(
           width: 70,
           child: BlocBuilder(
             bloc: Provider.of<CartBloc>(context),
@@ -197,7 +184,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               }
             },
           ),
-        )
+        )*/
       ],
     );
   }
@@ -215,8 +202,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     end: Alignment(0.8, 0.0),
                     // 10% of the width, so there are ten blinds.
                     colors: [
-                      AppColors.main_color,
-                      AppColors.main_color,
+                      AppColors.second_color,
+                      AppColors.second_color,
                     ],
                     // whitish to gray
                     tileMode:
@@ -352,136 +339,169 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         }
                       }),
                 )),
-            BlocBuilder(
-                bloc: widget._loginStatusBloc,
-                builder: (context, LoginStatusState state) {
-                  var shopBloc = Provider.of<ShopManagementBloc>(context);
+            Expanded(
+              child: BlocBuilder(
+                  bloc: widget._loginStatusBloc,
+                  builder: (context, LoginStatusState state) {
+                    var managementBloc = Provider.of<ManagementBloc>(context);
 
-                  print('askljflaksdjflaksjdflksadjf' +
-                      (state is IsLoggedIn).toString());
-
-                  return new Container(
-                    padding: EdgeInsets.only(right: 4, top: 20),
-                    child: Column(
-                      children: <Widget>[
-                        state is IsLoggedIn
-                            ? _buildDrawerItem(() {
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (context) {
-                            return ProfilePage();
-                          }));
-                        }, Icons.person, "پروفایل کاربری")
-                            : Container(),
-                        _buildDrawerItem(() {
-                          Navigator.of(context).pushNamed(CartPage.routeName);
-                        }, Icons.shopping_cart, "سبد خرید"),
-                        _buildDrawerItem(() {
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (context) {
-                            return InfoPage();
-                          }));
-                        }, Icons.info, "حقوق و قوانین"),
-                        state is IsLoggedIn
-                            ? _buildDrawerItem(() {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => OrderPage()));
-                        }, Icons.history, "سفارش های قبلی")
-                            : Container(),
-                        state is IsLoggedIn
-                            ? _buildDrawerItem(() {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => UserPetPage()));
-                        }, Icons.shopping_cart, "حیوان خانگی شما")
-                            : Container(),
-                        state is IsLoggedIn
-                            ? _buildDrawerItem(() {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => UserPetPage()));
-                        }, Icons.favorite, "علاقه‌مندی ها")
-                            : Container(),
-                        Divider(),
-                        _buildDrawerItem(() {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => SpecialProductsPage(
-                                  SpecialProductType.BEST_SELLER)));
-                        }, Icons.local_offer, "پرفروشترین محصولات"),
-                        _buildDrawerItem(() {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => SpecialProductsPage(
-                                  SpecialProductType.NEWEST)));
-                        }, Icons.new_releases, "جدید‌ترین محصولات"),
-                        Divider(),
-                        shopBloc.user == null
-                            ? _buildDrawerItem(() {
-                          if (shopBloc.user == null) {
+                    return new Container(
+//                    height: MediaQuery.of(context).size.height,
+                      padding: EdgeInsets.only(right: 4, top: 20),
+                      child: ListView(
+                        children: <Widget>[
+                          state is IsLoggedIn
+                              ? _buildDrawerItem(() {
+                            Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) {
+                                  return ProfilePage();
+                                }));
+                          }, Icons.person, "پروفایل کاربری")
+                              : Container(),
+                          _buildDrawerItem(() {
+                            Navigator.of(context).pushNamed(CartPage.routeName);
+                          }, Icons.shopping_cart, "سبد خرید"),
+                          _buildDrawerItem(() {
+                            Navigator.of(context)
+                                .push(MaterialPageRoute(builder: (context) {
+                              return InfoPage();
+                            }));
+                          }, Icons.info, "حقوق و قوانین"),
+                          state is IsLoggedIn
+                              ? _buildDrawerItem(() {
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => SellerLoginPage()));
-                          }
-                        }, Icons.store, "ورود به قسمت فروشندگان")
-                            : GestureDetector(
-                          onTap: () {
+                                builder: (context) => OrderPage()));
+                          }, Icons.history, "سفارش های قبلی")
+                              : Container(),
+                          state is IsLoggedIn
+                              ? _buildDrawerItem(() {
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => SellersListPage()));
-                          },
-                          child: Card(
-                            color: Colors.blueGrey[50],
-                            margin: EdgeInsets.only(right: 12, left: 55),
-                            child: Container(
-                              alignment: Alignment.centerRight,
-                              height: 75,
-                              width: double.infinity,
-                              child: Column(
-                                children: <Widget>[
-                                  Expanded(
-                                    flex: 3,
-                                    child: Row(
-                                      children: <Widget>[
-                                        Container(
-                                          child: Icon(
-                                            Icons.store,
-                                            color: Colors.grey[800],
-                                            size: 22,
+                                builder: (context) => UserPetPage()));
+                          }, Icons.shopping_cart, "حیوان خانگی شما")
+                              : Container(),
+                          state is IsLoggedIn
+                              ? _buildDrawerItem(() {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => UserPetPage()));
+                          }, Icons.favorite, "علاقه‌مندی ها")
+                              : Container(),
+                          Divider(),
+                          state is IsLoggedIn
+                              ? _buildDrawerItem(() {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => UserPetPage()));
+                          }, Icons.favorite, "علاقه‌مندی ها")
+                              : Container(),
+                          Divider(),
+                          _buildDrawerItem(() {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) =>
+                                    SpecialProductsPage(
+                                        SpecialProductType.BEST_SELLER)));
+                          }, Icons.local_offer, "پرفروشترین محصولات"),
+                          _buildDrawerItem(() {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) =>
+                                    SpecialProductsPage(
+                                        SpecialProductType.NEWEST)));
+                          }, Icons.new_releases, "جدید‌ترین محصولات"),
+                          Divider(),
+                          managementBloc.user == null
+                              ? _buildDrawerItem(() {
+                            if (managementBloc.user == null) {
+                              Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          ManagerLoginPage()));
+                            }
+                          }, Icons.store, "ورود به قسمت فروشندگان")
+                              : GestureDetector(
+                            onTap: () {
+                              if (managementBloc.srvCenterId == '') {
+                                Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            ShopManagementPage()));
+                              } else {
+                                Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            ServiceManagementPage()));
+                              }
+                            },
+                            child: Card(
+                              color: Colors.blueGrey[50],
+                              margin:
+                              EdgeInsets.only(right: 12, left: 55),
+                              child: Container(
+                                alignment: Alignment.centerRight,
+                                height: 75,
+                                width: double.infinity,
+                                child: Column(
+                                  children: <Widget>[
+                                    Expanded(
+                                      flex: 3,
+                                      child: Row(
+                                        children: <Widget>[
+                                          Container(
+                                            child: Icon(
+                                              Icons.store,
+                                              color: Colors.grey[800],
+                                              size: 22,
+                                            ),
+                                            margin: EdgeInsets.symmetric(
+                                                horizontal: 10),
                                           ),
-                                          margin: EdgeInsets.symmetric(
-                                              horizontal: 10),
-                                        ),
-                                        Text(
-                                          "ورود به قسمت فروشندگان",
-                                          style: TextStyle(
-                                              color: Colors.grey[800]),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Container(
-                                      child: Text(
-                                        shopBloc.user.email,
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 11),
+                                          Text(
+                                            "ورود به قسمت فروشندگان",
+                                            style: TextStyle(
+                                                color: Colors.grey[800]),
+                                          )
+                                        ],
                                       ),
-                                      decoration: BoxDecoration(
-                                          color: AppColors.main_color,
-                                          borderRadius: BorderRadius.only(
-                                              bottomLeft:
-                                              Radius.circular(4),
-                                              bottomRight:
-                                              Radius.circular(4))),
-                                      alignment: Alignment.centerRight,
-                                      padding: EdgeInsets.only(right: 12),
                                     ),
-                                  )
-                                ],
+                                    Expanded(
+                                      flex: 2,
+                                      child: Container(
+                                        child: Text(
+                                          managementBloc.user.email,
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 11),
+                                        ),
+                                        decoration: BoxDecoration(
+                                            color: AppColors.main_color,
+                                            borderRadius:
+                                            BorderRadius.only(
+                                                bottomLeft:
+                                                Radius.circular(
+                                                    4),
+                                                bottomRight:
+                                                Radius.circular(
+                                                    4))),
+                                        alignment: Alignment.centerRight,
+                                        padding:
+                                        EdgeInsets.only(right: 12),
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        )
-                      ],
-                    ),
-                  );
-                })
+                          state is IsLoggedIn && managementBloc.user == null
+                              ? _buildDrawerItem(() {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) =>
+                                    SellerRequestPage(
+                                        state.user.appUserId)));
+                          }, Icons.favorite, "درخواست فروشنده شدن")
+                              : Container(),
+                        ],
+                      ),
+                    );
+                  }),
+            )
           ],
         ),
       ),
@@ -541,8 +561,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       }
     }
 
-    return SafeArea(
-      child: new Stack(
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Stack(
         children: <Widget>[
           new Scaffold(
               resizeToAvoidBottomInset: false,
@@ -590,20 +611,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   })*/
                 ],
               )),
-          /* new SlideTransition(
-            child: SizedBox(
-              height: double.infinity,
-              width: double.infinity,
-              child: Container(
-                color: Colors.grey[300],
-                child: SearchPage(() {
-                  _updateOverlay(PageChangeEvent.SEARCH_HIDE);
-                }, () {
-                  _updateOverlay(PageChangeEvent.SEARCH_SHOW);
-                }),
-              ),
-            ),
-          ),*/
           new SlideTransition(
             position: mapPageOffset,
             child: SizedBox(
@@ -620,6 +627,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ],
       ),
     );
+  }
+
+  Future<bool> _onWillPop() async {
+    return (await showDialog(
+      context: context,
+      builder: (context) =>
+      new AlertDialog(
+        content: new Text('آیا می‌خواهید از اپ خارج شوید؟'),
+        actions: <Widget>[
+          new FlatButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: new Text('خیر'),
+          ),
+          new FlatButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: new Text('بله'),
+          ),
+        ],
+      ),
+    )) ??
+        false;
   }
 }
 

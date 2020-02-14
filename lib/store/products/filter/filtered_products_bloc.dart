@@ -26,8 +26,7 @@ class FilteredProductsBloc
 
   @override
   void onError(Object error, StackTrace stacktrace) {
-    print("FILTERED_PRODUCTS_BLOC ERROR ");
-    print(error);
+    print("FILTERED_PRODUCTS_BLOC ERROR " + error.toString());
     print(stacktrace);
   }
 

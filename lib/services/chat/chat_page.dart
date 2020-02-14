@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:store/common/constants.dart';
-import 'package:store/common/loading_widget.dart';
 import 'package:store/services/chat/chat_bloc.dart';
 import 'package:store/services/chat/model.dart';
 
@@ -9,16 +8,20 @@ import 'chat_event_state.dart';
 
 class ChatPage extends StatefulWidget {
   final ChatBloc _bloc;
+
+//  final SenderType _senderType;
   final String title;
 
-  ChatPage(this._bloc, this.title);
+  ChatPage(this._bloc, this.title /*, this._senderType*/);
 
   @override
   _ChatPageState createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
-//  String message = '';
+  List<SimpleMessage> loadedMessages;
+  ScrollController _scrollController =
+  new ScrollController(initialScrollOffset: 0.0);
   final TextEditingController message = TextEditingController();
 
   @override
@@ -26,7 +29,11 @@ class _ChatPageState extends State<ChatPage> {
     var screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title, style: TextStyle(fontSize: 16),),),
+        title: Text(
+          widget.title,
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
       body: Container(
         child: ListView(
           children: <Widget>[
@@ -35,22 +42,19 @@ class _ChatPageState extends State<ChatPage> {
               child: BlocBuilder<ChatBloc, ChatState>(
                 bloc: widget._bloc,
                 builder: (context, state) {
-                  if (state is MessagesLoading) {
-                    return Center(
-                      child: LoadingIndicator(),
-                    );
-                  } else if (state is MessagesLoaded) {
-                    return ListView(
-                      reverse: true,
-                      children: state.messages
-                          .map((msg) => MessageTextWidget(msg.text, true))
-                          .toList(),
-                    );
-                  } else if (state is ChatsLoadingFailed) {
-                    Helpers.errorToast();
-                    return Center(
-                      child: Text('err'),
-                    );
+                  if (state is ChatLoaded) {
+                    loadedMessages = state.chat.messages;
+
+                    widget._bloc.dispatch(SeenChat(state.chat));
+
+                    return _buildMessageList();
+                  } else if (loadedMessages != null) {
+                    if (state is FailedLoadingChat) {
+                      Helpers.errorToast();
+                      return Container();
+                    }
+
+                    return _buildMessageList();
                   } else {
                     return Container(
                       height: 20,
@@ -71,8 +75,8 @@ class _ChatPageState extends State<ChatPage> {
                       padding: EdgeInsets.only(left: 10),
                       child: IconButton(
                         onPressed: () {
-                          widget._bloc
-                              .dispatch(SendMessage(Message(message.text, 1)));
+                          widget._bloc.dispatch(
+                              SendMessage(SimpleMessage(message.text, true)));
                           message.text = '';
                         },
                         icon: Icon(
@@ -100,6 +104,24 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
+
+  Widget _buildMessageList() {
+//    _scrollController.animateTo(0.0, duration: Duration(milliseconds: 200),curve: );
+    var listView = ListView(
+//      reverse: true,
+      controller: _scrollController,
+      children: loadedMessages
+          .map((msg) => MessageTextWidget(msg.text, msg.sentByMe))
+          .toList(),
+    );
+    return listView;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget._bloc.dispatch(UpdateChat());
+  }
 }
 
 class MessageTextWidget extends StatelessWidget {
@@ -110,13 +132,16 @@ class MessageTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(text + "  " + sender.toString());
+
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment:
+      sender ? MainAxisAlignment.start : MainAxisAlignment.end,
       children: <Widget>[
         Container(
           margin: EdgeInsets.symmetric(horizontal: 4, vertical: 3),
           decoration: BoxDecoration(
-              color: Colors.blue[100],
+              color: sender ? Colors.blue[50] : Colors.green[50],
               borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(10),
                   topRight: Radius.circular(4),

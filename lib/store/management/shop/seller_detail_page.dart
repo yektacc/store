@@ -6,10 +6,12 @@ import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
-import 'package:store/data_layer/shop_management/shop_repository.dart';
+import 'package:store/data_layer/management/management_repository.dart';
+import 'package:store/store/management/management_bloc.dart';
+import 'package:store/store/management/management_event_state.dart';
 import 'package:store/store/products/filter/filter.dart';
-import 'package:store/store/shop_management/shop_management_bloc.dart';
-import 'package:store/store/shop_management/shop_management_event_state.dart';
+
+import '../model.dart';
 
 class SellerDetailPage extends StatefulWidget {
   final ShopIdentifier seller;
@@ -23,7 +25,7 @@ class SellerDetailPage extends StatefulWidget {
 class _SellerDetailPageState extends State<SellerDetailPage> {
   BehaviorSubject<List<PrdItem>> editedPrdItems = BehaviorSubject.seeded([]);
   Map<String, List<ShopProduct>> categoryTabsPrds = HashMap();
-  ShopManagementBloc _shopBloc;
+  ManagementBloc _managementBloc;
 
 //  final BehaviorSubject<bool> loading = BehaviorSubject.seeded(false);
 
@@ -36,8 +38,8 @@ class _SellerDetailPageState extends State<SellerDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_shopBloc == null) {
-      _shopBloc = Provider.of<ShopManagementBloc>(context);
+    if (_managementBloc == null) {
+      _managementBloc = Provider.of<ManagementBloc>(context);
     }
 
     editedPrdItems.listen((edited) {
@@ -53,8 +55,8 @@ class _SellerDetailPageState extends State<SellerDetailPage> {
           : Container();
     });
 
-    return BlocBuilder<ShopManagementBloc, ShopManagementState>(
-      bloc: _shopBloc,
+    return BlocBuilder<ManagementBloc, ManagementState>(
+      bloc: _managementBloc,
       builder: (context, state) {
         if (state is LoadingSMData) {
           return Scaffold(body: Center(child: LoadingIndicator(),),);
@@ -171,7 +173,7 @@ class _SellerDetailPageState extends State<SellerDetailPage> {
                                         .map((item) => item.prd)
                                         .toList());*/
 
-                                    _shopBloc.dispatch(EditShopProduct(
+                                    _managementBloc.dispatch(EditShopProduct(
                                         editedSnapshot.data
                                             .map((item) => item.prd)
                                             .toList()));

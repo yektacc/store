@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/store/products/product/product.dart';
 import 'package:store/store/products/product/products_repository.dart';
 import 'package:store/store/products/search/search_bloc.dart';
 import 'package:store/store/products/search/search_result_widget.dart';
 import 'package:store/store/structure/model.dart';
-import 'package:provider/provider.dart';
 
 class CustomSearchDelegate extends SearchDelegate {
   ProductsRepository productRepository;
@@ -70,7 +70,7 @@ class CustomSearchDelegate extends SearchDelegate {
                   ),
                 );
               } else if (state is SearchLoaded) {
-                print("RESSSSS: " + state.results.toString());
+                print("search response loaded: " + state.results.toString());
                 return Container(
                   child: SearchResultWgt(state.results),
                 );

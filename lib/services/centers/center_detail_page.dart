@@ -9,8 +9,10 @@ import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/data_layer/centers/centers_repository.dart';
 import 'package:store/data_layer/centers/service_repository.dart';
+import 'package:store/data_layer/netclient.dart';
 import 'package:store/services/chat/chat_bloc.dart';
 import 'package:store/services/chat/chat_page.dart';
+import 'package:store/services/chat/chat_repository.dart';
 import 'package:store/services/chat/model.dart';
 import 'package:store/store/login_register/login/login_page.dart';
 import 'package:store/store/login_register/login_status/login_status_bloc.dart';
@@ -343,7 +345,10 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                     Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) =>
                             ChatPage(
-                                ChatBloc(ClientChatUser(state.user.phoneNo),
+                                ChatBloc(
+                                    ChatRepository(Provider.of<Net>(context),
+                                        ClientChatUser(state.user.appUserId),
+                                        sessionId: state.user.sessionId),
                                     CenterChatUser(
                                         widget.center.id.toString())),
                                 widget.center.name)));

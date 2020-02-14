@@ -233,7 +233,7 @@ class _ClinicItemWgtState extends State<ClinicItemWgt> {
                         if (snapshot != null &&
                             snapshot.data != null &&
                             snapshot.data != '') {
-                          print('asdfadsfasdf' + snapshot.data);
+                          print('center image:' + snapshot.data);
                           return Helpers.image(snapshot.data);
                         } else {
                           return Container();

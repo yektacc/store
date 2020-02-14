@@ -174,7 +174,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               allSellers.addAll(variant.sellers);
                             }
 
-
                             print('all sellers: ' +
                                 allSellers.map((s) => s.shopId.toString())
                                     .toList()
