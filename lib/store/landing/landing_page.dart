@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:store/data_layer/centers/centers_repository.dart';
 import 'package:store/data_layer/fcm/fcm_token_repository.dart';
 import 'package:store/services/centers/centers_list_page.dart';
+import 'package:store/services/centers/model.dart';
 import 'package:store/services/lost_pets/lost_pets_page.dart';
 import 'package:store/services/lost_pets/lost_pets_repository.dart';
 import 'package:store/store/home/home_page.dart';
@@ -441,7 +441,8 @@ class _LandingPageState extends State<LandingPage> {
                       ),
                     ],
                   );
-                } else {
+                }
+                else {
                   return Container(
                     color: Colors.red,
                     child: Center(

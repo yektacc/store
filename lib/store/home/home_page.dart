@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
+import 'package:store/services/chat/user_inbox_page.dart';
 import 'package:store/store/landing/landing_page.dart';
 import 'package:store/store/location/map/map_page.dart';
 import 'package:store/store/login_register/login/login_bloc.dart';
@@ -131,9 +132,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   AppBar _buildAppBar(BuildContext context) {
     return new AppBar(
+      iconTheme: IconThemeData(color: AppColors.second_color),
+      backgroundColor: Colors.grey[50],
       title: Text(
         'فروشگاه',
-        style: TextStyle(fontSize: 15),
+        style: TextStyle(fontSize: 15, color: AppColors.second_color),
       ),
       /*title: FlatButton(
         child: Row(
@@ -170,7 +173,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => LandingPage()));
           },
-          icon: (Icon(Icons.assignment)),
+          icon: (Icon(
+            Icons.assignment,
+            color: Colors.grey[700],
+          )),
         )
         /*Container(
           width: 70,
@@ -357,6 +363,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   return ProfilePage();
                                 }));
                           }, Icons.person, "پروفایل کاربری")
+                              : Container(),
+                          state is IsLoggedIn
+                              ? _buildDrawerItem(() {
+                            Navigator.of(context).push(
+                                MaterialPageRoute(builder: (context) {
+                                  return UserInboxPage();
+                                }));
+                          }, Icons.chat, "پیامها")
                               : Container(),
                           _buildDrawerItem(() {
                             Navigator.of(context).pushNamed(CartPage.routeName);
@@ -578,26 +592,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                   GestureDetector(
                     child: AppBar(
-                      backgroundColor: Colors.grey[200],
+                      backgroundColor: Colors.grey[300],
                       leading: Padding(
                         padding: EdgeInsets.only(right: 14),
                         child: Icon(
                           Icons.search,
-                          color: AppColors.main_color,
+                          color: AppColors.second_color,
                         ),
                       ),
                       title: Container(
-                        alignment: Alignment.center,
+                        alignment: Alignment.centerRight,
                         height: 45,
                         padding:
                             EdgeInsets.symmetric(vertical: 6, horizontal: 14),
                         decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(30)),
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(4)),
                         child: Text(
                           'جستجو بین محصولات',
                           style: TextStyle(
-                              fontSize: 12, color: AppColors.main_color),
+                              fontSize: 12, color: Colors.grey[700]),
                           textAlign: TextAlign.center,
                         ),
                       ),

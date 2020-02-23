@@ -35,6 +35,12 @@ class _ChatPageState extends State<ChatPage> {
         ),
       ),
       body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/chat_background.jpg"),
+            fit: BoxFit.cover,
+          ),
+        ),
         child: ListView(
           children: <Widget>[
             Container(
@@ -53,14 +59,9 @@ class _ChatPageState extends State<ChatPage> {
                       Helpers.errorToast();
                       return Container();
                     }
-
                     return _buildMessageList();
                   } else {
-                    return Container(
-                      height: 20,
-                      width: 20,
-                      color: Colors.red,
-                    );
+                    return Container();
                   }
                 },
               ),
@@ -75,8 +76,11 @@ class _ChatPageState extends State<ChatPage> {
                       padding: EdgeInsets.only(left: 10),
                       child: IconButton(
                         onPressed: () {
-                          widget._bloc.dispatch(
-                              SendMessage(SimpleMessage(message.text, true)));
+                          widget._bloc.dispatch(SendMessage(SimpleMessage(
+                              message.text,
+                              true,
+                              false,
+                              DateTime.now().toString())));
                           message.text = '';
                         },
                         icon: Icon(
@@ -107,12 +111,24 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _buildMessageList() {
 //    _scrollController.animateTo(0.0, duration: Duration(milliseconds: 200),curve: );
+    List<Widget> items = [];
+    SimpleMessage prevMsg;
+
+    loadedMessages.forEach((msg) {
+      if (prevMsg == null || prevMsg.day != msg.day) {
+        items.add(_buildDayLabel(msg.day, msg.month));
+      }
+
+      items.add(MessageTextWidget(msg));
+      prevMsg = msg;
+    });
+
+    print('items:' + items.toString());
+
     var listView = ListView(
-//      reverse: true,
+      reverse: true,
       controller: _scrollController,
-      children: loadedMessages
-          .map((msg) => MessageTextWidget(msg.text, msg.sentByMe))
-          .toList(),
+      children: items.reversed.toList(),
     );
     return listView;
   }
@@ -122,36 +138,97 @@ class _ChatPageState extends State<ChatPage> {
     super.didChangeDependencies();
     widget._bloc.dispatch(UpdateChat());
   }
+
+  Widget _buildDayLabel(int day, int month) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 5),
+      padding: EdgeInsets.symmetric(vertical: 6, horizontal: 5),
+      color: Colors.grey[100],
+      child: Text(day.toString() + '/' + month.toString(),
+        style: TextStyle(color: Colors.blue),),
+    );
+  }
 }
 
 class MessageTextWidget extends StatelessWidget {
-  final String text;
-  final bool sender;
+  final SimpleMessage message;
 
-  MessageTextWidget(this.text, this.sender);
+  final double timeAreaHeight = 18;
+
+  MessageTextWidget(this.message);
 
   @override
   Widget build(BuildContext context) {
-    print(text + "  " + sender.toString());
+    print(message.text + "  " + message.sentByMe.toString());
 
     return Row(
       mainAxisAlignment:
-      sender ? MainAxisAlignment.start : MainAxisAlignment.end,
+      message.sentByMe ? MainAxisAlignment.start : MainAxisAlignment.end,
       children: <Widget>[
         Container(
           margin: EdgeInsets.symmetric(horizontal: 4, vertical: 3),
           decoration: BoxDecoration(
-              color: sender ? Colors.blue[50] : Colors.green[50],
+              color: message.sentByMe ? Colors.blue[50] : Colors.green[50],
               borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(10),
                   topRight: Radius.circular(4),
                   topLeft: Radius.circular(10),
                   bottomRight: Radius.circular(10))),
-          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+          padding: EdgeInsets.only(
+            top: 8,
+            left: 10,
+          ),
           alignment: Alignment.centerRight,
-          child: Text(
-            text,
-            style: TextStyle(fontSize: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(right: 10),
+                child: Text(
+                  message.text,
+                  style: TextStyle(fontSize: 15),
+                ),
+              ),
+              Container(
+                height: timeAreaHeight,
+                margin: EdgeInsets.only(bottom: 5),
+                child: Row(
+                  children: <Widget>[
+                    message.sentByMe && message.seen
+                        ? Padding(
+                      padding: EdgeInsets.only(right: 3),
+                      child: Icon(
+                        Icons.check,
+                        size: 12,
+                      ),
+                    )
+                        : Container(),
+                    message.sentByMe
+                        ? Container(
+                      alignment: Alignment.center,
+                      margin: EdgeInsets.only(right: 3),
+                      color: Colors.white,
+                      height: 10,
+                      width: 1,
+                    )
+                        : Container(),
+                    Container(
+                      margin: EdgeInsets.only(right: 6),
+                      height: timeAreaHeight,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            message.time,
+                            style: TextStyle(fontSize: 10),
+                          )
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              )
+            ],
           ),
         )
       ],

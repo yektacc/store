@@ -33,8 +33,9 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     try {
      var detail = await _repository.load(event.id);
      yield ProductDetailLoaded(detail);
-    } catch (e) {
+    } catch (e, stacktrace) {
       print("PRODUCT_DETAIL_BLOC: failure: " + e.toString());
+      print(stacktrace);
       yield ProductDetailFailure();
     }
   }

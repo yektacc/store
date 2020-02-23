@@ -53,7 +53,7 @@ class CustomSearchDelegate extends SearchDelegate {
     }
 
     final bloc = Provider.of<SearchBloc>(context);
-    bloc.dispatch(SearchFor(query,_identifier));
+    bloc.dispatch(SearchProducts(query, _identifier));
 
     return Center(
         child: BlocBuilder(
@@ -69,7 +69,7 @@ class CustomSearchDelegate extends SearchDelegate {
                     "نتیجه ای یافت نشد.",
                   ),
                 );
-              } else if (state is SearchLoaded) {
+              } else if (state is ProductSearchLoaded) {
                 print("search response loaded: " + state.results.toString());
                 return Container(
                   child: SearchResultWgt(state.results),

@@ -20,20 +20,25 @@ class ProfileRepository {
 
   Profile parse(Map<String, dynamic> json, String sessionId) {
     return Profile(
-        json['firstname'].toString() == "null"
+        json['firstname'].toString() == "null" || json['firstname'] == null
             ? ""
             : json['firstname'].toString(),
-        json['lastname'].toString() == "null"
+        json['lastname'].toString() == "null" || json['lastname'] == null
             ? ""
             : json['lastname'].toString(),
-        json['mobile_number'].toString() == "null"
+        json['mobile_number'].toString() == "null" ||
+            json['mobile_number'] == null
             ? ""
             : json['mobile_number'].toString(),
-        json['credit_card_number'].toString() == "null"
+        json['credit_card_number'].toString() == "null" ||
+            json['credit_card_number'] == null
             ? ""
             : json['credit_card_number'].toString(),
-        json['email'].toString() == "null" ? "" : json['email'].toString(),
-        json['national_code'].toString() == "null"
+        json['email'].toString() == "null" || json['email'] == null
+            ? ""
+            : json['email'].toString(),
+        json['national_code'].toString() == "null" ||
+            json['national_code'] == null
             ? ""
             : json['national_code'].toString(),
         sessionId);

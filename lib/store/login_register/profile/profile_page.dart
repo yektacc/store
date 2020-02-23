@@ -91,7 +91,9 @@ class _ProfilePageState extends State<ProfilePage> {
           Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => ProfileEditPage(_currentProfile)));
         }, Icons.edit, "ویرایش اطلاعات"),
-        ProfilePageOption(() {}, Icons.history, "خرید های قبلی"),
+    ProfilePageOption(() {
+      ///todo #3
+    }, Icons.history, "خرید های قبلی"),
         ProfilePageOption(() {
           Provider.of<ForgetPassBloc>(context).dispatch(ResetForgetPass());
           Navigator.of(context)

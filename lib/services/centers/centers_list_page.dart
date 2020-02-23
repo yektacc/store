@@ -7,17 +7,21 @@ import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/services/centers/center_detail_page.dart';
 import 'package:store/services/centers/centers_event_state.dart';
+import 'package:store/services/centers/filter_widget.dart';
+import 'package:store/store/products/search/search_bloc.dart';
 
-import '../../data_layer/centers/centers_repository.dart';
 import 'centers_bloc.dart';
 import 'model.dart';
 
 class CenterPage extends StatefulWidget {
   static const String routeName = 'centerpage';
 
+  final CenterFilterWidget filterWidget;
+
   final CenterFetchType type;
 
-  CenterPage(this.type);
+  CenterPage(this.type)
+      : this.filterWidget = CenterFilterWidget(CenterFilter(type));
 
   @override
   _CenterPageState createState() => _CenterPageState();
@@ -52,8 +56,10 @@ class _CenterPageState extends State<CenterPage> {
     if (_centersBloc == null) {
       _centersBloc = Provider.of<CentersBloc>(context);
       _centersBloc.dispatch(Reset());
-      _centersBloc.dispatch(FetchCenters(widget.type));
     }
+
+    widget.filterWidget.filters
+        .listen((filter) => _centersBloc.dispatch(FetchCenters(filter)));
 
     return BlocBuilder(
       bloc: _centersBloc,
@@ -72,7 +78,32 @@ class _CenterPageState extends State<CenterPage> {
               )
             ];
             return Scaffold(
+                floatingActionButton: FloatingActionButton(
+                  onPressed: () {
+                    showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext bc) {
+                          return widget.filterWidget;
+                        });
+                  },
+                  child: Icon(
+                    Icons.filter_list,
+                    color: Colors.white,
+                  ),
+                  backgroundColor: AppColors.second_color,
+                ),
                 appBar: AppBar(
+                  actions: <Widget>[
+                    IconButton(
+                      icon: Icon(Icons.search),
+                      onPressed: () {
+                        showSearch(
+                          context: context,
+                          delegate: CentersSearchDelegate(widget.type),
+                        );
+                      },
+                    ),
+                  ],
                   title: Text(name,
                       style: TextStyle(
                         fontSize: 16.0,
@@ -82,59 +113,7 @@ class _CenterPageState extends State<CenterPage> {
                   children: state.centers
                       .map((center) => ClinicItemWgt(center))
                       .toList(),
-                ) /*new NestedScrollView(
-                headerSliverBuilder:
-                    (BuildContext context, bool innerBoxIsScrolled) {
-                  return <Widget>[
-                    new SliverAppBar(
-                      backgroundColor: Colors.grey[300],
-                      title: Text(name,
-                          style: TextStyle(
-                            color: AppColors.main_color,
-                            fontSize: 16.0,
-                          )),
-                      expandedHeight: 360.0,
-                      floating: false,
-                      pinned: true,
-                      flexibleSpace: FlexibleSpaceBar(
-                          background: SafeArea(
-                              child: Container(
-                        height: 100,
-                        child: Card(
-                          elevation: 10,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25)),
-                          margin: EdgeInsets.only(
-                              top: 56, bottom: 13, right: 9, left: 9),
-                          child: Container(
-                            child: GoogleMap(
-                              gestureRecognizers: [
-                                Factory(() =>
-                                    PlatformViewVerticalGestureRecognizer()),
-                              ].toSet(),
-                              markers:
-                                  markers != null ? markers.toSet() : Set(),
-                              onMapCreated: _onMapCreated,
-                              initialCameraPosition: CameraPosition(
-                                  target: state.centers != null &&
-                                          state.centers.isNotEmpty
-                                      ? state.centers[0].location
-                                      : LatLng(36, 43),
-                                  zoom: 15),
-                            ),
-                          ),
-                        ),
-                      ))),
-                    ),
-                  ];
-                },
-                body: ListView(
-                  children: state.centers
-                      .map((center) => ClinicItemWgt(center))
-                      .toList(),
-                ),
-              ),*/
-                );
+                ));
           } else {
             return Scaffold(
               appBar: AppBar(
@@ -155,44 +134,6 @@ class _CenterPageState extends State<CenterPage> {
     );
   }
 }
-
-/*class PlatformViewVerticalGestureRecognizer
-    extends HorizontalDragGestureRecognizer {
-  PlatformViewVerticalGestureRecognizer({PointerDeviceKind kind})
-      : super(kind: kind);
-
-  Offset _dragDistance = Offset.zero;
-
-  @override
-  void addPointer(PointerEvent event) {
-    startTrackingPointer(event.pointer);
-  }
-
-  @override
-  void handleEvent(PointerEvent event) {
-    _dragDistance = _dragDistance + event.delta;
-    if (event is PointerMoveEvent) {
-      final double dy = _dragDistance.dy.abs();
-      final double dx = _dragDistance.dx.abs();
-
-      if (dy > dx && dy > kTouchSlop) {
-        // vertical drag - accept
-        resolve(GestureDisposition.accepted);
-        _dragDistance = Offset.zero;
-      } else if (dx > kTouchSlop && dx > dy) {
-        // horizontal drag - stop tracking
-        stopTrackingPointer(event.pointer);
-        _dragDistance = Offset.zero;
-      }
-    }
-  }
-
-  @override
-  String get debugDescription => 'horizontal drag (platform view)';
-
-  @override
-  void didStopTrackingLastPointer(int pointer) {}
-}*/
 
 class ClinicItemWgt extends StatefulWidget {
   final CenterItem _item;
@@ -216,7 +157,7 @@ class _ClinicItemWgtState extends State<ClinicItemWgt> {
         height: 122,
         width: double.infinity,
         child: Row(
-          textDirection: TextDirection.ltr,
+//          textDirection: TextDirection.ltr,
           children: <Widget>[
             new Column(
               children: <Widget>[
@@ -226,19 +167,7 @@ class _ClinicItemWgtState extends State<ClinicItemWgt> {
                       borderRadius: BorderRadius.circular(3)),
                   margin: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
                   width: 110,
-                  child: FutureBuilder<String>(
-                      future: Provider.of<CentersRepository>(context)
-                          .getCenterImgUrl(widget._item.id.toString()),
-                      builder: (context, snapshot) {
-                        if (snapshot != null &&
-                            snapshot.data != null &&
-                            snapshot.data != '') {
-                          print('center image:' + snapshot.data);
-                          return Helpers.image(snapshot.data);
-                        } else {
-                          return Container();
-                        }
-                      }),
+                  child: Helpers.image(widget._item.logoUrl),
                 ),
               ],
             ),
@@ -288,9 +217,8 @@ class _ClinicItemWgtState extends State<ClinicItemWgt> {
                         Container(
                           child: RatingBarIndicator(
                             unratedColor: Colors.grey[400],
-                            rating: double.parse(
-                                widget._item.score,
-                                    (err) => 3.0),
+                            rating:
+                            double.parse(widget._item.score, (err) => 3.0),
                             itemBuilder: (context, index) => Icon(
                               Icons.star,
                               color: AppColors.second_color,
@@ -318,6 +246,117 @@ class _ClinicItemWgtState extends State<ClinicItemWgt> {
           ],
         ),
       )),
+    );
+  }
+}
+
+class CentersSearchDelegate extends SearchDelegate {
+  final CenterFetchType type;
+
+  CentersSearchDelegate(this.type);
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    if (query.length < 3) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Center(
+            child: Text(
+              "متن جستجو باید حداقل ۳ حرف باشد",
+            ),
+          )
+        ],
+      );
+    }
+
+    //Add the search term to the searchBloc.
+    //The Bloc will then handle the searching and add the results to the searchResults stream.
+    //This is the equivalent of submitting the search term to whatever search service you are using
+    var searchBloc = Provider.of<SearchBloc>(context);
+
+    searchBloc.dispatch(SearchCenters(query, type));
+
+    return BlocBuilder<SearchBloc, SearchState>(
+      bloc: searchBloc,
+      builder: (context, state) {
+        if (state is LoadingResults) {
+          return LoadingIndicator();
+        } else if (state is NoResult) {
+          return Column(
+            children: <Widget>[
+              Text(
+                "نتیجه‌ای یافت نشد",
+              ),
+            ],
+          );
+        } else if (state is CenterSearchLoaded) {
+          var results = state.results;
+          return ListView.builder(
+            itemCount: results.length,
+            itemBuilder: (context, index) {
+              var result = results[index];
+              return CenterSearchItemWidget(result);
+            },
+          );
+        } else {
+          return Container();
+        }
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    // This method is called everytime the search term changes.
+    // If you want to add search suggestions as the user enters their search term, this is the place to do that.
+    return Column();
+  }
+}
+
+class CenterSearchItemWidget extends StatelessWidget {
+  final CenterItem item;
+
+  CenterSearchItemWidget(this.item);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: GestureDetector(
+        onTap: () =>
+            Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (context) => CenterDetailPage(item))),
+        child: ListTile(
+          title: Text(item.name),
+          leading: Container(
+            child: Helpers.image(item.logoUrl),
+            margin: EdgeInsets.all(8),
+          ),
+        ),
+      ),
     );
   }
 }

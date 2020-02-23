@@ -56,7 +56,8 @@ class Net {
       String url = '';
       if (endPoint == EndPoint.START_CHAT ||
           endPoint == EndPoint.SEND_MESSAGE ||
-          endPoint == EndPoint.GET_ALL_CHATS ||
+          endPoint == EndPoint.GET_ALL_CENTER_CHATS ||
+          endPoint == EndPoint.GET_ALL_USER_CHATS ||
           endPoint == EndPoint.SEEN_CHAT ||
           endPoint == EndPoint.GET_CHAT_WITH) {
         url = AppUrls.alt_api_url + getSubUrl(endPoint);
@@ -232,7 +233,8 @@ enum EndPoint {
   EDIT_SELLER_PRODUCT,
   GET_COMMENTS,
   SEND_COMMENT,
-  SEND_FCM_TOKEN,
+  SEND_USER_FCM_TOKEN,
+  SEND_MNG_FCM_TOKEN,
   GET_USER_PET,
   SEND_USER_PET,
   EDIT_USER_PET,
@@ -240,9 +242,11 @@ enum EndPoint {
   SEND_SELLER_REQUEST,
   START_CHAT,
   SEND_MESSAGE,
-  GET_ALL_CHATS,
+  GET_ALL_CENTER_CHATS,
+  GET_ALL_USER_CHATS,
   GET_CHAT_WITH,
-  SEEN_CHAT
+  SEEN_CHAT,
+  GET_CONTACT_INFO
 }
 
 String getSubUrl(EndPoint endPoint) {
@@ -416,7 +420,7 @@ String getSubUrl(EndPoint endPoint) {
     case EndPoint.SEND_COMMENT:
       subUrl = 'sendprdproductcomment';
       break;
-    case EndPoint.SEND_FCM_TOKEN:
+    case EndPoint.SEND_USER_FCM_TOKEN:
       subUrl = 'updateuserfcmtoken';
       break;
     case EndPoint.GET_USER_PET:
@@ -440,7 +444,7 @@ String getSubUrl(EndPoint endPoint) {
     case EndPoint.SEND_MESSAGE:
       subUrl = 'sendchat';
       break;
-    case EndPoint.GET_ALL_CHATS:
+    case EndPoint.GET_ALL_CENTER_CHATS:
       subUrl = 'getallchats';
       break;
     case EndPoint.SEEN_CHAT:
@@ -448,6 +452,15 @@ String getSubUrl(EndPoint endPoint) {
       break;
     case EndPoint.GET_CHAT_WITH:
       subUrl = 'getappuserchats';
+      break;
+    case EndPoint.GET_CONTACT_INFO:
+      subUrl = 'getappusers';
+      break;
+    case EndPoint.SEND_MNG_FCM_TOKEN:
+      subUrl = 'updatesellerfcmtoken';
+      break;
+    case EndPoint.GET_ALL_USER_CHATS:
+      subUrl = 'getappuserallchats';
       break;
   }
   return subUrl;

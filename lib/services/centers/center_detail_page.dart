@@ -6,6 +6,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:simple_slider/simple_slider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/data_layer/centers/centers_repository.dart';
 import 'package:store/data_layer/centers/service_repository.dart';
@@ -49,9 +50,33 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
       body: Container(
         child: ListView(
           children: <Widget>[
+            Container(
+                margin: EdgeInsets.only(bottom: 1, left: 1),
+                alignment: Alignment.center,
+                color: Colors.grey[200],
+                height: 170,
+                child: FutureBuilder<List<String>>(
+                    future: Provider.of<CentersRepository>(context)
+                        .getCenterImgUrl(widget.center.id.toString()),
+                    builder: (context, snapshot) {
+                      if (snapshot != null &&
+                          snapshot.data != null &&
+                          snapshot.data != []) {
+                        return ImageSliderWidget(
+                          imageUrls: [widget.center.logoUrl] + snapshot.data,
+                          imageBorderRadius: BorderRadius.circular(8.0),
+                        );
+
+//                        return Helpers.image(snapshot.data);
+                      } else if (snapshot.data == []) {
+                        return Helpers.image(widget.center.logoUrl);
+                      } else {
+                        return Container();
+                      }
+                    })),
             new Container(
               color: Colors.grey[200],
-              height: 100,
+              height: 56,
               width: double.infinity,
               child: Row(
                 children: <Widget>[
@@ -59,23 +84,9 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                     child: Container(
                       padding: EdgeInsets.only(top: 10, right: 10),
                       color: Colors.grey[200],
-                      child: Column(
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          /* Expanded(
-                            child: Center(
-                              child: Text(
-                                widget.center.name,
-                                style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey[600],
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),*/
-                          /*  Divider(
-                            color: Colors.grey,
-                          ),*/
                           Expanded(
                               child: Row(
                             children: <Widget>[
@@ -186,30 +197,6 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: Container(
-                        margin: EdgeInsets.only(bottom: 1, left: 1),
-                        alignment: Alignment.centerLeft,
-                        color: Colors.grey[200],
-                        height: 100,
-                        child: FutureBuilder<String>(
-                            future: Provider.of<CentersRepository>(context)
-                                .getCenterImgUrl(widget.center.id.toString()),
-                            builder: (context, snapshot) {
-                              if (snapshot != null &&
-                                  snapshot.data != null &&
-                                  snapshot.data != '') {
-                                return Helpers.image(snapshot.data);
-                              } else {
-                                return Container();
-                              }
-                            }) /*Icon(
-                        Icons.pets,
-                        size: 90,
-                        color: Colors.grey[200],
-                      )*/
-                        ),
-                  )
                 ],
               ),
             ),
@@ -290,7 +277,9 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                       onTap: () {
                         launch("mailto:${widget.center.email}");
                       },
-                      child: Row(
+                      child: widget.center.email != null &&
+                          widget.center.email != ''
+                          ? Row(
                         children: <Widget>[
                           Icon(
                             Icons.email,
@@ -307,44 +296,35 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                             ),
                           )
                         ],
-                      ),
+                      )
+                          : Container(),
                     ),
                   )
                 ],
               ),
             ),
-            widget.center.description == ''
-                ? Container()
-                : Container(
-                    padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+              child: Row(
+                children: <Widget>[
+                  widget.center.description == ''
+                      ? Container()
+                      : Expanded(
                     child: Text(
                       widget.center.description,
                       style: TextStyle(fontSize: 14, color: Colors.white),
                     ),
-                    color: AppColors.main_color,
                   ),
-            widget.center.description == ''
-                ? Container()
-                : Container(
-                    height: 2,
-                    decoration: BoxDecoration(
-                        color: Colors.grey[400],
-                        borderRadius: BorderRadius.only(
-                            bottomRight: Radius.circular(4),
-                            bottomLeft: Radius.circular(4))),
-                  ),
-            Container(
-              alignment: Alignment.center,
-              child: GestureDetector(
-                onTap: () {
-                  var state =
-                      Provider
-                          .of<LoginStatusBloc>(context)
-                          .currentState;
-                  if (state is IsLoggedIn) {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) =>
-                            ChatPage(
+                  GestureDetector(
+                    onTap: () {
+                      var state =
+                          Provider
+                              .of<LoginStatusBloc>(context)
+                              .currentState;
+                      if (state is IsLoggedIn) {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) =>
+                                ChatPage(
                                 ChatBloc(
                                     ChatRepository(Provider.of<Net>(context),
                                         ClientChatUser(state.user.appUserId),
@@ -352,69 +332,150 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                                     CenterChatUser(
                                         widget.center.id.toString())),
                                 widget.center.name)));
-                  } else {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => LoginPage()));
-                  }
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Card(
-                      margin: EdgeInsets.only(top: 10),
-                      elevation: 6,
-                      child: Container(
-                        padding:
-                        EdgeInsets.symmetric(vertical: 9, horizontal: 28),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              'پیام به این مرکز',
-                              style: TextStyle(fontSize: 13),
+                      } else {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LoginPage()));
+                      }
+                    },
+                    child: Column(
+                      children: <Widget>[
+                        Card(
+                          shape: RoundedRectangleBorder(
+                              borderRadius:
+                              BorderRadius.all(Radius.circular(80))),
+                          margin: EdgeInsets.only(top: 10),
+                          elevation: 6,
+                          child: Container(
+                            width: 60,
+                            height: 60,
+                            padding: EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 4),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Padding(
+                                  padding: EdgeInsets.only(top: 3),
+                                  child: Icon(
+                                    Icons.chat,
+                                    color: Colors.yellow[800],
+                                    size: 26,
+                                  ),
+                                ),
+                              ],
                             ),
-                            Padding(
-                              padding: EdgeInsets.only(right: 18),
-                              child: Icon(
-                                Icons.chat,
-                                color: AppColors.main_color,
-                                size: 18,
-                              ),
-                            )
-                          ],
+                          ),
                         ),
-                      ),
-                    )
-                  ],
-                ),
+                        Padding(
+                          child: Text(
+                            'ارسال پیام',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          padding: EdgeInsets.only(top: 7),
+                        )
+                      ],
+                    ),
+                  )
+                ],
               ),
+              color: AppColors.main_color,
             ),
-            new Row(
+            widget.center.description == ''
+                ? Container()
+                : Container(
+              height: 2,
+              decoration: BoxDecoration(
+                  color: Colors.grey[400],
+                  borderRadius: BorderRadius.only(
+                      bottomRight: Radius.circular(4),
+                      bottomLeft: Radius.circular(4))),
+            ),
+            /*Container(
+              alignment: Alignment.center,
+              child: ,
+            )*/
+            widget.center.workingDays.isNotEmpty
+                ? _buildWorkingDayWidget(widget.center.workingDays)
+                : Container(),
+            Divider(),
+
+            Container(
+              child: Text(
+                "خدمات مرکز",
+                style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+              ),
+              margin: EdgeInsets.only(right: 10, top: 10),
+            ),
+            StreamBuilder(
+                stream: Provider.of<ServicesRepository>(context)
+                    .getCenterServices(widget.center.departmentId),
+                builder: (context, AsyncSnapshot<List<Service>> snapshot) {
+                  if (snapshot.data != null && snapshot.data.isNotEmpty) {
+                    return Container(
+                      color: Colors.grey[200],
+                      height: 56,
+                      padding: EdgeInsets.only(right: 6),
+                      margin: EdgeInsets.only(top: 10),
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: snapshot.data
+                            .map((service) => _buildService(service.name))
+                            .toList(),
+                      ),
+                    );
+                  } else {
+                    return Container();
+                  }
+                }),
+            /* new Expanded(
+              child: ListView(
+                children: <Widget>[
+                ],
+              ),
+            )*/
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorkingDayWidget(List<WorkingDay> wkds) {
+    return Column(
+        children: wkds
+            .map((wkd) =>
+        wkd.days.isNotEmpty
+            ? Column(
+          children: <Widget>[
+            Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Container(
-                  child: Icon(Icons.date_range, color: AppColors.main_color),
+                  child: Icon(Icons.date_range,
+                      color: AppColors.main_color),
                   margin: EdgeInsets.only(right: 10),
                 ),
                 Expanded(
                   child: Container(
                     alignment: Alignment.center,
                     child: Wrap(
-                      children: widget.center.workingDay1.days
-                          .map((d) => Container(
-                        child: Text(d.toString()),
-                                margin: EdgeInsets.only(right: 1, top: 1),
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 8),
-                                color: Colors.blueGrey[50],
-                              ))
+                      children: wkd.days
+                          .map((d) =>
+                          Container(
+                            child: Text(d.toString()),
+                            margin:
+                            EdgeInsets.only(right: 1, top: 1),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 8),
+                            color: Colors.blueGrey[50],
+                          ))
                           .toList(),
                     ),
                   ),
                 ),
               ],
             ),
-            new Row(
+            Row(
               children: <Widget>[
                 Container(
                   child: Icon(
@@ -428,7 +489,7 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                   height: 60,
                   margin: EdgeInsets.only(left: 14),
                   child: Text(
-                    widget.center.workingDay1.from.substring(0, 5),
+                    wkd.from.substring(0, 5),
                     style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
@@ -445,7 +506,7 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                   alignment: Alignment.center,
                   height: 60,
                   child: Text(
-                    widget.center.workingDay1.to.substring(0, 5),
+                    wkd.to.substring(0, 5),
                     style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
@@ -456,47 +517,11 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                   margin: EdgeInsets.only(left: 30),
                 )
               ],
-            ),
-            Divider(),
-            Container(
-              child: Text(
-                "خدمات مرکز",
-                style: TextStyle(fontSize: 13, color: Colors.grey[500]),
-              ),
-              margin: EdgeInsets.only(right: 10, top: 10),
-            ),
-            StreamBuilder(
-                stream: Provider.of<ServicesRepository>(context)
-                    .getCenterServices(widget.center.id),
-                builder: (context, AsyncSnapshot<List<Service>> snapshot) {
-                  if (snapshot.data != null && snapshot.data.isNotEmpty) {
-                    return Container(
-                      color: Colors.grey[300],
-                      height: 56,
-                      padding: EdgeInsets.only(right: 6),
-                      margin: EdgeInsets.only(top: 10),
-                      /* child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: snapshot.data[0].serviceName
-                            .split(';')
-                            .map((serviceName) => _buildService(serviceName))
-                            .toList(),
-                      ),*/
-                    );
-                  } else {
-                    return Container();
-                  }
-                }),
-            /* new Expanded(
-              child: ListView(
-                children: <Widget>[
-                ],
-              ),
-            )*/
+            )
           ],
-        ),
-      ),
-    );
+        )
+            : Container())
+            .toList());
   }
 
   Widget _buildScoreSubmissionDialog(Function(int score) onClick) {
@@ -569,14 +594,14 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 4, vertical: 10),
       decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
+          border: Border.all(color: AppColors.main_color),
           color: Colors.grey[50],
           borderRadius: BorderRadius.circular(4)),
       padding: EdgeInsets.symmetric(horizontal: 20),
       alignment: Alignment.center,
       child: Text(
         title,
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+        style: TextStyle(fontSize: 12, color: AppColors.main_color),
       ),
     );
   }

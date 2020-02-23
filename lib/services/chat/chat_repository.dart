@@ -97,11 +97,12 @@ class ChatRepository {
   Future<List<FullMessage>> getAllMessages() async {
     var res;
     if (owner is ClientChatUser) {
-      res = await _net.post(EndPoint.GET_ALL_CHATS, cacheEnabled: false, body: {
+      res = await _net
+          .post(EndPoint.GET_ALL_USER_CHATS, cacheEnabled: false, body: {
         'app_user_id': (owner as ClientChatUser).appUserId,
       });
     } else if (owner is CenterChatUser) {
-      res = await _net.post(EndPoint.GET_ALL_CHATS,
+      res = await _net.post(EndPoint.GET_ALL_CENTER_CHATS,
           cacheEnabled: false,
           body: {'srv_center_id': (owner as CenterChatUser).srvCenterId});
     } else {
@@ -112,12 +113,6 @@ class ChatRepository {
       var list = List<Map<String, dynamic>>.from(res.data);
 
       var messages = list.map((json) => FullMessage.fromJson(json)).toList();
-
-      messages.forEach((msg) {
-        if (msg.appUserId != 56) {
-          print('found one');
-        }
-      });
 
       return messages;
     } else {
@@ -179,4 +174,51 @@ class ChatRepository {
       return null;
     }
   }
+
+  Future<ContactInfo> getContactInfo(ChatUser chatUser) async {
+    if (chatUser is ClientChatUser) {
+      var res = await _net.post(EndPoint.GET_CONTACT_INFO,
+          body: {'id': chatUser.appUserId.toString()});
+
+      if (res is SuccessResponse) {
+        var info = List<Map<String, dynamic>>.from(res.data)[0];
+
+        var fn = info['firstname'];
+        var ln = info['lastname'];
+
+        var title;
+
+        if (fn != '' || ln != '') {
+          title = fn + " " + ln;
+        } else {
+          title = 'نام مشخص نشده است';
+        }
+
+        return ContactInfo(title);
+      } else {
+        return ContactInfo('');
+      }
+    } else if (chatUser is CenterChatUser) {
+      var res = await _net.post(EndPoint.GET_CENTERS,
+          body: {'center_id': chatUser.srvCenterId});
+
+      if (res is SuccessResponse) {
+        var info = List<Map<String, dynamic>>.from(res.data)[0];
+
+        var centerName = info['center_name'];
+
+        return ContactInfo(centerName);
+      } else {
+        return ContactInfo('');
+      }
+    } else {
+      throw Exception('invalid type: $chatUser');
+    }
+  }
+}
+
+class ContactInfo {
+  final String title;
+
+  ContactInfo(this.title);
 }

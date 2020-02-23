@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 import 'package:store/common/bloc_state_event.dart';
+import 'package:store/services/chat/chat_repository.dart';
 
 import 'model.dart';
 
@@ -21,9 +22,10 @@ class ChatLoading extends ChatState {
 }
 
 class ChatLoaded extends ChatState {
+  final ContactInfo otherInfo;
   final Chat chat;
 
-  ChatLoaded(this.chat);
+  ChatLoaded(this.chat, this.otherInfo);
 
   @override
   String toString() {

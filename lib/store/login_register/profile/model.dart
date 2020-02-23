@@ -12,8 +12,7 @@ class Profile {
 */
 
   Profile(this.firstName, this.lastName, this.phone, this.creditCardNo,
-      this.email, this.nationalCode, this.sessionId
-      /*, this.address*/);
+      this.email, this.nationalCode, this.sessionId);
 
   @override
   String toString() => "name: $firstName  phone: $phone ";

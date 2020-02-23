@@ -1,7 +1,6 @@
 import 'package:meta/meta.dart';
 import 'package:store/common/bloc_state_event.dart';
 
-import '../../data_layer/centers/centers_repository.dart';
 import 'model.dart';
 
 @immutable
@@ -42,9 +41,9 @@ class CentersLoadingFailed extends CentersState {
 // EVENTS *******************************
 
 class FetchCenters extends CentersEvent {
-  final CenterFetchType type;
+  final CenterFilter filter;
 
-  FetchCenters(this.type);
+  FetchCenters(this.filter);
 
   @override
   String toString() {

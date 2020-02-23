@@ -261,7 +261,8 @@ class _DeliveryPageState extends State<DeliveryPage> {
 
     var _centersRepo = Provider.of<CentersRepository>(context);
 
-    var stores = await _centersRepo.getCenters(CenterFetchType.STORE);
+    var stores =
+    await _centersRepo.getCenters(CenterFilter(CenterFetchType.STORE));
 
     if (deliveryItems.isEmpty) {
       if (stores != null) {

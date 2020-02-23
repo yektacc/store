@@ -79,7 +79,6 @@ Future main() async {
   final ProductsBloc _productsBloc = ProductsBloc(_productRepo);
   final FilteredProductsBloc _filteredProductsBloc =
       FilteredProductsBloc(_productsBloc);
-  final SearchBloc _searchBloc = SearchBloc(_productRepo, _searchInteractor);
   final StructureBloc _structureBloc = StructureBloc(_structureRepo);
   final CartBloc _cartBloc = CartBloc(_detailRepo);
   final RegisterBloc _registerBloc = RegisterBloc(_registerInteractor);
@@ -106,8 +105,11 @@ Future main() async {
   final CentersBloc _centersBloc = CentersBloc(_centersRepo);
   final ManagementRepository _sellerRepo = ManagementRepository(net);
   final PreviousOrdersRepository _ordersRepo = PreviousOrdersRepository(net);
-  final ManagementBloc _managementBloc =
-  ManagementBloc(_sellerRepo, CreateProductRepository(), _ordersRepo);
+  final ManagementBloc _managementBloc = ManagementBloc(
+      _sellerRepo, CreateProductRepository(), _ordersRepo, _fcmRepo);
+
+  final SearchBloc _searchBloc =
+  SearchBloc(_productRepo, _searchInteractor, _centersRepo);
 
   final ProductsCountRepository _countRepo =
       ProductsCountRepository(_productRepo, _structureBloc);

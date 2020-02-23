@@ -35,7 +35,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
       appBar: AppBar(
         elevation: 0,
       ),
-      backgroundColor: AppColors.main_color,
+      backgroundColor: AppColors.second_color,
       body: Form(
           key: _formKey,
           child: BlocBuilder(
@@ -108,12 +108,11 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
                 width: 100,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                    color: AppColors.main_color,
+                    border: Border.all(color: AppColors.second_color),
                     borderRadius: BorderRadius.all(Radius.circular(30))),
-                child: Text(
-                  "تایید",
-                  style: TextStyle(fontSize: 13, color: Colors.white),
-                ),
+                child: Text("تایید",
+                    style:
+                    TextStyle(fontSize: 13, color: AppColors.second_color)),
               ),
             ),
           ),
@@ -170,11 +169,11 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
                 width: 100,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                    color: AppColors.main_color,
+                    border: Border.all(color: AppColors.second_color),
                     borderRadius: BorderRadius.all(Radius.circular(30))),
                 child: Text(
                   "تایید",
-                  style: TextStyle(fontSize: 13, color: Colors.white),
+                  style: TextStyle(fontSize: 13, color: AppColors.second_color),
                 ),
               ),
             ),
@@ -232,11 +231,12 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
                 width: 100,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                    color: AppColors.main_color,
-                    borderRadius: BorderRadius.all(Radius.circular(30))),
+                    border: Border.all(color: AppColors.second_color),
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(30))),
                 child: Text(
                   "تغییر رمز عبور",
-                  style: TextStyle(fontSize: 13, color: Colors.white),
+                  style: TextStyle(fontSize: 13, color: AppColors.second_color),
                 ),
               ),
             ),
@@ -254,9 +254,8 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
     loginBloc
         .dispatch(AttemptLogin(phoneController.text, newPassController.text));
 
-
     loginBlocSubscription = loginBloc.state.listen((state) {
-      if(state is LoginSuccessful) {
+      if (state is LoginSuccessful) {
         Navigator.popAndPushNamed(context, HomePage.routeName);
         Navigator.pop(context);
         loginBlocSubscription.cancel();

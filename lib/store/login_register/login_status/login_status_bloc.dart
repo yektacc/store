@@ -16,7 +16,7 @@ class LoginStatusBloc extends Bloc<LoginStatusEvent, LoginStatusState> {
     _streamSubscription = _loginBloc.state.listen((state) {
       if (state is LoginSuccessful) {
         dispatch(UpdateStatus(LoggedInStatus(state.user)));
-        _fcmRepo.updateToken(state.user.sessionId);
+        _fcmRepo.updateUserToken(state.user.sessionId);
       } else if (state is LogoutSuccessful) {
         dispatch(UpdateStatus(NotLoggedInStatus()));
       }

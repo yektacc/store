@@ -67,8 +67,20 @@ class Helpers {
   }
 
   static String getPersianDate(String gregorianDateTime) {
-    return PersianDateTime.fromGregorian(gregorianDateTime: gregorianDateTime)
-        .toString();
+    print('gregorian time to conver: $gregorianDateTime');
+    var dateTime = gregorianDateTime.split(' ');
+
+    if (dateTime.length == 2) {
+      return PersianDateTime.fromGregorian(gregorianDateTime: dateTime[0])
+          .toString();
+    } else {
+      return PersianDateTime.fromGregorian(gregorianDateTime: gregorianDateTime)
+          .toString();
+    }
+  }
+
+  static String getIranTime(String gregorianDateTime) {
+    return gregorianDateTime.split(' ')[1].substring(0, 5);
   }
 }
 

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:store/app.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_bloc.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_event_state.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_page.dart';
-import 'package:provider/provider.dart';
 
 import 'login_bloc.dart';
 import 'login_event_state.dart';
@@ -63,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
             height: double.infinity,
             child: new Center(
               child: new Container(
-                color: AppColors.main_color,
+                color: AppColors.second_color,
                 child: new BlocBuilder(
                   bloc: widget._bloc,
                   builder: (context, LoginState state) {
@@ -139,12 +139,14 @@ class _LoginPageState extends State<LoginPage> {
                                       width: 100,
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
-                                          color: AppColors.main_color,
+                                          border: Border.all(
+                                              color: AppColors.second_color),
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(30))),
                                       child: Text(
                                         'ورود',
-                                        style: TextStyle(fontSize: 13),
+                                        style: TextStyle(fontSize: 13,
+                                            color: AppColors.second_color),
                                       ),
                                     ),
                                   ),

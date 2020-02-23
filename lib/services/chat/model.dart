@@ -1,4 +1,6 @@
 import 'package:quiver/core.dart';
+import 'package:store/common/constants.dart';
+import 'package:store/services/chat/chat_repository.dart';
 
 // message
 
@@ -8,13 +10,14 @@ class FullMessage extends Message {
   final int id;
   final int chatId;
   final String text;
+  final String date;
   final int srvCenterId;
   final int appUserId;
   final String sender;
   final bool seen;
 
   FullMessage(this.id, this.chatId, this.text, this.srvCenterId, this.appUserId,
-      this.sender, this.seen);
+      this.sender, this.seen, this.date);
 
   factory FullMessage.fromJson(Map<String, dynamic> json) {
     return FullMessage(
@@ -24,7 +27,8 @@ class FullMessage extends Message {
         json['srv_center_id'],
         json['app_user_id'],
         json['sender'],
-        json['is_seen'] == 1);
+        json['is_seen'] == 1,
+        json['created_at']);
   }
 
   @override
@@ -37,7 +41,37 @@ class SimpleMessage extends Message {
   final bool sentByMe;
   final String text;
 
-  SimpleMessage(this.text, this.sentByMe);
+//  final String time;
+  final bool seen;
+  final String _date;
+  final String _persianDate;
+
+  int get day {
+    print(_persianDate);
+    print(_date);
+    try {
+      return int.parse(_persianDate.split("/")[2]);
+    } catch (e, stack) {
+      print(e);
+      print(stack);
+      return 0;
+    }
+  }
+
+  int get month {
+    try {
+      return int.parse(_persianDate.split("/")[1]);
+    } catch (e, stack) {
+      print(e);
+      print(stack);
+      return 0;
+    }
+  }
+
+  String get time => Helpers.getIranTime(_date);
+
+  SimpleMessage(this.text, this.sentByMe, this.seen, this._date)
+      : this._persianDate = Helpers.getPersianDate(_date);
 }
 
 // user
@@ -78,6 +112,12 @@ class CenterChatUser extends ChatUser {
   String get id => srvCenterId;
 }
 
+class FullDataChatUser {
+  final ChatUser chatUser;
+  final ContactInfo contactInfo;
+
+  FullDataChatUser(this.chatUser, this.contactInfo);
+}
 // chat
 
 class Chat {
@@ -101,7 +141,8 @@ class Chat {
       } else if (other is ClientChatUser && msg.sender == 'srv_center') {
         sentByMe = true;
       }
-      return SimpleMessage(msg.text, sentByMe);
+
+      return SimpleMessage(msg.text, sentByMe, msg.seen, msg.date);
     } else {
       throw Exception('wrong message type: $msg');
     }
@@ -122,4 +163,11 @@ class Chat {
     });
     return newMessage;
   }
+}
+
+class ChatIdentifier {
+  final int centerId;
+  final int appUserId;
+
+  ChatIdentifier(this.centerId, this.appUserId);
 }

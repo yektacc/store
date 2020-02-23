@@ -181,12 +181,12 @@ class _FilterLostAndFoundState extends State<FilterLostAndFound> {
         key: _filterFormKey,
         child: new Container(
           color: Colors.grey[300],
-          height: 200,
+          height: 216,
           child: Column(
             children: <Widget>[
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 14),
+                  padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   color: Colors.grey[100],
                   child: ProvinceCitySelectionRow((province, city) {
                     currentProvince = province;
@@ -341,13 +341,13 @@ class _ProvinceCitySelectionRowState extends State<ProvinceCitySelectionRow> {
                         borderRadius: BorderRadius.all(
                           Radius.circular(5),
                         ),
-                        border: Border.all(color: AppColors.second_color)),
-                    height: 70,
+                        border: Border.all(color: Colors.grey[300])),
+                    height: 60,
                     alignment: Alignment.center,
                     margin: EdgeInsets.symmetric(horizontal: 4),
                     child: DropdownButton<Province>(
                       iconEnabledColor: Colors.red,
-                      itemHeight: 70,
+                      itemHeight: 60,
                       underline: Container(),
                       isExpanded: true,
                       hint: Text("استان"),
@@ -387,13 +387,13 @@ class _ProvinceCitySelectionRowState extends State<ProvinceCitySelectionRow> {
                           borderRadius: BorderRadius.all(
                             Radius.circular(5),
                           ),
-                          border: Border.all(color: AppColors.second_color)),
-                      height: 70,
+                          border: Border.all(color: Colors.grey[300])),
+                      height: 60,
                       alignment: Alignment.center,
                       margin: EdgeInsets.only(right: 12),
                       child: new DropdownButton<City>(
                         iconEnabledColor: Colors.red,
-                        itemHeight: 70,
+                        itemHeight: 60,
                         underline: Container(),
                         icon: Icon(Icons.location_city),
                         isExpanded: true,
@@ -484,6 +484,8 @@ class _LostPetItemWgtState extends State<LostPetItemWgt> {
                     child: Container(
                         margin: EdgeInsets.only(),
                         decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(4)),
                           color: widget._item.reqType.id == 2
                               ? AppColors.main_color
                               : AppColors.second_color,

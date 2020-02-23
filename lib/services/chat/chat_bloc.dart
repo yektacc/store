@@ -25,6 +25,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   ChatState get initialState => ChatLoading();
 
   @override
+  void onError(Object error, StackTrace stacktrace) {
+    print(error);
+    print(stacktrace);
+  }
+
+  @override
   Stream<ChatState> mapEventToState(ChatEvent event) async* {
     if (event is SendMessage) {
       yield ChatLoading();
@@ -39,7 +45,16 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       yield ChatLoading();
       var messages = await _chatRepository.getMessagesWith(other);
       if (messages != null) {
-        yield ChatLoaded(Chat(messages, _chatRepository.owner, other, chatId));
+        var contactInfo = await _chatRepository.getContactInfo(other);
+
+        yield ChatLoaded(
+            Chat(
+                messages.toList() /*.reversed.toList()*/, _chatRepository.owner,
+                other,
+                chatId),
+            contactInfo);
+
+        print(messages);
       } else {
         yield FailedLoadingChat();
       }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:core';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:store/common/constants.dart';
 import 'package:store/data_layer/netclient.dart';
 import 'package:store/data_layer/province/province_repository.dart';
 import 'package:store/store/location/provinces/model.dart';
@@ -14,8 +15,15 @@ class CentersRepository {
 
   CentersRepository(this._provinceRepo, this.net);
 
-  Future<List<CenterItem>> getCenters(CenterFetchType fetchType) async {
+  Future<List<CenterItem>> getCenters(CenterFilter filter) async {
     String param;
+
+    var fetchType = filter.type;
+
+    String provinceId =
+    filter.provinceId == -1 ? '' : filter.provinceId.toString();
+    String cityId = filter.cityId == -1 ? '' : filter.cityId.toString();
+    String sort = filter.sort == CenterSortType.SCORE ? 'best_score' : 'newest';
 
     switch (fetchType) {
       case CenterFetchType.CLINICS:
@@ -32,8 +40,13 @@ class CentersRepository {
         break;
     }
 
-    var response =
-        await net.post(EndPoint.GET_CENTERS, body: {'center_type': param});
+    var response = await net.post(EndPoint.GET_CENTERS, body: {
+      'center_type': param,
+      'province_id': provinceId,
+      'city_id': cityId,
+      'center_name': filter.name,
+      'filter_type': sort
+    });
 
     if (response is SuccessResponse) {
       List<Map<String, dynamic>> jsonList =
@@ -78,7 +91,7 @@ class CentersRepository {
             centerRaw.remainedAddress ?? "",
             centerRaw.id ?? "",
             centerRaw.phoneNo ?? "",
-            centerRaw.logo ?? "",
+            centerRaw.logo != null ? AppUrls.image_url + centerRaw.logo : "",
             centerRaw.description ?? "",
             centerRaw.typeId ?? "",
             centerRaw.score ?? "",
@@ -89,7 +102,7 @@ class CentersRepository {
             latLng,
             province ?? UnknownProvince(),
             city ?? UnknownCity(),
-            centerRaw.wd1,
+            [centerRaw.wd1, centerRaw.wd2, centerRaw.wd3],
             centerRaw.departmentId);
       }).toList());
 
@@ -131,7 +144,7 @@ class CentersRepository {
     }
   }
 
-  Future<String> getCenterImgUrl(String centerId) async {
+  Future<List<String>> getCenterImgUrl(String centerId) async {
     var response = await net
         .post(EndPoint.GET_CENTER_PICTURES, body: {'center_id': centerId});
     if (response is SuccessResponse) {
@@ -139,18 +152,18 @@ class CentersRepository {
           new List<Map<String, dynamic>>.from(response.data);
 
       if (centerImages.isNotEmpty && centerImages[0].containsKey('image')) {
-        return centerImages[0]['image'];
+        return centerImages.map((img) => img['image']).toList();
       } else {
-        return '';
+        return [];
       }
     } else {
-      return '';
+      return [];
     }
   }
 
   Future<String> getCityNameByCenterId(
       CenterFetchType centerType, int id) async {
-    List<CenterItem> centers = await getCenters(centerType);
+    List<CenterItem> centers = await getCenters(CenterFilter(centerType));
 
     CenterItem center;
     if (centers.map((c) => c.id).contains(id)) {
@@ -174,126 +187,6 @@ class CentersRepository {
     }
   }
 }
-
-class WorkingDay {
-  final String _days;
-  final String from;
-  final String to;
-
-  WorkingDay(this._days, this.from, this.to);
-
-  List<String> get days {
-    List<String> result = [];
-    try {
-      result = _days.split(';').map((s) => s.substring(2)).toList();
-    } catch (e) {}
-    return result;
-  }
-}
-
-class CenterRaw {
-  final int id;
-  final int sellerId;
-  final int userId;
-  final String name;
-  final int typeId;
-  final int departmentId;
-  final int provinceId;
-  final int cityId;
-  final int districtId;
-  final String remainedAddress;
-  final String phoneNo;
-  final String phoneFax;
-  final WorkingDay wd1;
-  final WorkingDay wd2;
-  final WorkingDay wd3;
-  final String logo;
-  final String description;
-  final String score;
-  final String website;
-  final String email;
-  final String location;
-  final bool isActive;
-  final String serviceIds;
-
-  CenterRaw(
-      this.id,
-      this.sellerId,
-      this.userId,
-      this.name,
-      this.typeId,
-      this.departmentId,
-      this.provinceId,
-      this.cityId,
-      this.districtId,
-      this.remainedAddress,
-      this.phoneNo,
-      this.phoneFax,
-      this.wd1,
-      this.wd2,
-      this.wd3,
-      this.logo,
-      this.description,
-      this.score,
-      this.website,
-      this.email,
-      this.location,
-      this.isActive,
-      this.serviceIds);
-
-  factory CenterRaw.fromJson(Map<String, dynamic> centerJson) {
-    return CenterRaw(
-        centerJson['id'],
-        centerJson['seller_id'],
-        centerJson['user_id'],
-        centerJson['center_name'],
-        centerJson['center_type'],
-        centerJson['department_id'],
-        centerJson['province_id'],
-        centerJson['city_id'],
-        centerJson['district_id'],
-        centerJson['remaind'],
-        centerJson['center_phone'].toString(),
-        centerJson['phone_fax'].toString(),
-        WorkingDay(
-            centerJson['workingday1'].toString(),
-            centerJson['timefrom1'].toString(),
-            centerJson['timeto1'].toString()),
-        WorkingDay(
-            centerJson['workingday2'].toString(),
-            centerJson['timefrom2'].toString(),
-            centerJson['timeto2'].toString()),
-        WorkingDay(
-            centerJson['workingday3'].toString(),
-            centerJson['timefrom3'].toString(),
-            centerJson['timeto3'].toString()),
-        centerJson['center_logo'],
-        centerJson['center_description'],
-        centerJson['center_score'].toString(),
-        centerJson['center_website'],
-        centerJson['center_email'],
-        centerJson['ne_location'].toString(),
-        centerJson['is_active'] == 1 ? true : false,
-        /*centerJson['services']*/
-        "");
-  }
-}
-
-class CenterType {
-  final int id;
-  final String name;
-  final String image;
-  final String fee;
-
-  CenterType(this.id, this.name, this.image, this.fee);
-
-  factory CenterType.fromJson(Map<String, dynamic> categoryJson) {
-    return CenterType(categoryJson['id'], categoryJson['category_name'],
-        categoryJson['category_image'], categoryJson['fee'].toString());
-  }
-}
-
-enum CenterFetchType { CLINICS, PENSION_BARBER, STORE, ALL }
 
 /*
 class Service {
