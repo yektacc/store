@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/store/products/cart/cart_bloc.dart';
 import 'package:store/store/products/cart/cart_bloc_event.dart';
 import 'package:store/store/products/cart/cart_page.dart';
-import 'package:store/store/products/cart/cart_product.dart';
+import 'package:store/store/products/cart/model.dart';
 import 'package:store/store/products/filter/filter_sort.dart';
 import 'package:store/store/products/filter/filtered_products_bloc.dart';
 import 'package:store/store/products/filter/filtered_products_bloc_event.dart';
@@ -15,8 +18,6 @@ import 'package:store/store/products/product/product_item_wgt.dart';
 import 'package:store/store/products/product/products_bloc.dart';
 import 'package:store/store/products/product/products_bloc_event.dart';
 import 'package:store/store/structure/model.dart';
-import 'package:provider/provider.dart';
-import 'package:rxdart/rxdart.dart';
 
 class ProductsPage extends StatefulWidget {
   static const String routeName = 'productspage';
@@ -84,16 +85,16 @@ class _ProductsPageState extends State<ProductsPage>
                       child: Container(
                         color: Colors.grey[200],
                         child: _buildProductsList(
-                            state is CartLoaded ? state.products : []),
+                            state is CartLoaded ? state.cart.products : []),
                       ),
                     ),
-                    state is CartLoaded && state.products.isNotEmpty
+                    state is CartLoaded && state.cart.products.isNotEmpty
                         ? GestureDetector(
                             onTap: () {
                               Navigator.of(context)
                                   .pushNamed(CartPage.routeName);
                             },
-                            child: CartBottomBar(state.count))
+                        child: CartBottomBar(state.cart.count))
                         : Container(),
                     new Container(
                       child: isShownController.stream.value !=
@@ -138,7 +139,6 @@ class _ProductsPageState extends State<ProductsPage>
           _controller.closed.then((value) {
             setState(() {
               isShownController.add(FilterTabState.HIDDEN);
-
             });
           });
 
@@ -157,8 +157,18 @@ class _ProductsPageState extends State<ProductsPage>
     super.didChangeDependencies();
   }
 
-  AppBar _buildAppBar() {
-    return new AppBar(
+  CustomAppBar _buildAppBar() {
+    String identifier = '';
+
+    try {
+      identifier =
+          (_productsBloc.currentState as ProductsLoaded).identifier.name;
+    } catch (e, stk) {
+      print(e);
+      print(stk);
+    }
+
+    return new CustomAppBar(
       leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
@@ -167,34 +177,13 @@ class _ProductsPageState extends State<ProductsPage>
           onPressed: () {
             Navigator.of(context).pop();
           }),
-      title: new SizedBox(
-        width: double.infinity,
-        height: double.infinity,
-        child: Row(
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                child: Text(
-                  "محصولات" /*
-                  Provider.of<ProductsBloc>(context).currentIdentifier != null
-                      ? Provider.of<ProductsBloc>(context)
-                          .currentIdentifier
-                          .getName()
-                      : ""*/
-                  ,
-                  style: TextStyle(fontSize: 14),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      titleText: 'محصولات ' + identifier,
     );
   }
 
   Widget _buildProductsList(List<CartProduct> cartProducts) {
     return BlocBuilder(
-        bloc: Provider.of<FilteredProductsBloc>(context),
+        bloc: _filteredProductsBloc,
         builder: (context, FilteredProductsState state) {
           if (state is FilteredProductsLoaded) {
             if (state.filteredProducts.isEmpty) {

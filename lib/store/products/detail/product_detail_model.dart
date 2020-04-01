@@ -1,11 +1,12 @@
+import 'package:quiver/core.dart';
 import 'package:store/store/products/filter/filter.dart';
 import 'package:store/store/structure/model.dart';
-import 'package:quiver/core.dart';
 
 class DetailedProduct {
   final String id;
   final String titleFa;
   final String code;
+  final String brand;
   final String positivePoints;
   final String negativePoints;
   final String weight;
@@ -16,12 +17,12 @@ class DetailedProduct {
   final List<ProductVariant> variants;
   final StructSubCategory subCategory;
 
-  factory DetailedProduct.fromJson(
-      Map<String, dynamic> detailJson, StructSubCategory subCategory) {
+  factory DetailedProduct.fromJson(Map<String, dynamic> detailJson, StructSubCategory subCategory) {
     return DetailedProduct(
         detailJson["product_id"].toString(),
         detailJson["product_title_fa"],
         detailJson["product_code"].toString(),
+        detailJson["product_brand"].toString(),
         detailJson["product_positive_points"].toString(),
         detailJson["product_nagative_points"].toString(),
         detailJson["product_weight"].toString(),
@@ -35,11 +36,10 @@ class DetailedProduct {
         subCategory);
   }
 
-
-  DetailedProduct(
-      this.id,
+  DetailedProduct(this.id,
       this.titleFa,
       this.code,
+      this.brand,
       this.positivePoints,
       this.negativePoints,
       this.weight,
@@ -52,7 +52,7 @@ class DetailedProduct {
 
   @override
   int get hashCode {
-    return hash2(id,'detail');
+    return hash2(id, 'detail');
   }
 
   @override
@@ -61,20 +61,35 @@ class DetailedProduct {
         other is DetailedProduct &&
         other.id == this.id;
   }
+
+  DetailSeller getSellerById(int shopId) {
+    DetailSeller foundSeller;
+
+    variants.forEach((variant) {
+      variant.sellers.forEach((seller) {
+        if (seller.shopId == shopId.toString()) {
+          seller = seller;
+        }
+      });
+    });
+
+    return foundSeller;
+  }
 }
 
 class ProductVariant {
   final String id;
   final String color;
 
-  final List<SellerProduct> sellers;
+  final List<DetailSeller> sellers;
 
   factory ProductVariant.fromJson(Map<String, dynamic> variantJson) {
     return ProductVariant(
         variantJson["variant_id"].toString(),
         variantJson["product_color"],
         (variantJson["shops"] as List)
-            .map((value) => SellerProduct.fromJson(
+            .map((value) =>
+            DetailSeller.fromJson(
                 variantJson["variant_id"].toString(), value))
             .toList());
   }
@@ -82,7 +97,7 @@ class ProductVariant {
   ProductVariant(this.id, this.color, this.sellers);
 }
 
-class SellerProduct {
+class DetailSeller {
   final String shopId;
   final String variantId;
   final int saleItemId;
@@ -92,12 +107,14 @@ class SellerProduct {
   final Price salePrice;
   final String discount;
   final String guarantee;
-  final String maxOrder;
+  final int saleCount;
+  final int stockQuantity;
+
+  final int maxOrder;
   final bool available;
 
-  factory SellerProduct.fromJson(
-      String variantId, Map<String, dynamic> sellerJson) {
-    return SellerProduct(
+  factory DetailSeller.fromJson(String variantId, Map<String, dynamic> sellerJson) {
+    return DetailSeller(
         sellerJson['product_seller_id'].toString(),
         variantId,
         sellerJson["product_sale_item_id"],
@@ -107,12 +124,15 @@ class SellerProduct {
         Price(sellerJson["product_sale_price"].toString()),
         sellerJson["product_sale_discount"].toString(),
         sellerJson["product_guarantee"],
-        sellerJson["product_maximum_orderable"].toString(),
+        sellerJson["sale_count"],
+        sellerJson["stock_quantity"],
+        sellerJson["product_maximum_orderable"].toString() == 'null'
+            ? 1
+            : sellerJson["product_maximum_orderable"],
         sellerJson["product_is_exist"].toString() == "موجود" ? true : false);
   }
 
-  SellerProduct(
-      this.shopId,
+  DetailSeller(this.shopId,
       this.variantId,
       this.saleItemId,
       this.name,
@@ -121,6 +141,8 @@ class SellerProduct {
       this.salePrice,
       this.discount,
       this.guarantee,
+      this.saleCount,
+      this.stockQuantity,
       this.maxOrder,
       this.available);
 }

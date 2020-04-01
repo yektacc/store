@@ -5,24 +5,29 @@ import 'package:store/data_layer/payment/delivery/delivery_time.dart';
 
 import '../netclient.dart';
 
-class OrderRepository {
-  final Net _client;
+class SaveOrderRepository {
+  final Net _net;
 
-  OrderRepository(this._client);
+  SaveOrderRepository(this._net);
 
-  Future<bool> saveFinal(String sessionId, String orderCode) async {
-    PostResponse response = await _client.post(EndPoint.SAVE_FINAL_ORDER,
-        body: {'session_id': sessionId, 'order_code': orderCode});
+  Future<int> saveFinal(String sessionId, String orderCode,
+      int addressId) async {
+    PostResponse response = await _net.post(EndPoint.SAVE_FINAL_ORDER, body: {
+      'session_id': sessionId,
+      'order_code': orderCode,
+      'transferee_address_id': addressId.toString(),
+      'payment_method': 1
+    });
     if (response is SuccessResponse) {
-      return true;
+      return Map<String, dynamic>.from(response.data)['payment_id'];
     } else {
-      return false;
+      return -1;
     }
   }
 
   Future<bool> save(String sessionId, String orderCode, String addressId,
       int totalAmount, int shippingCost, DeliveryTime deliveryTime) async {
-    PostResponse response = await _client.post(EndPoint.SAVE_ORDER, body: {
+    PostResponse response = await _net.post(EndPoint.SAVE_ORDER, body: {
       'session_id': sessionId,
       'order_code': orderCode,
       'transferee_address_id': addressId,
@@ -30,11 +35,24 @@ class OrderRepository {
       'delivery_date': jsonEncode(deliveryTime.toJson()),
       'shipment_cost': shippingCost.toString(),
     });
-    if (response is SuccessResponse) {
-      return true;
-    } else {
-      return false;
-    }
+    return response is SuccessResponse;
+  }
+
+  Future<bool> saveTransaction(String orderId, String sellerId,
+      String deliveryCost) async {
+    var res = await _net.post(EndPoint.SAVE_TRANSACTION, body: {
+      'order_id': orderId,
+      'seller_id': sellerId,
+      'tariff_amount': deliveryCost,
+    });
+
+    return res is SuccessResponse;
+  }
+
+  Future<bool> saveFinalTransaction(int paymentId) async {
+    var res = await _net.post(EndPoint.PAYMENT_FINAL_TRANSACTION,
+        body: {'payment_id': paymentId.toString()});
+    return res is SuccessResponse;
   }
 }
 
@@ -53,43 +71,3 @@ class DeliveryTime {
     };
   }
 }
-
-/*Future<bool> setCart(
-      String sessionId, List<String> productIds, String total) async {
-    PostResponse response = await _client.post(EndPoint.SEND_SHOPPING_CART,
-        body: {
-          'session_id': sessionId,
-          "cart_items": productIds,
-          "total_amount": total
-        });
-    if (response is SuccessResponse) {
-      return true;
-    } else {
-      return false;
-    }
-  }*/
-/*  Future<bool> emptyCart(String sessionId, String orderCode) async {
-    PostResponse response =
-        await _client.post(EndPoint.EMPTY_SHOPPING_CART, body: {
-      'session_id': sessionId,
-      "order_code": orderCode,
-    });
-    if (response is SuccessResponse) {
-      return true;
-    } else {
-      return false;
-    }
-  }*/
-
-/*@JsonSerializable()
-class CartItem {
-  @JsonKey(name: 'id')
-  final int id;
-
-  CartItem(this.id);
-
-  factory CartItem.fromJson(Map<String, dynamic> json) =>
-      _$CartItemFromJson(json);
-
-  Map<String, dynamic> toJson() => _$CartItemToJson(this);
-}*/

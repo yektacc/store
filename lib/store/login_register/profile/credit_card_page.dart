@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:store/common/constants.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 
 class CreditCardPage extends StatefulWidget {
   @override
@@ -8,6 +9,8 @@ class CreditCardPage extends StatefulWidget {
 }
 
 class _CreditCardPageState extends State<CreditCardPage> {
+  bool isEditing = false;
+
   final focus1 = FocusNode();
   final focus2 = FocusNode();
   final focus3 = FocusNode();
@@ -22,14 +25,6 @@ class _CreditCardPageState extends State<CreditCardPage> {
 
   String mergedNumbers;
 
-
-  /*@override
-  void initState() {
-    SharedPreferences.getInstance().then((pref) {
-      pref.remove(prefKey);
-    });
-  }*/
-
   @override
   Widget build(BuildContext context) {
     SharedPreferences.getInstance().then((pref) {
@@ -40,16 +35,19 @@ class _CreditCardPageState extends State<CreditCardPage> {
       }
     });
 
-    if (mergedNumbers != null) {
+    if (mergedNumbers != null && !isEditing) {
       controller1.text = mergedNumbers.substring(0, 4);
       controller2.text = mergedNumbers.substring(4, 8);
       controller3.text = mergedNumbers.substring(8, 12);
       controller4.text = mergedNumbers.substring(12, 16);
+      setState(() {
+        isEditing = true;
+      });
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('کارت بانکی'),
+      appBar: CustomAppBar(
+        titleText: 'کارت بانکی',
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -91,12 +89,12 @@ class _CreditCardPageState extends State<CreditCardPage> {
                                 child: TextFormField(
                                   controller: controller1,
                                   maxLength: 4,
-                                  autofocus: true,
                                   textAlign: TextAlign.center,
                                   decoration: InputDecoration(counterText: ''),
                                   /*  onFieldSubmitted: (v) {
                                 },*/
                                   onChanged: (newText) {
+                                    isEditing = true;
                                     if (newText.length == 4) {
                                       FocusScope.of(context).requestFocus(
                                           focus1);
@@ -115,6 +113,8 @@ class _CreditCardPageState extends State<CreditCardPage> {
                                   textAlign: TextAlign.center,
                                   decoration: InputDecoration(counterText: ''),
                                   onChanged: (newText) {
+                                    isEditing = true;
+
                                     if (newText.length == 4) {
                                       FocusScope.of(context).requestFocus(
                                           focus2);
@@ -133,6 +133,8 @@ class _CreditCardPageState extends State<CreditCardPage> {
                                   textAlign: TextAlign.center,
                                   decoration: InputDecoration(counterText: ''),
                                   onChanged: (newText) {
+                                    isEditing = true;
+
                                     if (newText.length == 4) {
                                       FocusScope.of(context).requestFocus(
                                           focus3);
@@ -150,6 +152,9 @@ class _CreditCardPageState extends State<CreditCardPage> {
                                   maxLength: 4,
                                   textAlign: TextAlign.center,
                                   decoration: InputDecoration(counterText: ''),
+                                  onChanged: (text) {
+                                    isEditing = true;
+                                  },
                                 ),
                               ),
                               Padding(
@@ -192,8 +197,8 @@ class _CreditCardPageState extends State<CreditCardPage> {
               alignment: Alignment.center,
               height: 50,
               width: 100,
-              child: Text(mergedNumbers == null ?
-              "ثبت" : 'تغییر',
+              child: Text(
+                mergedNumbers == null ? "ثبت" : 'تغییر',
                 style: TextStyle(color: Colors.white),
               ),
             ),

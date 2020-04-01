@@ -26,8 +26,6 @@ class _ProductGridListState extends State<ProductGridList> {
 
   @override
   Widget build(BuildContext context) {
-    print('build running');
-
     if (loadedProducts == null) {
       loadedProducts = [];
       widget.getProducts.then((products) {

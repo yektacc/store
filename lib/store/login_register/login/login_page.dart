@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:store/app.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_bloc.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_event_state.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_page.dart';
@@ -56,14 +57,14 @@ class _LoginPageState extends State<LoginPage> {
     });*/
 
     return Scaffold(
-        appBar: AppBar(elevation: 0,),
+        appBar: CustomAppBar(titleText: 'ورود', elevation: 0,),
         body: new Container(
           child: SizedBox(
             width: double.infinity,
             height: double.infinity,
             child: new Center(
               child: new Container(
-                color: AppColors.second_color,
+                color: AppColors.main_color,
                 child: new BlocBuilder(
                   bloc: widget._bloc,
                   builder: (context, LoginState state) {
@@ -140,13 +141,13 @@ class _LoginPageState extends State<LoginPage> {
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                           border: Border.all(
-                                              color: AppColors.second_color),
+                                              color: AppColors.main_color),
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(30))),
                                       child: Text(
                                         'ورود',
                                         style: TextStyle(fontSize: 13,
-                                            color: AppColors.second_color),
+                                            color: AppColors.main_color),
                                       ),
                                     ),
                                   ),
@@ -156,7 +157,6 @@ class _LoginPageState extends State<LoginPage> {
                                 color: Colors.grey[100],
                                 child: Center(
                                   child: FlatButton(
-                                    textColor: Colors.blueGrey,
                                     onPressed: () {
                                       Provider.of<ForgetPassBloc>(context)
                                           .dispatch(ResetForgetPass());
@@ -176,7 +176,6 @@ class _LoginPageState extends State<LoginPage> {
                                 color: Colors.white,
                                 child: Center(
                                   child: FlatButton(
-                                    textColor: Colors.blueGrey,
                                     onPressed: () {
                                       Navigator.of(context).push(
                                           AppRoutes.registerPage(context));
@@ -209,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                       );
                     } else if (state is LoadingLoginAttempt) {
                       return Center(
-                        child: new Center(child: LoadingIndicator()),
+                        child: new Center(child: LightLoadingIndicator()),
                       );
                     } else if (state is LoginSuccessful) {
                       Navigator.of(context).pop();

@@ -35,6 +35,7 @@ class _MainAreaState extends State<MainArea> {
                   if (state is FavoritesLoading) {
                     return Container();
                   } else if (state is FavoritesLoaded) {
+//                    return Container(height: 20,width: 20,color: Colors.red,);
                     if (state.products.isEmpty) {
                       return Container();
                     } else {
@@ -104,7 +105,7 @@ class _MainAreaState extends State<MainArea> {
                                           children: <Widget>[
                                             Card(
                                                 elevation: 6,
-                                                color: AppColors.second_color,
+                                                color: AppColors.main_color,
                                                 shape: RoundedRectangleBorder(
                                                     borderRadius:
                                                         BorderRadius.circular(

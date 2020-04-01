@@ -28,14 +28,12 @@ class ProductDetailRepository {
           categoryJson['type_name'],
           '',
           categoryJson['basecategory_id'],
-          categoryJson['subcategory_id']);
+          categoryJson['subcategory_id'],
+          categoryJson['basecategory_name'],
+          categoryJson['subcategory_name']);
 
       DetailedProduct detail =
           DetailedProduct.fromJson(detailList.first, subCategory);
-      /*
-    DetailedProduct detail = DetailedProduct.fromJson(jsonBody);
-*/
-
       return detail;
     }
   }
@@ -54,7 +52,7 @@ class ProductDetailRepository {
     }
   }
 
-  Future<SellerProduct> getSeller(
+  Future<DetailSeller> getSeller(
     int id,
     int variantId,
     int sellerId,
@@ -72,7 +70,7 @@ class ProductDetailRepository {
       {String variantId, String sellerId}) async {
     DetailedProduct detail = await load(id);
     ProductVariant variant;
-    SellerProduct seller;
+    DetailSeller seller;
 
     if (variantId != null) {
       variant =

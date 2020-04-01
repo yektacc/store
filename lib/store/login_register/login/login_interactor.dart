@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:get_ip/get_ip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:store/data_layer/netclient.dart';
 import 'package:store/store/login_register/login/user.dart';
@@ -41,8 +40,14 @@ class LoginRepository {
     }
   }
 
+  Future<String> _getIp() async {
+    var ip = await net.get(EndPoint.GET_IP);
+    return ip;
+  }
+  
   Future<LoginResponse> attemptLogin(String phoneNo, String password) async {
-    var ip = await GetIp.ipAddress;
+    var ip = await _getIp();
+    
     var response = await net.post(EndPoint.LOG_IN,
         body: {'mobile_number': phoneNo, 'password': password, 'client_ip': ip},
         cacheEnabled: false);

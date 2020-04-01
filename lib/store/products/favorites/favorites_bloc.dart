@@ -4,20 +4,21 @@ import 'package:bloc/bloc.dart';
 import 'package:store/store/login_register/login/user.dart';
 import 'package:store/store/login_register/login_status/login_status_bloc.dart';
 import 'package:store/store/login_register/login_status/login_status_event_state.dart';
-import 'package:store/store/products/detail/product_detail_repository.dart';
+import 'package:store/store/products/product/products_repository.dart';
 
 import 'favorite_event_state.dart';
 import 'favorite_repository.dart';
+import 'model.dart';
 
 class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
   final LoginStatusBloc _loginStatusBloc;
-  final ProductDetailRepository _detailRepo;
+  final ProductsRepository _productsRepo;
   final FavoriteRepository _favoritesRepo;
 
   StreamSubscription _streamSubscription;
   User user;
 
-  FavoriteBloc(this._loginStatusBloc, this._favoritesRepo, this._detailRepo) {
+  FavoriteBloc(this._loginStatusBloc, this._favoritesRepo, this._productsRepo) {
     _streamSubscription = _loginStatusBloc.state.listen((state) {
       if (state is IsLoggedIn) {
         user = state.user;
@@ -32,6 +33,7 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
   @override
   void onError(Object error, StackTrace stacktrace) {
     print("ERROR FAVORITES" + error.toString());
+    print(stacktrace);
   }
 
   @override
@@ -42,37 +44,46 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
     if (event is FetchFavorites) {
       yield FavoritesLoading();
       if (user != null) {
-        var detailProducts = await _favoritesRepo.getAll(user.sessionId);
-        var products =
-            await _detailRepo.getProductListFromDetailList(detailProducts);
-        yield (FavoritesLoaded(detailProducts, products));
+        var products = await _loadProductsByAppUser(user.appUserId);
+        yield (FavoritesLoaded(products));
       } else {
         yield NotAvailable();
       }
     } else if (event is AddFavorite) {
       yield FavoritesLoading();
       if (user != null) {
-        print('alsdjfl' + event.favoriteProduct.id.toString());
-        await _favoritesRepo.add(event.favoriteProduct, user.sessionId);
-        var detailProducts = await _favoritesRepo.getAll(user.sessionId);
-        var products =
-            await _detailRepo.getProductListFromDetailList(detailProducts);
-        yield (FavoritesLoaded(detailProducts, products));
+        await _favoritesRepo.add(event.detailProduct, user.appUserId);
+        var products = await _loadProductsByAppUser(user.appUserId);
+        yield (FavoritesLoaded(products));
       } else {
         yield NotAvailable();
       }
     } else if (event is RemoveFavorite) {
       yield FavoritesLoading();
       if (user != null) {
-        await _favoritesRepo.remove(event.productId, user.sessionId);
-        var detailProducts = await _favoritesRepo.getAll(user.sessionId);
-        var products =
-            await _detailRepo.getProductListFromDetailList(detailProducts);
-        yield (FavoritesLoaded(detailProducts, products));
+        await _favoritesRepo.remove(event.favoriteID, user.appUserId);
+        var products = await _loadProductsByAppUser(user.appUserId);
+        yield (FavoritesLoaded(products));
       } else {
         yield NotAvailable();
       }
     }
+  }
+
+  Future<List<FavoriteProduct>> _loadProductsByAppUser(int appUserId) async {
+    return await _loadProductsByIdentifier(
+        await _favoritesRepo.getAll(user.appUserId));
+  }
+
+  Future<List<FavoriteProduct>> _loadProductsByIdentifier(
+      List<FavoriteIdentifier> identifiers) async {
+    var mappedList = identifiers.map((identifier) async {
+      var product = await _productsRepo.loadById(identifier.productId);
+      return FavoriteProduct(product, identifier);
+    }).toList();
+
+    List<FavoriteProduct> list = await Future.wait(mappedList);
+    return list;
   }
 
   @override

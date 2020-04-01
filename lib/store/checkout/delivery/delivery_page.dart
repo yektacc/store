@@ -1,34 +1,31 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:persian_datepicker/persian_datetime.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
-import 'package:store/data_layer/centers/centers_repository.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/data_layer/order/save_order_repository.dart';
 import 'package:store/data_layer/payment/delivery/delivery_price_repository.dart';
 import 'package:store/data_layer/payment/delivery/delivery_time.dart';
-import 'package:store/services/centers/centers_bloc.dart';
-import 'package:store/services/centers/model.dart';
-import 'package:store/store/location/address/model.dart';
-import 'package:store/store/location/provinces/model.dart';
-import 'package:store/store/products/cart/cart_bloc.dart';
-import 'package:store/store/products/cart/cart_bloc_event.dart';
-import 'package:store/store/products/cart/cart_product.dart';
-import 'package:store/store/products/detail/product_detail_model.dart';
-import 'package:store/store/products/detail/product_detail_repository.dart';
+import 'package:store/store/checkout/checkout_event_state.dart';
+import 'package:store/store/products/cart/model.dart';
 import 'package:store/store/products/filter/filter.dart';
 
-import '../payment_page.dart';
+import '../checkout_bloc.dart';
+import '../payment/payment_page.dart';
 
 class DeliveryPage extends StatefulWidget {
-  final String orderCode;
-  final Address _address;
-  final String sessionId;
+  static const String routeName = 'deliverypage';
 
-  DeliveryPage(this._address, this.orderCode, this.sessionId);
+  /* final String orderCode;
+  final Address _address;
+  final String sessionId;*/
+
+  DeliveryPage(/*this._address, this.orderCode, this.sessionId*/);
 
   @override
   _DeliveryPageState createState() => _DeliveryPageState();
@@ -38,26 +35,30 @@ class _DeliveryPageState extends State<DeliveryPage> {
   var selectedDayOfMonth = BehaviorSubject<List<DayOfMonth>>.seeded([]);
   var selectedHourFrom = BehaviorSubject.seeded(-1);
   var selectedHourTo = BehaviorSubject<int>.seeded(-1);
+  StreamSubscription checkoutSub;
 
   @override
   void dispose() {
     selectedDayOfMonth.close();
     selectedHourFrom.close();
     selectedHourTo.close();
+    checkoutSub.cancel();
     super.dispose();
   }
 
-  CartBloc _cartBloc;
-  ProductDetailRepository _detailRepo;
-  CentersBloc _centersBloc;
+//  CartBloc _cartBloc;
+//  ProductDetailRepository _detailRepo;
+//  CentersBloc _centersBloc;
+  CheckoutBloc _checkoutBloc;
 
-  BehaviorSubject<Price> totalPrice = BehaviorSubject();
+//  BehaviorSubject<Price> totalPrice = BehaviorSubject();
 
   @override
   Widget build(BuildContext context) {
-    if (_cartBloc == null) {
+    /* if (_cartBloc == null) {
       _cartBloc = Provider.of<CartBloc>(context);
-    }
+    }*/
+/*
 
     if (_detailRepo == null) {
       _detailRepo = Provider.of<ProductDetailRepository>(context);
@@ -66,40 +67,46 @@ class _DeliveryPageState extends State<DeliveryPage> {
     if (_centersBloc == null) {
       _centersBloc = Provider.of<CentersBloc>(context);
     }
+*/
 
-    _cartBloc.dispatch(FetchCart());
+    _checkoutBloc ??= Provider.of<CheckoutBloc>(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.grey[200],
-        leading: IconButton(
-          onPressed: () {
-            SchedulerBinding.instance.addPostFrameCallback((_) {
-              Navigator.of(context).pop();
-            });
-          },
-          icon: Icon(
-            Icons.arrow_back,
-            color: AppColors.main_color,
-          ),
-        ),
-        title: Text(
-          "ارسال",
-          style: TextStyle(color: AppColors.main_color),
-        ),
-      ),
-      body: new BlocBuilder(
-        bloc: _cartBloc,
-        builder: (context, CartState state) {
-          if (state is CartLoading) {
-            return LoadingIndicator();
-          } else if (state is CartLoaded) {
-            return Column(
+//    _cartBloc.dispatch(FetchCart());
+
+    return BlocBuilder<CheckoutBloc, CheckoutState>(
+      bloc: _checkoutBloc,
+      builder: (context, checkoutState) {
+        print('new state: ' + checkoutState.toString());
+        if (checkoutState is OrderWithDeliveryInf) {
+          return Scaffold(
+            appBar: CustomAppBar(
+              light: true,
+              leading: IconButton(
+                onPressed: () {
+                  SchedulerBinding.instance.addPostFrameCallback((_) {
+                    Navigator.of(context).pop();
+                  });
+                },
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: AppColors.main_color,
+                ),
+              ),
+              title: Text(
+                "ارسال",
+                style: TextStyle(color: AppColors.main_color),
+              ),
+            ),
+            body: Column(
               children: <Widget>[
                 Expanded(
                   child: StreamBuilder<Widget>(
-                      stream: _buildDeliveryItemWgts(state.products, context),
+                      stream: _buildDeliveryItemWgts(
+                          checkoutState.cart.products,
+                          context,
+                          checkoutState.deliveryInfo.items),
                       builder: (context, snapshot) {
+                        print('VERY ITEMS TO WIDGET  $snapshot');
                         if (snapshot != null && snapshot.data != null) {
                           return snapshot.data;
                         } else {
@@ -117,83 +124,51 @@ class _DeliveryPageState extends State<DeliveryPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      StreamBuilder(
-                        stream: totalPrice,
-                        builder: (context, AsyncSnapshot<Price> snapshot) {
-                          if (snapshot.data != null) {
-                            return Text(
-                              "مجموع هزینه حمل: ${snapshot.data.formatted()}",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.main_color),
-                            );
-                          } else {
-                            return Container();
-                          }
-                        },
+                      Text(
+                        "مجموع هزینه حمل: ${checkoutState.deliveryInfo
+                            .totalPrice.formatted()}",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.main_color),
                       )
                     ],
                   ),
                 ),
                 new GestureDetector(
                   onTap: () {
-                    var persianDateTime = PersianDateTime();
-
-                    var day1 = persianDateTime.add(Duration(days: 1));
-                    var day2 = persianDateTime.add(Duration(days: 2));
-                    var day3 = persianDateTime.add(Duration(days: 3));
-                    var day4 = persianDateTime.add(Duration(days: 4));
-                    var day5 = persianDateTime.add(Duration(days: 5));
-                    var day6 = persianDateTime.add(Duration(days: 6));
-                    var day7 = persianDateTime.add(Duration(days: 7));
-
                     showModalBottomSheet(
                         context: context,
                         builder: (context) {
-                          return DeliveryTimePicker([
-                            DayOfMonth(day1.jalaaliDay, day1.jalaaliMonth,
-                                day1.jalaaliMonthName),
-                            DayOfMonth(day2.jalaaliDay, day2.jalaaliMonth,
-                                day2.jalaaliMonthName),
-                            DayOfMonth(day3.jalaaliDay, day3.jalaaliMonth,
-                                day3.jalaaliMonthName),
-                            DayOfMonth(day4.jalaaliDay, day4.jalaaliMonth,
-                                day4.jalaaliMonthName),
-                            DayOfMonth(day5.jalaaliDay, day5.jalaaliMonth,
-                                day5.jalaaliMonthName),
-                            DayOfMonth(day6.jalaaliDay, day6.jalaaliMonth,
-                                day6.jalaaliMonthName),
-                            DayOfMonth(day7.jalaaliDay, day7.jalaaliMonth,
-                                day7.jalaaliMonthName),
-                          ], selectedDayOfMonth, selectedHourFrom,
-                              selectedHourTo, () async {
-                            DeliveryTime deliveryTime = DeliveryTime(
-                                selectedDayOfMonth.value,
-                                selectedHourFrom.value,
-                                selectedHourTo.value);
+                          return DeliveryTimePicker(selectedDayOfMonth,
+                              selectedHourFrom, selectedHourTo, () async {
+                                DeliveryTime deliveryTime = DeliveryTime(
+                                    selectedDayOfMonth.value,
+                                    selectedHourFrom.value,
+                                    selectedHourTo.value);
 
-                            var res =
-                                await Provider.of<OrderRepository>(context)
-                                    .save(
-                                        widget.sessionId,
-                                        widget.orderCode,
-                                        widget._address.id.toString(),
-                                        Provider.of<CartBloc>(context)
-                                            .getTotal(),
-                                        totalPrice.stream.value.amount,
-                                        deliveryTime);
+                                _checkoutBloc.dispatch(
+                                    SubmitDelivery(deliveryTime));
 
-                            if (totalPrice.value != null && res) {
-                              Navigator.of(context).push(MaterialPageRoute(
+                                checkoutSub ??=
+                                    _checkoutBloc.state.listen((state) {
+                                      print('new state:' + state.toString());
+                                      if (state is OrderPayment) {
+                                        Navigator.of(context).pushNamed(
+                                            PaymentPage.routeName);
+                                      }
+                                    });
+
+                                /* if (totalPrice.value != null && res) {
+                             */ /* Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) => PaymentPage(
                                       widget._address,
                                       totalPrice.value,
                                       widget.orderCode,
-                                      widget.sessionId)));
+                                      widget.sessionId)));*/ /*
                             } else {
                               Helpers.errorToast();
-                            }
-                          });
+                            }*/
+                              });
                         });
                   },
                   child: Hero(
@@ -201,18 +176,16 @@ class _DeliveryPageState extends State<DeliveryPage> {
                       child: PickDeliveryDateBottomBar(true)),
                 )
               ],
-            );
-          } else {
-            return Container(
-              child: Text('err'),
-            );
-          }
-        },
-      ),
+            ),
+          );
+        } else {
+          return Container();
+        }
+      },
     );
   }
 
-  List getCityProvinceByShopId(int shopId, List<CenterItem> shops) {
+  /*List getCityProvinceByShopId(int shopId, List<CenterItem> shops) {
     print('shops: ${shops.map((s) => s.id).toList().toString()}');
     print('shopId: $shopId');
 
@@ -227,114 +200,6 @@ class _DeliveryPageState extends State<DeliveryPage> {
     }
   }
 
-  Stream<Widget> _buildDeliveryItemWgts(
-      List<CartProduct> products, BuildContext context) async* {
-    List<DeliveryItem> deliveryItems = [];
-
-/*
-    List<WeightProduct> weightProducts = [];
-*/
-
-/*
-    categorizedById.forEach((id, sameIdProducts) async* {
-      await for (final snapshot in getProductsWeighted(id, sameIdProducts)) {
-        deliveryItems.
-      }
-    })*/
-
-/*    CentersBloc centersBloc = Provider.of<CentersBloc>(context);
-
-    */
-
-/*    getWeightedProducts(products)
-        .then((weighted) {
-      print("@#DSSSSSSSAAAAAAAAAAAA" + weighted[0].weight.toString());
-    });*/
-
-    List<WeightProduct> weightedProducts = await getWeightedProducts(products);
-
-    print('weighted products: ' + weightedProducts.toString());
-
-/*
-    _centersBloc.dispatch(FetchCenters(CenterFetchType.STORE));
-*/
-
-    var _centersRepo = Provider.of<CentersRepository>(context);
-
-    var stores =
-    await _centersRepo.getCenters(CenterFilter(CenterFetchType.STORE));
-
-    if (deliveryItems.isEmpty) {
-      if (stores != null) {
-        if (stores.isNotEmpty && stores[0].typeId == 4) {
-          List<CenterItem> shops = stores;
-
-          City tmpCity;
-
-          /*   weightedProducts.forEach((product) {
-              tmpCity = getCityProvinceByShopId(
-                  int.parse(product.product.storeThumbnail.id), shops)[0];
-
-              Province province = getCityProvinceByShopId(
-                  int.parse(product.product.storeThumbnail.id), shops)[1];
-
-              if (deliveryItems.map((di) => di.city).contains(tmpCity)) {
-                deliveryItems
-                    .firstWhere((di) => di.city == tmpCity)
-                    .products
-                    .add(product);
-              } else {
-                deliveryItems.add(DeliveryItem(tmpCity, province, [product]));
-              }
-            });*/
-
-          int tmpShopId;
-
-          weightedProducts.forEach((product) {
-            tmpCity = getCityProvinceByShopId(
-                int.parse(product.product.storeThumbnail.id), shops)[0];
-
-            Province province = getCityProvinceByShopId(
-                int.parse(product.product.storeThumbnail.id), shops)[1];
-
-            if (deliveryItems
-                .map((di) => di.sellerId)
-                .contains(int.parse(product.product.storeThumbnail.id))) {
-              var availableDi = deliveryItems
-                  .firstWhere((DeliveryItem di) =>
-              di.sellerId ==
-                  int.parse(product.product.storeThumbnail.id))
-                  .products
-                  .add(product);
-            } else {
-              deliveryItems.add(DeliveryItem(tmpCity, province, [product],
-                  int.parse(product.product.storeThumbnail.id)));
-            }
-          });
-
-          totalPrice.add(await getTotalPrice(deliveryItems));
-
-          yield ListView(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(top: 12),
-              ) as Widget
-            ] +
-                deliveryItems.map((di) => DeliveryItemWgt(di)).toList(),
-          );
-        }
-      } else {
-        yield Center(
-          child: LoadingIndicator(),
-        );
-      }
-    }
-
-    /* await for (final state in _centersBloc.state) {
-
-    }*/
-  }
-
   Future<List<WeightProduct>> getWeightedProducts(
       List<CartProduct> allCartProducts) async {
     print("all cart products in weightproducts function: " +
@@ -347,28 +212,6 @@ class _DeliveryPageState extends State<DeliveryPage> {
     List<WeightProduct> list = await Future.wait(mappedList);
 
     return list;
-
-    /* Map<String, List<CartProduct>> categorizedById = HashMap();
-
-    List<WeightProduct> allWeighted = [];
-
-    allCartProducts.forEach((cartProduct) {
-      var id = cartProduct.product.id;
-      if (categorizedById.containsKey(id)) {
-        categorizedById[id].add(cartProduct);
-      } else {
-        categorizedById.putIfAbsent(
-            cartProduct.product.id, () => [cartProduct]);
-      }
-    });
-
-    categorizedById.forEach((id, products) {
-      getProductsWeighted(id, products).listen((weighted) {
-        allWeighted.addAll(weighted);
-          return allWeighted;
-
-      });
-    });*/
   }
 
   Future<Price> getTotalPrice(List<DeliveryItem> items) async {
@@ -393,47 +236,75 @@ class _DeliveryPageState extends State<DeliveryPage> {
     var detail = await _detailRepo.load(cartProduct.product.id);
     return WeightProduct(cartProduct, double.parse(detail.weight),
         detail.unit == 'کیلوگرم' ? 1 : 0);
+  }*/
+
+  Stream<Widget> _buildDeliveryItemWgts(List<CartProduct> products,
+      BuildContext context, List<DeliveryItem> deliveryItems) async* {
+    yield ListView(
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(top: 12),
+        )
+      ] +
+          deliveryItems.map((di) => DeliveryItemWgt(di)).toList(),
+    );
+//    List<DeliveryItem> deliveryItems = [];
+
+    /*  List<WeightProduct> weightedProducts = await getWeightedProducts(products);
+
+    print('weighted products: ' + weightedProducts.toString());
+
+    var _centersRepo = Provider.of<CentersRepository>(context);
+
+    var stores =
+        await _centersRepo.getCenters(CenterFilter(CenterFetchType.STORE));*/
+
+    /*if (deliveryItems.isEmpty) {
+      if (stores != null) {
+        if (stores.isNotEmpty && stores[0].typeId == 4) {
+          List<CenterItem> shops = stores;
+
+          City tmpCity;
+
+          int tmpShopId;
+
+          weightedProducts.forEach((product) {
+            tmpCity = getCityProvinceByShopId(
+                int.parse(product.product.storeThumbnail.id), shops)[0];
+
+            Province province = getCityProvinceByShopId(
+                int.parse(product.product.storeThumbnail.id), shops)[1];
+
+            if (deliveryItems
+                .map((di) => di.sellerId)
+                .contains(int.parse(product.product.storeThumbnail.id))) {
+              var availableDi = deliveryItems
+                  .firstWhere((DeliveryItem di) =>
+                      di.sellerId ==
+                      int.parse(product.product.storeThumbnail.id))
+                  .products
+                  .add(product);
+            } else {
+              deliveryItems.add(DeliveryItem(tmpCity, province, [product],
+                  int.parse(product.product.storeThumbnail.id)));
+            }
+          });
+
+          totalPrice.add(await getTotalPrice(deliveryItems));
+
+         
+        }
+      } else {
+        yield Center(
+          child: LoadingIndicator(),
+        );
+      }*/
   }
-}
 
-class WeightProduct extends CartProduct {
-  final int unit;
-  final double weight;
-  final String unitName;
+/* await for (final state in _centersBloc.state) {
 
-  WeightProduct(CartProduct cartProduct, this.weight, this.unit)
-      : this.unitName = unit == 1 ? 'کیلوگرم' : 'گرم',
-        super(cartProduct.product, cartProduct.count);
-}
-
-class DeliveryItem {
-  final City city;
-  final Province province;
-  final List<WeightProduct> products;
-  final int sellerId;
-
-  bool matchCity(City city) {
-    return city.id == this.city.id;
-  }
-
-  double _getTotalWeight() {
-    double total = products.fold(
-        0.0,
-        (pr, wp) =>
-            pr + (wp.unit == 1 ? wp.weight : wp.weight / 1000) * wp.count);
-
-    return total;
-  }
-
-  String getTotalWeightString() {
-    var grams = _getTotalWeight() * 1000;
-
-    return grams % 1000 == 0
-        ? _getTotalWeight().toInt().toString() + ' کیلوگرم '
-        : (_getTotalWeight() * 1000).round().toString() + ' گرم ';
-  }
-
-  DeliveryItem(this.city, this.province, this.products, this.sellerId);
+    }
+  }*/
 }
 
 class DeliveryItemWgt extends StatefulWidget {
@@ -495,7 +366,7 @@ class _DeliveryItemWgtState extends State<DeliveryItemWgt> {
                         Container(
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20),
-                                color: AppColors.second_color),
+                                color: AppColors.main_color),
                             padding: EdgeInsets.symmetric(horizontal: 13),
                             margin: EdgeInsets.symmetric(
                                 vertical: 6, horizontal: 10),
@@ -529,18 +400,18 @@ class _DeliveryItemWgtState extends State<DeliveryItemWgt> {
               children: <Widget>[
                 Container(
                     child: Container(
-                  padding: EdgeInsets.only(left: 2, top: 2, bottom: 2),
-                  child: Column(
-                    children: [
+                      padding: EdgeInsets.only(left: 2, top: 2, bottom: 2),
+                      child: Column(
+                        children: [
                           Padding(
                             padding: EdgeInsets.only(top: 10),
                           ) as Widget
                         ] +
-                        widget.deliveryItem.products
-                            .map((p) => _buildProductItem(p))
-                            .toList(),
-                  ),
-                )),
+                            widget.deliveryItem.products
+                                .map((p) => _buildProductItem(p))
+                                .toList(),
+                      ),
+                    )),
                 Container(
                   height: 70,
                   child: Center(
@@ -571,12 +442,11 @@ class _DeliveryItemWgtState extends State<DeliveryItemWgt> {
                                 ),
                                 FutureBuilder(
                                   future: Provider.of<DeliveryPriceRepository>(
-                                          context)
+                                      context)
                                       .getPrice(
-                                          widget.deliveryItem.city,
-                                          widget.deliveryItem.province,
-                                          widget.deliveryItem
-                                              ._getTotalWeight()),
+                                      widget.deliveryItem.city,
+                                      widget.deliveryItem.province,
+                                      widget.deliveryItem.getTotalWeight()),
                                   builder:
                                       (context, AsyncSnapshot<int> snapshot) {
                                     print("sdddddddddsss" +

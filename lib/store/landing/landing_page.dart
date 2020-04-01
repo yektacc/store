@@ -12,8 +12,8 @@ import 'package:store/store/login_register/login/login_bloc.dart';
 import 'package:store/store/login_register/login/login_event_state.dart';
 import 'package:store/store/login_register/login_status/login_status_bloc.dart';
 import 'package:store/store/login_register/login_status/login_status_event_state.dart';
-import 'package:store/store/management/management_bloc.dart';
-import 'package:store/store/management/management_event_state.dart';
+import 'package:store/store/management/management_login_bloc.dart';
+import 'package:store/store/management/management_login_event_state.dart';
 
 class LandingPage extends StatefulWidget {
   @override
@@ -23,7 +23,7 @@ class LandingPage extends StatefulWidget {
 class _LandingPageState extends State<LandingPage> {
   LoginBloc _loginBloc;
   LoginStatusBloc _loginStatusBloc;
-  ManagementBloc _managementBloc;
+  ManagerLoginBloc _managerLoginBloc;
   LandingBloc _landingBloc;
 
   @override
@@ -34,8 +34,8 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_managementBloc == null) {
-      _managementBloc = Provider.of<ManagementBloc>(context);
+    if (_managerLoginBloc == null) {
+      _managerLoginBloc = Provider.of<ManagerLoginBloc>(context);
     }
 
     if (_loginStatusBloc == null) {
@@ -89,7 +89,7 @@ class _LandingPageState extends State<LandingPage> {
                   }
 
                   print('attempting running it');
-                  Provider.of<ManagementBloc>(context)
+                  Provider.of<ManagerLoginBloc>(context)
                       .dispatch(InitiateManagerLogin());
 
                   return Column(
@@ -441,8 +441,17 @@ class _LandingPageState extends State<LandingPage> {
                       ),
                     ],
                   );
-                }
-                else {
+                } else if (state is InitialLoading) {
+                  return Container(
+                      height: double.infinity,
+                      width: double.infinity,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage('assets/logo.png'))),
+                      ));
+                } else {
+                  print('the state is: $state');
                   return Container(
                     color: Colors.red,
                     child: Center(
@@ -506,9 +515,9 @@ class _LandingPageState extends State<LandingPage> {
     var inboxMng = Provider.of<InboxManager>(context);
     var net = Provider.of<Net>(context);
 
-    if (_managementBloc.user != null && inboxMng.managerInbox == null) {
+    if (_managerLoginBloc.user != null && inboxMng.managerInbox == null) {
       inboxMng.managerInbox = InboxBloc(
-          ChatRepository(net, CenterChatUser(_managementBloc.srvCenterId)));
+          ChatRepository(net, CenterChatUser(_managerLoginBloc.srvCenterId)));
     }
 
     if (inboxMng.)

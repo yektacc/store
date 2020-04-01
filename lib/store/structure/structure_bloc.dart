@@ -29,16 +29,16 @@ class StructureBloc extends Bloc<StructureEvent, StructureState> {
     if (event is FetchStructure) {
       try {
         yield LoadingStructure();
-        await for (final snapshot in _repository.fetch()) {
-          if (snapshot.isNotEmpty) {
-            yield LoadedStructure(snapshot);
-          } else {
-            yield FailureStructure();
-            Nik.e("failed: structure response from repository is empty");
-          }
+        var snapshot = await _repository.fetchAsync();
+        if (snapshot.isNotEmpty) {
+          yield LoadedStructure(snapshot);
+        } else {
+          yield FailureStructure();
+          Nik.e("failed: structure response from repository is empty");
         }
-      } catch (e) {
+      } catch (e, stacktrace) {
         print("STRUCTURE_BLOC: failure: " + e.toString());
+        print(stacktrace);
         yield FailureStructure();
       }
     }

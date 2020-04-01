@@ -1,5 +1,4 @@
 import 'dart:collection';
-
 import 'package:store/store/products/product/products_repository.dart';
 import 'package:store/store/structure/model.dart';
 import 'package:store/store/structure/structure_bloc.dart';
@@ -14,12 +13,12 @@ class ProductsCountRepository {
   ProductsCountRepository(this._productsRepository, this._structureBloc) {
     _structureBloc.dispatch(FetchStructure());
 
-    _structureBloc.state.listen((state) {
+    /* _structureBloc.state.listen((state) {
       if (state is LoadedStructure) {
         state.pets.forEach((petStruct) => petStruct.categories
             .forEach((catStruct) => getCount(catStruct).listen((_) {})));
       }
-    });
+    });*/
   }
 
   Stream<int> getCount(Identifier _identifier) async* {

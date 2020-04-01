@@ -50,8 +50,14 @@ class ProductsRepository {
             pr.variantId,
             pr.nameFA,
             StoreThumbnail(pr.shopId, pr.shopName),
-            StructSubCategory(num.parse(pr.catId), "err", "err",
-                num.parse(pr.petId), num.parse(pr.catId)),
+            StructSubCategory(
+                pr.catId,
+                pr.subCatName,
+                "",
+                pr.petId,
+                pr.catId,
+                pr.petName,
+                pr.catName),
             imgUrl: AppUrls.image_url + pr.img,
             price: Price(pr.salePrice),
             brand: pr.brand);
@@ -116,6 +122,35 @@ class ProductsRepository {
     yield ProductRes(result);*/
   }
 
+  Future<Product> loadById(int productId) async {
+    var res =
+    await _net.post(EndPoint.GET_PRODUCTS, body: {'product_id': productId});
+
+    if (res is SuccessResponse) {
+      var jsonEntity = ProductJsonEntity.fromJson(
+          List<Map<String, dynamic>>.from(res.data)[0]);
+
+      return Product(
+          jsonEntity.id,
+          jsonEntity.variantId,
+          jsonEntity.nameFA,
+          StoreThumbnail(jsonEntity.shopId, jsonEntity.shopName),
+          StructSubCategory(
+              jsonEntity.catId,
+              jsonEntity.subCatName,
+              "",
+              jsonEntity.petId,
+              jsonEntity.catId,
+              jsonEntity.petName,
+              jsonEntity.catName),
+          imgUrl: AppUrls.image_url + jsonEntity.img,
+          price: Price(jsonEntity.salePrice),
+          brand: jsonEntity.brand);
+    } else {
+      return null;
+    }
+  }
+
   Future<List<Product>> fetchPopular(Identifier identifier) async {
     return [];
   }
@@ -134,29 +169,37 @@ class ProductJsonEntity {
   final bool exists;
   final String shopId;
   final String shopName;
-  final String petId;
-  final String catId;
-  final String subCatId;
+  final int petId;
+  final int catId;
+  final int subCatId;
+  final String petName;
+  final String catName;
+  final String subCatName;
+
   final String brand;
 
   factory ProductJsonEntity.fromJson(Map<String, dynamic> productJson) {
     return ProductJsonEntity(
-        productJson["product_id"].toString(),
-        productJson["product_title_fa"],
-        productJson["product_title_en"],
-        productJson["product_code"].toString(),
-        productJson["product_image"],
-        productJson["product_score"].toString(),
-        productJson["main_price"].toString(),
-        productJson["sale_price"].toString(),
-        productJson['is_exist'] == 1 ? true : false,
-        productJson["center_name"],
-        productJson["seller_center_id"].toString(),
-        productJson["basecategory_id"].toString(),
-        productJson["subcategory_id"].toString(),
-        productJson["product_type_id"].toString(),
-        productJson["product_brand"],
-        productJson['variant_id'].toString());
+      productJson["product_id"].toString(),
+      productJson["product_title_fa"],
+      productJson["product_title_en"],
+      productJson["product_code"].toString(),
+      productJson["product_image"],
+      productJson["product_score"].toString(),
+      productJson["main_price"].toString(),
+      productJson["sale_price"].toString(),
+      productJson['is_exist'] == 1 ? true : false,
+      productJson["center_name"],
+      productJson["seller_center_id"].toString(),
+      productJson["basecategory_id"],
+      productJson["subcategory_id"],
+      productJson["product_type_id"],
+      productJson["product_brand"],
+      productJson['variant_id'].toString(),
+      productJson['basecategory_name'].toString(),
+      productJson['subcategory_name'].toString(),
+      productJson['product_type_name'].toString(),
+    );
   }
 
   ProductJsonEntity(
@@ -176,5 +219,8 @@ class ProductJsonEntity {
     this.subCatId,
     this.brand,
     this.variantId,
+      this.petName,
+      this.catName,
+      this.subCatName,
   );
 }

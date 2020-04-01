@@ -3,9 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:persian_datepicker/persian_datetime.dart';
 import 'package:provider/provider.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:store/common/constants.dart';
-import 'package:store/data_layer/province/province_repository.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/services/lost_pets/lost_pets_event_state.dart';
 import 'package:store/store/location/provinces/model.dart';
 
@@ -56,17 +55,15 @@ class _LostPetsPageState extends State<LostPetsPage> {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.second_color,
+        backgroundColor: AppColors.main_color,
         onPressed: () {
           _openFilterBar(context);
         },
         child: Icon(Icons.filter_list),
       ),
-      appBar: AppBar(
-        title: Text(
-          name,
-          style: TextStyle(fontSize: 16),
-        ),
+      appBar: CustomAppBar(
+        titleText: name,
+        light: true,
         actions: <Widget>[
           Card(
             shape:
@@ -78,6 +75,7 @@ class _LostPetsPageState extends State<LostPetsPage> {
                     icon: Icon(
                       Icons.description,
                       size: 22,
+                      color: Colors.white,
                     ),
                     onPressed: () {
                       Navigator.push(
@@ -291,167 +289,6 @@ class _FilterLostAndFoundState extends State<FilterLostAndFound> {
   }
 }
 
-class ProvinceCitySelectionRow extends StatefulWidget {
-  final Function(Province, City) onChange;
-  BehaviorSubject<bool> required = BehaviorSubject.seeded(false);
-  bool validate;
-  City initialCity;
-  Province initialProvince;
-
-  ProvinceCitySelectionRow(this.onChange,
-      {this.initialCity,
-        this.initialProvince,
-        this.validate = false,
-        this.required}) {
-    assert(!validate || required != null);
-  }
-
-  @override
-  _ProvinceCitySelectionRowState createState() =>
-      _ProvinceCitySelectionRowState();
-}
-
-class _ProvinceCitySelectionRowState extends State<ProvinceCitySelectionRow> {
-  Province currentProvince;
-  City currentCity;
-
-  @override
-  Widget build(BuildContext context) {
-    var showError = false;
-
-    return StreamBuilder<bool>(
-      stream: widget.required,
-      builder: (context, snapshot) {
-        showError = snapshot.data != null &&
-            snapshot.data &&
-            currentProvince == null &&
-            currentCity == null;
-
-        return Column(
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                new Expanded(
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(5),
-                        ),
-                        border: Border.all(color: Colors.grey[300])),
-                    height: 60,
-                    alignment: Alignment.center,
-                    margin: EdgeInsets.symmetric(horizontal: 4),
-                    child: DropdownButton<Province>(
-                      iconEnabledColor: Colors.red,
-                      itemHeight: 60,
-                      underline: Container(),
-                      isExpanded: true,
-                      hint: Text("استان"),
-                      value: currentProvince == null &&
-                          widget.initialProvince != null
-                          ? widget.initialProvince
-                          : currentProvince,
-                      elevation: 16,
-                      style: TextStyle(color: Colors.grey[900], fontSize: 14),
-                      onChanged: (Province newValue) {
-                        setState(() {
-                          currentProvince = newValue;
-                          currentCity = null;
-
-                          widget.initialProvince = null;
-                          widget.initialCity = null;
-                          widget.onChange(currentProvince, currentCity);
-                        });
-                      },
-                      items: (Provider.of<ProvinceRepository>(context).getAll())
-                          .map<DropdownMenuItem<Province>>((Province value) {
-                        return DropdownMenuItem<Province>(
-                          value: value,
-                          child: Text(value == null ? "استان" : value.name),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
-                new Expanded(
-                  child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(5),
-                          ),
-                          border: Border.all(color: Colors.grey[300])),
-                      height: 60,
-                      alignment: Alignment.center,
-                      margin: EdgeInsets.only(right: 12),
-                      child: new DropdownButton<City>(
-                        iconEnabledColor: Colors.red,
-                        itemHeight: 60,
-                        underline: Container(),
-                        icon: Icon(Icons.location_city),
-                        isExpanded: true,
-                        hint: Text("شهر"),
-                        value: currentCity == null && widget.initialCity != null
-                            ? widget.initialCity
-                            : currentCity,
-                        elevation: 16,
-                        style: TextStyle(color: Colors.grey[900], fontSize: 14),
-                        onChanged: (City newValue) {
-                          setState(() {
-                            currentCity = newValue;
-                            widget.initialCity = null;
-                            widget.onChange(currentProvince, currentCity);
-                          });
-                        },
-                        items: currentProvince == null &&
-                            widget.initialProvince != null
-                            ? widget.initialProvince.cities
-                            .map<DropdownMenuItem<City>>((City value) {
-                          return DropdownMenuItem<City>(
-                            value: value,
-                            child:
-                            Text(value == null ? "شهر" : value.name),
-                          );
-                        }).toList()
-                            : currentProvince == null
-                            ? []
-                            : currentProvince.cities
-                            .map<DropdownMenuItem<City>>((City value) {
-                          return DropdownMenuItem<City>(
-                            value: value,
-                            child: Text(
-                                value == null ? "شهر" : value.name),
-                          );
-                        }).toList(),
-                      )),
-                )
-              ],
-            ),
-            showError
-                ? Container(
-              height: 40,
-              alignment: Alignment.centerRight,
-              padding: EdgeInsets.only(right: 16),
-              child: Text(
-                "لطفا شهر و استان خود را انتخاب کنید",
-                style: TextStyle(fontSize: 13, color: Colors.red[700]),
-              ),
-            )
-                : Container(),
-          ],
-        );
-      },
-    );
-  }
-}
-
 class LostPetItemWgt extends StatefulWidget {
   final LostPet _item;
 
@@ -484,11 +321,11 @@ class _LostPetItemWgtState extends State<LostPetItemWgt> {
                     child: Container(
                         margin: EdgeInsets.only(),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(4)),
+                          borderRadius:
+                          BorderRadius.only(topRight: Radius.circular(4)),
                           color: widget._item.reqType.id == 2
                               ? AppColors.main_color
-                              : AppColors.second_color,
+                              : AppColors.main_color,
                           /*borderRadius: BorderRadius.only(
                                 topRight: Radius.circular(4),
                                 bottomLeft: Radius.circular(19))*/

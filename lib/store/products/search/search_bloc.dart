@@ -50,7 +50,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     yield LoadingResults();
 
     await for (final allProducts in _productsRepo.load(event.identifier)) {
-      print('loaded all products : ${event.identifier.getName()} $allProducts');
+      print('loaded all products : ${event.identifier.name} $allProducts');
       var result = _interactor.search(allProducts, event.query);
 
       if (result.isEmpty) {

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
-import 'package:store/store/management/management_bloc.dart';
-import 'package:store/store/management/management_event_state.dart';
-import 'package:store/store/management/service/service_management_page.dart';
-import 'package:store/store/management/shop/shop_management_page.dart';
+import 'package:store/common/widgets/app_widgets.dart';
+import 'package:store/store/management/management_login_bloc.dart';
+import 'package:store/store/management/management_login_event_state.dart';
+
+import 'management_home_page.dart';
 
 class ManagerLoginPage extends StatefulWidget {
   @override
@@ -13,7 +14,7 @@ class ManagerLoginPage extends StatefulWidget {
 
 class _ManagerLoginPageState extends State<ManagerLoginPage> {
   final _formKey = GlobalKey<FormState>();
-  ManagementBloc _managementBloc;
+  ManagerLoginBloc _managerLoginBloc;
   bool error = false;
 
   /*final*/
@@ -23,30 +24,28 @@ class _ManagerLoginPageState extends State<ManagerLoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_managementBloc == null) {
-      _managementBloc = Provider.of<ManagementBloc>(context);
+    if (_managerLoginBloc == null) {
+      _managerLoginBloc = Provider.of<ManagerLoginBloc>(context);
     }
 
-    _managementBloc.state.listen((state) {
+    _managerLoginBloc.state.listen((state) {
       print('management login state: $state $loggedIn');
-      if (state is SMDataLoaded && !loggedIn) {
+      if (state is ManagerLoggedIn && !loggedIn) {
         loggedIn = true;
 
-        if (state.services.isNotEmpty) {
-          Navigator.of(context)
-              .popAndPushNamed(ServiceManagementPage.routeName);
-        } else if (state.shops.isNotEmpty) {
-          Navigator.of(context).popAndPushNamed(ShopManagementPage.routeName);
-        }
+        print(
+            'manager logged in state, identifiers: ${state.user
+                .centerIdentifiers}');
+
+        Navigator.of(context).popAndPushNamed(ManagementHomePage.routeName);
       }
     });
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'ورود فروشندگان',
-          style: TextStyle(fontSize: 16),
-        ),
+      appBar: CustomAppBar(
+        titleText: 'ورود فروشندگان',
+        backgroundColor: AppColors.second_color,
+        elevation: 0,
       ),
       body: new Container(
         child: SizedBox(
@@ -54,7 +53,7 @@ class _ManagerLoginPageState extends State<ManagerLoginPage> {
           height: double.infinity,
           child: new Center(
             child: new Container(
-              color: Colors.grey[300],
+              color: AppColors.second_color,
               child: Container(
                 child: new Form(
                   key: _formKey,
@@ -116,25 +115,9 @@ class _ManagerLoginPageState extends State<ManagerLoginPage> {
                             textColor: Colors.white,
                             onPressed: () {
                               if (_formKey.currentState.validate()) {
-                                _managementBloc.dispatch(ShopManagerLogin(
+                                _managerLoginBloc.dispatch(ShopManagerLogin(
                                     phoneController,
                                     passController.text.toString()));
-                                /*  loginSeller(phoneController,
-                                        )
-                                    .then((List<ShopIdentifier> response) {
-                                  if (response.isEmpty) {
-                                    setState(() {
-                                      error = true;
-                                      phoneController = '';
-                                      passController.text = '';
-                                    });
-                                  } else {
-                                    Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                SellersListPage(response)));
-                                  }
-                                });*/
                               }
                             },
                             child: Container(
@@ -142,7 +125,7 @@ class _ManagerLoginPageState extends State<ManagerLoginPage> {
                               width: 100,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                  color: AppColors.main_color,
+                                  color: AppColors.second_color,
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(30))),
                               child: Text(
@@ -163,7 +146,7 @@ class _ManagerLoginPageState extends State<ManagerLoginPage> {
                                 ? Text(
                                     "نام کاربری یا کلمه عبور صحیح نمی باشد!",
                                     style: TextStyle(
-                                        color: AppColors.main_color,
+                                        color: AppColors.second_color,
                                         fontWeight: FontWeight.bold),
                                   )
                                 : Container()),

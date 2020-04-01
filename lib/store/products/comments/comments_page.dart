@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/store/login_register/login/login_page.dart';
 import 'package:store/store/login_register/login_status/login_status_bloc.dart';
 import 'package:store/store/login_register/login_status/login_status_event_state.dart';
@@ -29,7 +30,7 @@ class _CommentsPageState extends State<CommentsPage> {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.second_color,
+        backgroundColor: AppColors.main_color,
         onPressed: () {
           var currentLoginState =
               Provider.of<LoginStatusBloc>(context).currentState;
@@ -61,8 +62,8 @@ class _CommentsPageState extends State<CommentsPage> {
           child: Icon(Icons.add_comment),
         ),
       ),
-      appBar: AppBar(
-        title: Text('نظرات کاربران'),
+      appBar: CustomAppBar(
+        titleText: 'نظرات کاربران',
       ),
       body: FutureBuilder<List<Comment>>(
         future: _commentsRepository.fetch(widget.saleItemId),

@@ -7,11 +7,13 @@ import 'package:store/store/products/filter/filter.dart';
 import 'package:store/store/products/product/product.dart';
 import 'package:store/store/products/product/products_repository.dart';
 import 'package:store/store/structure/model.dart';
+import 'package:store/store/structure/repository.dart';
 
 class SpecialProductsRepository {
   final Net _net;
+  final StructureRepository _structureRepository;
 
-  SpecialProductsRepository(this._net);
+  SpecialProductsRepository(this._net, this._structureRepository);
 
   Future<List<Product>> getSpecialProducts(SpecialProductType type) {
     switch (type) {
@@ -41,8 +43,14 @@ class SpecialProductsRepository {
                 pr.variantId,
                 pr.nameFA,
                 StoreThumbnail(pr.shopId, pr.shopName),
-                StructSubCategory(num.parse(pr.catId), "err", "err",
-                    num.parse(pr.petId), num.parse(pr.catId)),
+                StructSubCategory(
+                    pr.catId,
+                    pr.subCatName,
+                    "",
+                    pr.petId,
+                    pr.catId,
+                    pr.petName,
+                    pr.catName),
                 imgUrl: AppUrls.image_url + pr.img,
                 price: Price(pr.salePrice),
                 brand: pr.brand);
@@ -69,8 +77,14 @@ class SpecialProductsRepository {
                 pr.variantId,
                 pr.nameFA,
                 StoreThumbnail(pr.shopId, pr.shopName),
-                StructSubCategory(num.parse(pr.catId), "err", "err",
-                    num.parse(pr.petId), num.parse(pr.catId)),
+                StructSubCategory(
+                    pr.catId,
+                    pr.subCatName,
+                    "",
+                    pr.petId,
+                    pr.catId,
+                    pr.petName,
+                    pr.catName),
                 imgUrl: AppUrls.image_url + pr.img,
                 price: Price(pr.salePrice),
                 brand: pr.brand);

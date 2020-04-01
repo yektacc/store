@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/data_layer/management/management_repository.dart';
 import 'package:store/store/products/product/product.dart';
 import 'package:store/store/products/product/products_bloc.dart';
@@ -10,12 +11,12 @@ import 'package:store/store/products/product/products_bloc_event.dart';
 
 import '../model.dart';
 
-class SellerAddProductsPage extends StatefulWidget {
+class ShopAddProductsPage extends StatefulWidget {
   static const String routeName = 'selleraddproduct';
 
   final ShopIdentifier shop;
 
-  SellerAddProductsPage({@required this.shop});
+  ShopAddProductsPage({@required this.shop});
 
   final priceController = TextEditingController();
   final countController = TextEditingController();
@@ -23,10 +24,10 @@ class SellerAddProductsPage extends StatefulWidget {
   final maximumOrderController = TextEditingController();
 
   @override
-  _SellerAddProductsPageState createState() => _SellerAddProductsPageState();
+  _ShopAddProductsPageState createState() => _ShopAddProductsPageState();
 }
 
-class _SellerAddProductsPageState extends State<SellerAddProductsPage> {
+class _ShopAddProductsPageState extends State<ShopAddProductsPage> {
   ProductsBloc _productsBloc;
   ManagementRepository _shopRepository;
 
@@ -57,12 +58,14 @@ class _SellerAddProductsPageState extends State<SellerAddProductsPage> {
             }
           }
         },
+        backgroundColor: AppColors.second_color,
         child: Center(
           child: Text("تایید"),
         ),
       ),
-      appBar: AppBar(
-        title: Text("قیمت دهی"),
+      appBar: CustomAppBar(
+        altBackground: true,
+        titleText: "قیمت دهی",
       ),
       body: new BlocBuilder(
         bloc: _productsBloc,
@@ -120,7 +123,7 @@ class _SellerAddProductsPageState extends State<SellerAddProductsPage> {
                                                   widget.countController,
                                               textAlign: TextAlign.center,
                                               decoration: InputDecoration(
-                                                  hintText: "تعداد",
+                                                  hintText: "کالایی که در صورت فروش باید موجود باشد",
                                                   hintStyle:
                                                       TextStyle(fontSize: 13)),
                                               validator: (value) {
@@ -178,7 +181,7 @@ class _SellerAddProductsPageState extends State<SellerAddProductsPage> {
                                             margin: EdgeInsets.symmetric(
                                                 horizontal: 40),
                                             child: RaisedButton(
-                                                color: AppColors.main_color,
+                                                color: AppColors.second_color,
                                                 child: Text(
                                                   "تایید",
                                                   style: TextStyle(
@@ -280,7 +283,7 @@ class _SellerAddProductsPageState extends State<SellerAddProductsPage> {
                       width: 65,
                       margin: EdgeInsets.only(right: 6),
                       child: RaisedButton(
-                        color: AppColors.main_color,
+                        color: AppColors.second_color,
                         onPressed: () {
                           onClick();
                         },
@@ -336,7 +339,7 @@ class _SellerAddProductsPageState extends State<SellerAddProductsPage> {
                       child: IconButton(
                         onPressed: () => onDeleteClicked(),
                         icon: Icon(Icons.delete),
-                        color: AppColors.main_color,
+                        color: AppColors.second_color,
                       ),
                     )
                   ],

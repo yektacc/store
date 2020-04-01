@@ -37,7 +37,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     try {
       await for (final items in _repository.load(event.identifier)) {
         currentIdentifier = event.identifier;
-        yield ProductsLoaded(items);
+        yield ProductsLoaded(items, event.identifier);
       }
     } catch (e) {
       print("PRODUCT_BLOC: failure: " + e.toString());
@@ -49,7 +49,7 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
       LoadPopularProducts event) async* {
     yield LoadingProducts();
     await for (final snapshot in _repository.load(event.identifier)) {
-      yield ProductsLoaded(snapshot);
+      yield ProductsLoaded(snapshot, event.identifier);
     }
   }
 }

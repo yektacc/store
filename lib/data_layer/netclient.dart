@@ -174,6 +174,73 @@ class Net {
       }
     }
   }
+
+  Future<String> get(EndPoint endPoint) async {
+    String url = '';
+
+//    url = AppUrls.api_url + getSubUrl(endPoint);
+    url = 'http://server.epet24.ir/ip.php';
+
+    print("\n>>>>>>>>>>>>>>>>>>>>>>>$endPoint>>>>>>>>>>>>>>>>>>>>>>>>>>>\n"
+        "sending GET request: \n"
+        "------------------------------\n"
+        "url: $url\n"
+        ">>>>>>>>>>>>>>>>>>>>>>>>>>>$endPoint>>>>>>>>>>>>>>>>>>>>>>>\n");
+
+    var first = true;
+    var err = false;
+    var remainedTries = 1;
+    var nextRetryAfter = 0;
+
+    Dio dio = Dio();
+
+//    dio.interceptors.add(InterceptorsWrapper(onResponse: (Response response) {
+//      // Do some pre processing before returning the response data
+//      return response; // continue
+//    }, onError: (DioError e) {
+//      // Do some pre processing when the request fails
+//      print(e);
+//      /*
+//      if (e.response.statusCode == 429) {
+//        nextRetryAfter = int.parse(e.response.headers['retry-after'].first,
+//            onError: (_) => 0);
+//        print(
+//            'retry afterr ${e.response.realUri}:' + nextRetryAfter.toString());
+//      }*/
+//      err = true;
+//      return e; //continue
+//    }));
+
+    while (first || err && remainedTries > 0) {
+      first = false;
+
+      var responseString;
+
+      try {
+        Response res = await dio.get(url);
+        if (res.statusCode == 200) {
+          nextRetryAfter = 0;
+          responseString = res.data;
+        } else {
+          err = true;
+          print(
+              "STATUS ERROR LOADING URL: status: ${res
+                  .statusCode} $endPoint remaind tries: $remainedTries  ");
+        }
+      } catch (e, stacktrace) {
+        await Future.delayed(Duration(seconds: nextRetryAfter));
+        err = true;
+        remainedTries--;
+        print("ERROR LOADING URL: $endPoint remaind tries: $remainedTries" +
+            e.toString());
+        print(stacktrace);
+      }
+
+      if (!err) {
+        return responseString;
+      }
+    }
+  }
 }
 
 enum EndPoint {
@@ -222,6 +289,7 @@ enum EndPoint {
   REQUEST_PASSWORD_CHANGE,
   LOG_IN,
   LOG_OUT,
+  GET_IP,
   SEND_REGISTER_INFO,
   SEND_SHOPPING_CART,
   SEND_VERIFICATION_CODE,
@@ -246,7 +314,15 @@ enum EndPoint {
   GET_ALL_USER_CHATS,
   GET_CHAT_WITH,
   SEEN_CHAT,
-  GET_CONTACT_INFO
+  GET_CONTACT_INFO,
+  SAVE_TRANSACTION,
+  SEND_COUPON,
+  GET_FAVORITES,
+  ADD_FAVORITE,
+  DELETE_FAVORITE,
+  PAYMENT_FINAL_TRANSACTION,
+  ORDER_PRODUCT_PACKED,
+  ORDER_SENT
 }
 
 String getSubUrl(EndPoint endPoint) {
@@ -445,7 +521,7 @@ String getSubUrl(EndPoint endPoint) {
       subUrl = 'sendchat';
       break;
     case EndPoint.GET_ALL_CENTER_CHATS:
-      subUrl = 'getallchats';
+      subUrl = 'getsrvcenterallchats';
       break;
     case EndPoint.SEEN_CHAT:
       subUrl = 'setseen';
@@ -461,6 +537,35 @@ String getSubUrl(EndPoint endPoint) {
       break;
     case EndPoint.GET_ALL_USER_CHATS:
       subUrl = 'getappuserallchats';
+      break;
+    case EndPoint.SAVE_TRANSACTION:
+      subUrl = 'prdordersellertransaction';
+      break;
+    case EndPoint.SEND_COUPON:
+      subUrl = 'sendcouponcode';
+      break;
+    case EndPoint.GET_IP:
+      subUrl = 'temp';
+      break;
+    case EndPoint.GET_FAVORITES:
+      subUrl = 'getappuserprdlike';
+      break;
+    case EndPoint.ADD_FAVORITE:
+      subUrl = 'sendappuserprdlike';
+      break;
+    case EndPoint.DELETE_FAVORITE:
+      subUrl = 'deleteappuserprdlike';
+      break;
+
+    case EndPoint.PAYMENT_FINAL_TRANSACTION:
+      subUrl = 'formfinancialtransaction';
+      break;
+
+    case EndPoint.ORDER_PRODUCT_PACKED:
+    // TODO: Handle this case.
+      break;
+    case EndPoint.ORDER_SENT:
+    // TODO: Handle this case.
       break;
   }
   return subUrl;

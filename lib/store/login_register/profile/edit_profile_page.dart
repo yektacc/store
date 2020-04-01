@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/store/location/provinces/model.dart';
 import 'package:store/store/location/provinces/provinces_bloc.dart';
 import 'package:store/store/location/provinces/provinces_bloc_event.dart';
 import 'package:store/store/login_register/profile/profile_bloc_event_state.dart';
 import 'package:store/store/login_register/profile/profile_repository.dart';
-import 'package:provider/provider.dart';
 
 import 'model.dart';
 import 'profile_bloc.dart';
@@ -34,7 +35,6 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   final nationalCodeController = TextEditingController();
   final creditCardController = TextEditingController();
 
-
   @override
   void initState() {
     super.initState();
@@ -48,11 +48,11 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
 
   @override
   Widget build(BuildContext context) {
-
-
-
     return new Scaffold(
-        appBar: AppBar(elevation: 0,title: Text("ویرایش پروفایل",style: TextStyle(fontSize: 15),),),
+        appBar: CustomAppBar(
+          elevation: 0,
+          titleText: "ویرایش پروفایل",
+        ),
         body: Container(
           color: AppColors.main_color,
           child: new Form(
@@ -156,42 +156,6 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       },
                     ),
                     padding: EdgeInsets.only(left: 50, right: 20, top: 12)),
-                new Container(
-                    color: Colors.grey[50],
-                    child: TextFormField(
-                      style: TextStyle(fontSize: 13),
-                      keyboardType: TextInputType.number,
-                      controller: creditCardController,
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                          icon: Icon(Icons.credit_card),
-                          hintText: "شماره کارت",
-                          hintStyle: TextStyle(fontSize: 13)),
-                      validator: (value) {},
-                    ),
-                    padding: EdgeInsets.only(left: 50, right: 20, top: 12))
-                /*new Container(
-                  color: Colors.grey[100],
-                  child: TextFormField(
-                    style: TextStyle(fontSize: 13),
-                    keyboardType: TextInputType.multiline,
-                    maxLines: 2,
-                    controller: lastNameController,
-                    textAlign: TextAlign.right,
-                    decoration: InputDecoration(
-                        icon: Icon(Icons.location_on),
-                        hintText: "آدرس",
-                        hintStyle: TextStyle(fontSize: 13)),
-                    validator: (value) {
-                      if (value.isEmpty) {
-                        return 'لطفا این فیلد را تکمیل کنید';
-                      }
-                      return null;
-                    },
-                  ),
-                  padding: EdgeInsets.only(left: 50, right: 20, top: 12),
-                )*/
-                ,
                 new Container(
                   color: Colors.grey[50],
                   width: double.infinity,

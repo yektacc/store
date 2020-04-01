@@ -5,7 +5,7 @@ import 'package:quiver/core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/store/management/model.dart';
-import 'package:store/store/management/shop/seller_add_product_page.dart';
+import 'package:store/store/management/seller/shop_add_product_page.dart';
 
 import '../netclient.dart';
 
@@ -26,14 +26,14 @@ class ManagementRepository {
     }
   }
 
-  Future<Shop> getFullShop(ShopIdentifier identifier) async {
+  Future<List<ShopProduct>> getShopProducts(ShopIdentifier identifier) async {
     PostResponse response = await _client.post(EndPoint.GET_PRODUCT_OF_SELLER,
         body: {'seller_id': identifier.id.toString()}, cacheEnabled: false);
     if (response is SuccessResponse) {
       var list = List<Map<String, dynamic>>.from(response.data);
-      return Shop(identifier, list.map(_parseProduct).toList());
+      return list.map(_parseProduct).toList();
     } else {
-      return Shop(identifier, []);
+      return [];
     }
   }
 
@@ -127,11 +127,11 @@ class ManagementRepository {
   CenterIdentifier _parseLogin(Map<String, dynamic> json) {
     switch (json['center_type']) {
       case 1:
-        return ServiceIdentifier(json['id'] /*, json['seller_id']*/,
+        return ServiceIdentifier(json['id'], json['seller_id'],
             json['center_name'], json['city_id'], json['chat_is_active'] == 1);
         break;
       case 4:
-        return ShopIdentifier(json['id'] /*, json['seller_id']*/,
+        return ShopIdentifier(json['id'], json['seller_id'],
             json['center_name'], json['city_id']);
         break;
       default:
@@ -178,7 +178,6 @@ class ManagementRepository {
 
   final key1 = 'sm_mail';
   final key2 = 'sm_password';
-  final key3 = 'sm_type';
 
   Future<ManagerUser> readManagerUser() async {
     print('this function was called');
@@ -186,29 +185,13 @@ class ManagementRepository {
 
     final prefs = await SharedPreferences.getInstance();
 
-    ManagerType type;
-
-    try {
-      var index = int.parse(prefs.getString(key3));
-      type = ManagerType.values[index];
-    } catch (e, stacktrace) {
-      print(e);
-      print(stacktrace);
-      return null;
-    }
-
     final user = ManagerUser(
-      prefs.getString(key1) ?? "err",
-      prefs.getString(key2) ?? "err",
-      type,
-    );
+        prefs.getString(key1) ?? "err", prefs.getString(key2) ?? "err", []);
 
     print('read user from shared prefs:' + user.toString());
 
-    if (user.email == "err" || user.password == "err" || type == null) {
-      print(
-          'failed reading manager user ${user.email} ${user.password} ${user
-              .type}');
+    if (user.email == "err" || user.password == "err") {
+      print('failed reading manager user ${user.email} ${user.password}');
       return null;
     }
     return user;
@@ -219,18 +202,14 @@ class ManagementRepository {
 
     prefs.setString(key1, user.email);
     prefs.setString(key2, user.password);
-    prefs.setString(key3, user.type.index.toString());
 
-    print(
-        'saved manager user email: ${user.email}  pass: ${user
-            .password} type: ${user.type}');
+    print('saved manager user email: ${user.email}  pass: ${user.password}');
   }
 
   _removeUser() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(key1);
     prefs.remove(key2);
-    prefs.remove(key3);
   }
 }
 
@@ -304,6 +283,14 @@ class ShopProduct {
   int get hashCode {
     return hash3(this.id, this.variantId, this.sellerId);
   }
+}
+
+class DetailedShopProduct {
+  final ShopProduct product;
+  final int stockQuantity;
+  final int saleCount;
+
+  DetailedShopProduct(this.product, this.stockQuantity, this.saleCount);
 }
 
 //  Future<bool> editProductOfSeller(List<PrdItem> items) async {

@@ -37,7 +37,8 @@ class AddressRepository {
               ad.provinceId ?? '',
               ad.name ?? "",
               ad.phone ?? "",
-              ad.postalCode?? ''))
+          ad.postalCode ?? '',
+          ad.editable == 1))
           .toList();
     } else {
       return [];

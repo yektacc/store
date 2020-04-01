@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/store/location/address/edit_address_page.dart';
 import 'package:store/store/login_register/login_status/login_status_bloc.dart';
 import 'package:store/store/login_register/login_status/login_status_event_state.dart';
-import 'package:provider/provider.dart';
 
 import 'address_bloc.dart';
 import 'address_bloc_event.dart';
@@ -142,14 +142,19 @@ class _AddressItemState extends State<AddressItem> {
                               size: 20,
                             ),
                             onPressed: () {
-
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => AddressAddEditPage(
-                                        true,
-                                        address: widget._address,
-                                        sessionId: int.parse(
-                                            loginState.user.sessionId),
-                                      )));
+                              if (widget._address.editable) {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) =>
+                                        AddressAddEditPage(
+                                          true,
+                                          address: widget._address,
+                                          sessionId: int.parse(
+                                              loginState.user.sessionId),
+                                        )));
+                              } else {
+                                Helpers.showToast(
+                                    'آدرس مورد نظر به دلیل استفاده قبلی غیر قابل اصلاح می باشد. درصورت نیاز آدرس جدید تعریف کنید.');
+                              }
                             },
                           ),
                           IconButton(

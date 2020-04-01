@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
+import 'package:store/common/widgets/app_widgets.dart';
+import 'package:store/common/widgets/form_fields.dart';
 import 'package:store/store/home/home_page.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_bloc.dart';
 import 'package:store/store/login_register/login/login_bloc.dart';
@@ -32,10 +34,11 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: CustomAppBar(
+        titleText: 'فراموشی رمز عبور',
         elevation: 0,
       ),
-      backgroundColor: AppColors.second_color,
+      backgroundColor: AppColors.main_color,
       body: Form(
           key: _formKey,
           child: BlocBuilder(
@@ -58,7 +61,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
                     state.msg == '' ? 'خطا!، مجددا تلاش نمایید' : state.msg);
                 return Container();
               } else if (state is LoadingForgetPass) {
-                return LoadingIndicator();
+                return LightLoadingIndicator();
               } else {
                 return Container();
               }
@@ -73,24 +76,9 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
       children: <Widget>[
         Container(
             color: Colors.white,
-            child: TextFormField(
-              keyboardType: TextInputType.number,
-              controller: phoneController,
-              textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                  hintText: "شماره موبایل", hintStyle: TextStyle(fontSize: 13)),
-              validator: (value) {
-                if (value.isEmpty) {
-                  return 'شماره موبایل وارد نشده است';
-                } else if (!(value.startsWith("09") && value.length == 11 ||
-                    value.startsWith("+989") && value.length == 13 ||
-                    value.startsWith("00989") && value.length == 14)) {
-                  return 'شماره موبایل وارد شده صحیح نمی باشد';
-                }
-                return null;
-              },
-            ),
-            padding: EdgeInsets.only(left: 50, right: 50, top: 12)),
+            child:
+            FormFields.phone(controller: phoneController, noBorder: true),
+            padding: EdgeInsets.only(top: 24, bottom: 24)),
         Container(
           child: Container(
             color: Colors.white,
@@ -108,11 +96,11 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
                 width: 100,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.second_color),
+                    border: Border.all(color: AppColors.main_color),
                     borderRadius: BorderRadius.all(Radius.circular(30))),
                 child: Text("تایید",
                     style:
-                    TextStyle(fontSize: 13, color: AppColors.second_color)),
+                    TextStyle(fontSize: 13, color: AppColors.main_color)),
               ),
             ),
           ),
@@ -135,12 +123,11 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
       children: <Widget>[
         Container(
             color: Colors.white,
-            child: TextFormField(
-              keyboardType: TextInputType.number,
-              controller: otpController,
-              textAlign: TextAlign.center,
-              decoration: InputDecoration(
-                  hintText: "کد", hintStyle: TextStyle(fontSize: 13)),
+            child: FormFields.text(
+              "کد",
+              otpController,
+              noBorder: true,
+              noIcon: true,
               validator: (value) {
                 if (value.isEmpty) {
                   return 'کد وارد نشده است';
@@ -149,8 +136,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
                 }
                 return null;
               },
-            ),
-            padding: EdgeInsets.only(left: 50, right: 50, top: 12)),
+            )),
         Container(
           child: Container(
             color: Colors.white,
@@ -169,11 +155,11 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
                 width: 100,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.second_color),
+                    border: Border.all(color: AppColors.main_color),
                     borderRadius: BorderRadius.all(Radius.circular(30))),
                 child: Text(
                   "تایید",
-                  style: TextStyle(fontSize: 13, color: AppColors.second_color),
+                  style: TextStyle(fontSize: 13, color: AppColors.main_color),
                 ),
               ),
             ),
@@ -197,12 +183,12 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
       children: <Widget>[
         Container(
             color: Colors.white,
-            child: TextFormField(
-              controller: newPassController,
-              textAlign: TextAlign.center,
-              obscureText: true,
-              decoration: InputDecoration(
-                  hintText: "رمزعبور جدید", hintStyle: TextStyle(fontSize: 13)),
+          child: FormFields.text(
+            'رمز عبور جدید',
+            newPassController,
+            obscure: true,
+            noIcon: true,
+            noBorder: true,
               validator: (value) {
                 if (value.isEmpty) {
                   return 'رمز عبور وارد نشده است';
@@ -211,8 +197,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
                 }
                 return null;
               },
-            ),
-            padding: EdgeInsets.only(left: 50, right: 50, top: 12)),
+          ),),
         Container(
           child: Container(
             color: Colors.white,
@@ -231,12 +216,11 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
                 width: 100,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.second_color),
-                    borderRadius: BorderRadius.all(
-                        Radius.circular(30))),
+                    border: Border.all(color: AppColors.main_color),
+                    borderRadius: BorderRadius.all(Radius.circular(30))),
                 child: Text(
                   "تغییر رمز عبور",
-                  style: TextStyle(fontSize: 13, color: AppColors.second_color),
+                  style: TextStyle(fontSize: 13, color: AppColors.main_color),
                 ),
               ),
             ),

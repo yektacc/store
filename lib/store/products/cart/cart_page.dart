@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
@@ -6,23 +7,21 @@ import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
-import 'package:store/data_layer/cart/cart_repository.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/data_layer/centers/centers_repository.dart';
 import 'package:store/services/centers/model.dart';
+import 'package:store/store/checkout/checkout_bloc.dart';
+import 'package:store/store/checkout/checkout_event_state.dart';
 import 'package:store/store/home/home_page.dart';
 import 'package:store/store/location/address/address_page.dart';
-import 'package:store/store/login_register/login/login_bloc.dart';
-import 'package:store/store/login_register/login/login_event_state.dart';
 import 'package:store/store/login_register/login/login_page.dart';
-import 'package:store/store/login_register/login_status/login_status_bloc.dart';
-import 'package:store/store/login_register/login_status/login_status_event_state.dart';
 import 'package:store/store/petstore/pet_store.dart';
 import 'package:store/store/products/filter/filter.dart';
 import 'package:store/store/products/product/product_item_wgt.dart';
 
 import 'cart_bloc.dart';
 import 'cart_bloc_event.dart';
-import 'cart_product.dart';
+import 'model.dart';
 
 class CartPage extends StatefulWidget {
   static const String routeName = 'cartpage';
@@ -31,29 +30,18 @@ class CartPage extends StatefulWidget {
   _CartPageState createState() => _CartPageState();
 }
 
-class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
+class _CartPageState extends State<CartPage> {
   final BehaviorSubject<bool> isShownSubject = BehaviorSubject.seeded(false);
   final BehaviorSubject<bool> loading = BehaviorSubject.seeded(false);
 
-/*
-  final BehaviorSubject<bool> loading = BehaviorSubject.seeded(false);
-*/
-
   CartBloc _cartBloc;
-
-/*  AnimationController animController;
-  Animation<Offset> totalBarOffset;*/
+  CheckoutBloc _checkoutBloc;
+  StreamSubscription _sub;
+  StreamSubscription _addressPageLaunchSub;
 
   @override
   void initState() {
     super.initState();
-    /*  isShownSubject.listen((isShown) {
-      if (isShown) {
-        animController.forward();
-      } else {
-        animController.reverse();
-      }
-    });*/
   }
 
   @override
@@ -62,10 +50,24 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
       _cartBloc = Provider.of<CartBloc>(context);
     }
 
+    if (_checkoutBloc == null) {
+      _checkoutBloc = Provider.of<CheckoutBloc>(context);
+      _checkoutBloc.dispatch(CheckoutClear());
+    }
+
+    _sub ??= _checkoutBloc.state.listen((state) {
+      print('new state $state');
+      if (state is CheckoutNotLoggedIn) {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => LoginPage()));
+        _sub.cancel();
+      }
+    });
+
     _cartBloc.dispatch(FetchCart());
 
     return Scaffold(
-        appBar: AppBar(
+        appBar: CustomAppBar(
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
@@ -81,10 +83,7 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
                   _cartBloc.dispatch(Clear());
                 })
           ],
-          title: Text(
-            'سبد خرید',
-            style: TextStyle(fontSize: 16),
-          ),
+          titleText: 'سبد خرید',
         ),
         body: Stack(
           children: <Widget>[
@@ -99,9 +98,9 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
                     );
                   } else if (cartState is CartLoaded) {
                     Map<StoreThumbnail, List<CartProduct>> productsByStore =
-                        HashMap();
+                    HashMap();
 
-                    cartState.products.forEach((cp) {
+                    cartState.cart.products.forEach((cp) {
                       StoreThumbnail store = cp.product.storeThumbnail;
 
                       if (productsByStore.containsKey(store)) {
@@ -117,10 +116,25 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
                         Expanded(child: _buildShopsList(productsByStore)),
                         Container(
                             child: new Container(
-                          alignment: Alignment.bottomCenter,
-                          child: GestureDetector(
-                              onTap: () {
-                                if (!loading.value) {
+                              alignment: Alignment.bottomCenter,
+                              child: GestureDetector(
+                                  onTap: () {
+                                    Provider.of<CheckoutBloc>(context)
+                                        .dispatch(SubmitCart(cartState.cart));
+
+                                    _addressPageLaunchSub ??=
+                                        _checkoutBloc.state.listen((
+                                            checkoutState) {
+                                          if (checkoutState is SimpleOrder) {
+                                            Navigator.of(context)
+                                                .pushNamed(
+                                                AddressPage.routeName);
+                                            _addressPageLaunchSub.cancel();
+                                            _addressPageLaunchSub = null;
+                                          }
+                                        });
+
+                                    /*if (!loading.value) {
                                   Provider.of<LoginStatusBloc>(context)
                                       .state
                                       .listen((loginState) async {
@@ -155,22 +169,22 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
                                                   LoginPage()));
                                     }
                                   });
-                                }
-                              },
-                              child: Stack(
-                                children: <Widget>[
-                                  Container(
-                                    child: TotalBar(
-                                        isShownSubject,
+                                }*/
+                                  },
+                                  child: Stack(
+                                    children: <Widget>[
+                                      Container(
+                                        child: TotalBar(
+                                            isShownSubject,
 /*
                                     ((state.total) * (9 / 100)).toInt(),
 */
-                                        cartState.total),
-                                  ),
-                                  GotoAddressBottomBar()
-                                ],
-                              )),
-                        ))
+                                            cartState.cart.total),
+                                      ),
+                                      GotoAddressBottomBar()
+                                    ],
+                                  )),
+                            ))
                       ],
                     );
                   } else if (cartState is CartEmpty) {
@@ -237,65 +251,65 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
       list.add(Container(
         child: Column(
             children: <Widget>[
-                  Container(
-                    height: 70,
-                    child: Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            store.name,
-                            style: TextStyle(fontSize: 15),
-                          ),
-                          Container(
-                            child: new FutureBuilder<String>(
-                                future: Provider.of<CentersRepository>(context)
-                                    .getCityNameByCenterId(
-                                        CenterFetchType.STORE,
-                                        int.parse(store.id)),
-                                builder: (context, snapshot) {
-                                  if (snapshot != null &&
-                                      snapshot.data != null &&
-                                      snapshot.data != '') {
-                                    return Card(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(30))),
-                                      margin: EdgeInsets.only(right: 20),
-                                      child: Container(
-                                        margin: EdgeInsets.only(
-                                            left: 12,
-                                            right: 8,
-                                            top: 5,
-                                            bottom: 5),
-                                        child: Row(
-                                          children: <Widget>[
-                                            Padding(
-                                              padding: EdgeInsets.only(left: 5),
-                                              child: Icon(
-                                                Icons.location_on,
-                                                size: 17,
-                                                color: AppColors.main_color,
-                                              ),
-                                            ),
-                                            Text(
-                                              snapshot.data,
-                                              style: TextStyle(fontSize: 12),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  } else {
-                                    return Container();
-                                  }
-                                }),
-                          )
-                        ],
+              Container(
+                height: 70,
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        store.name,
+                        style: TextStyle(fontSize: 15),
                       ),
-                    ),
+                      Container(
+                        child: new FutureBuilder<String>(
+                            future: Provider.of<CentersRepository>(context)
+                                .getCityNameByCenterId(
+                                CenterFetchType.STORE,
+                                int.parse(store.id)),
+                            builder: (context, snapshot) {
+                              if (snapshot != null &&
+                                  snapshot.data != null &&
+                                  snapshot.data != '') {
+                                return Card(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(30))),
+                                  margin: EdgeInsets.only(right: 20),
+                                  child: Container(
+                                    margin: EdgeInsets.only(
+                                        left: 12,
+                                        right: 8,
+                                        top: 5,
+                                        bottom: 5),
+                                    child: Row(
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 5),
+                                          child: Icon(
+                                            Icons.location_on,
+                                            size: 17,
+                                            color: AppColors.main_color,
+                                          ),
+                                        ),
+                                        Text(
+                                          snapshot.data,
+                                          style: TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                return Container();
+                              }
+                            }),
+                      )
+                    ],
                   ),
-                ] +
+                ),
+              ),
+            ] +
                 products.map((cp) => CartListItem(cp)).toList() +
                 [Divider()]),
       ));
@@ -312,9 +326,9 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
   @override
   void dispose() {
     isShownSubject.close();
-/*
     loading.close();
-*/
+    _sub.cancel();
+    _addressPageLaunchSub.cancel();
     super.dispose();
   }
 }
@@ -322,9 +336,6 @@ class _CartPageState extends State<CartPage> with TickerProviderStateMixin {
 class TotalBar extends StatefulWidget {
   final BehaviorSubject<bool> isShown;
 
-/*
-  final int tax;
-*/
   final int products;
 
   TotalBar(this.isShown /*, this.tax*/, this.products);
@@ -388,103 +399,97 @@ class CartListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        /*Navigator.of(context)
-            .push(AppRoutes.productDetailPage(context, _product));*/
-      },
-      child: new Card(
-        child: Container(
-          height: 200,
-          width: 320,
-          child: new Column(
-            children: <Widget>[
-              Expanded(
-                flex: 4,
-                child: new Row(
-                  children: <Widget>[
-                    new Expanded(
-                      flex: 1,
-                      child: Container(
-                        padding: EdgeInsets.only(left: 10, top: 10),
-                        child: Helpers.image(_cartProduct.product.imgUrl),
-                      ),
+    return new Card(
+      child: Container(
+        height: 200,
+        width: 320,
+        child: new Column(
+          children: <Widget>[
+            Expanded(
+              flex: 4,
+              child: new Row(
+                children: <Widget>[
+                  new Expanded(
+                    flex: 1,
+                    child: Container(
+                      padding: EdgeInsets.only(left: 10, top: 10),
+                      child: Helpers.image(_cartProduct.product.imgUrl),
                     ),
-                    Expanded(
-                        flex: 2,
-                        child: Center(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: Text(
-                              "${_cartProduct.product.name}",
-                              style: TextStyle(fontSize: 11),
-                            ),
+                  ),
+                  Expanded(
+                      flex: 2,
+                      child: Center(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Text(
+                            "${_cartProduct.product.name}",
+                            style: TextStyle(fontSize: 11),
                           ),
-                        )),
-                  ],
-                ),
+                        ),
+                      )),
+                ],
               ),
-              Row(
+            ),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      padding: EdgeInsets.only(),
+                      child: Text(_cartProduct.product.price.formatted(),
+                          style: TextStyle(fontSize: 14, color: Colors.green)),
+                    ),
+                  ),
+                ),
+                BuyingCountWgt(
+                      (CountWgtEvent e) {
+                    if (e == CountWgtEvent.ADD) {
+                      Provider.of<CartBloc>(context)
+                          .dispatch(Add(_cartProduct.product));
+                    } else {
+                      Provider.of<CartBloc>(context)
+                          .dispatch(Remove(_cartProduct.product));
+                    }
+                  },
+                  initialCount: _cartProduct.count,
+                )
+              ],
+            ),
+            Container(
+              color: Colors.grey[100],
+              child: Row(
                 children: <Widget>[
                   Expanded(
+                    child: Container(
+                      padding: EdgeInsets.only(right: 17),
+                      alignment: Alignment.centerRight,
+                      child: Text("مجموع این محصول:",
+                          style:
+                          TextStyle(fontSize: 12, color: Colors.black54)),
+                    ),
+                  ),
+                  Container(
+                    height: 40,
+                    width: 150,
                     child: Align(
-                      alignment: Alignment.centerLeft,
+                      alignment: Alignment.center,
                       child: Container(
-                        padding: EdgeInsets.only(),
-                        child: Text(_cartProduct.product.price.formatted(),
+                        padding: EdgeInsets.only(left: 14),
+                        child: Text(
+                            (_cartProduct.product.price.amount *
+                                _cartProduct.count)
+                                .toString() +
+                                " تومان ",
                             style:
-                                TextStyle(fontSize: 14, color: Colors.green)),
+                            TextStyle(fontSize: 12, color: Colors.black54)),
                       ),
                     ),
                   ),
-                  BuyingCountWgt(
-                    (CountWgtEvent e) {
-                      if (e == CountWgtEvent.ADD) {
-                        Provider.of<CartBloc>(context)
-                            .dispatch(Add(_cartProduct.product));
-                      } else {
-                        Provider.of<CartBloc>(context)
-                            .dispatch(Remove(_cartProduct.product));
-                      }
-                    },
-                    initialCount: _cartProduct.count,
-                  )
                 ],
               ),
-              Container(
-                color: Colors.grey[100],
-                child: Row(
-                  children: <Widget>[
-                    Container(
-                      height: 40,
-                      width: 150,
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Container(
-                          padding: EdgeInsets.only(left: 14),
-                          child: Text(
-                              (_cartProduct.product.price.amount *
-                                          _cartProduct.count)
-                                      .toString() +
-                                  " تومان ",
-                              style: TextStyle(
-                                  fontSize: 12, color: Colors.black54)),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text("  :مجموع این محصول",
-                            style:
-                                TextStyle(fontSize: 12, color: Colors.black54)),
-                      ),
-                    )
-                  ],
-                ),
-              )
-            ],
-          ),
+            )
+          ],
         ),
       ),
     );

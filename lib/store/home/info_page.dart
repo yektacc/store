@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:store/common/loading_widget.dart';
-import 'package:store/store/info/info_client.dart';
 import 'package:provider/provider.dart';
+import 'package:store/common/loading_widget.dart';
+import 'package:store/common/widgets/app_widgets.dart';
+import 'package:store/store/info/info_client.dart';
 
 class InfoPage extends StatefulWidget {
   static const String routeName = 'infopage';
@@ -29,8 +30,8 @@ class _InfoPageState extends State<InfoPage> {
     });
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("اطلاعات"),
+      appBar: CustomAppBar(
+        titleText: "اطلاعات",
       ),
       body: Container(
         child: _fullInfo == null

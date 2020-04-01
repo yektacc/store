@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/services/chat/user_inbox_page.dart';
 import 'package:store/store/landing/landing_page.dart';
 import 'package:store/store/location/map/map_page.dart';
@@ -13,13 +14,14 @@ import 'package:store/store/login_register/login_status/login_status_event_state
 import 'package:store/store/login_register/profile/profile_bloc.dart';
 import 'package:store/store/login_register/profile/profile_bloc_event_state.dart';
 import 'package:store/store/login_register/profile/profile_page.dart';
-import 'package:store/store/management/management_bloc.dart';
+import 'package:store/store/management/management_home_page.dart';
+import 'package:store/store/management/management_login_bloc.dart';
+import 'package:store/store/management/management_login_event_state.dart';
 import 'package:store/store/management/manager_login_page.dart';
-import 'package:store/store/management/service/service_management_page.dart';
-import 'package:store/store/management/shop/seller_request_form.dart';
-import 'package:store/store/management/shop/shop_management_page.dart';
+import 'package:store/store/management/seller/shop_request_form.dart';
 import 'package:store/store/order/order_page.dart';
 import 'package:store/store/products/cart/cart_page.dart';
+import 'package:store/store/products/favorites/favorites_page.dart';
 import 'package:store/store/products/filter/filtered_products_bloc.dart';
 import 'package:store/store/products/product/products_bloc.dart';
 import 'package:store/store/products/search/search_delegate.dart';
@@ -130,14 +132,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     ));*/
   }
 
-  AppBar _buildAppBar(BuildContext context) {
-    return new AppBar(
-      iconTheme: IconThemeData(color: AppColors.second_color),
-      backgroundColor: Colors.grey[50],
-      title: Text(
-        'فروشگاه',
-        style: TextStyle(fontSize: 15, color: AppColors.second_color),
-      ),
+  CustomAppBar _buildAppBar(BuildContext context) {
+    return new CustomAppBar(
+      titleText: 'فروشگاه',
+      light: true,
       /*title: FlatButton(
         child: Row(
           children: <Widget>[
@@ -208,8 +206,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     end: Alignment(0.8, 0.0),
                     // 10% of the width, so there are ten blinds.
                     colors: [
-                      AppColors.second_color,
-                      AppColors.second_color,
+                      AppColors.main_color,
+                      AppColors.main_color,
                     ],
                     // whitish to gray
                     tileMode:
@@ -349,7 +347,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: BlocBuilder(
                   bloc: widget._loginStatusBloc,
                   builder: (context, LoginStatusState state) {
-                    var managementBloc = Provider.of<ManagementBloc>(context);
+                    var managerLoginBloc =
+                    Provider.of<ManagerLoginBloc>(context);
 
                     return new Container(
 //                    height: MediaQuery.of(context).size.height,
@@ -384,26 +383,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           state is IsLoggedIn
                               ? _buildDrawerItem(() {
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => OrderPage()));
-                          }, Icons.history, "سفارش های قبلی")
+                                builder: (context) => UserOrderPage()));
+                          }, Icons.history, "سفارش های شما")
                               : Container(),
                           state is IsLoggedIn
                               ? _buildDrawerItem(() {
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) => UserPetPage()));
-                          }, Icons.shopping_cart, "حیوان خانگی شما")
+                          }, Icons.pets, "حیوان خانگی شما")
                               : Container(),
+                          state is IsLoggedIn ? Divider() : Container(),
                           state is IsLoggedIn
                               ? _buildDrawerItem(() {
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => UserPetPage()));
-                          }, Icons.favorite, "علاقه‌مندی ها")
-                              : Container(),
-                          Divider(),
-                          state is IsLoggedIn
-                              ? _buildDrawerItem(() {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => UserPetPage()));
+                                builder: (context) => FavoritesPage()));
                           }, Icons.favorite, "علاقه‌مندی ها")
                               : Container(),
                           Divider(),
@@ -420,28 +413,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                         SpecialProductType.NEWEST)));
                           }, Icons.new_releases, "جدید‌ترین محصولات"),
                           Divider(),
-                          managementBloc.user == null
+                          !(managerLoginBloc.currentState is ManagerLoggedIn)
                               ? _buildDrawerItem(() {
-                            if (managementBloc.user == null) {
+                            if (!(managerLoginBloc.currentState
+                            is ManagerLoggedIn)) {
                               Navigator.of(context).push(
                                   MaterialPageRoute(
                                       builder: (context) =>
                                           ManagerLoginPage()));
                             }
-                          }, Icons.store, "ورود به قسمت فروشندگان")
+                          }, Icons.store, "ورود به قسمت مدیریت")
                               : GestureDetector(
                             onTap: () {
-                              if (managementBloc.srvCenterId == '') {
-                                Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            ShopManagementPage()));
-                              } else {
-                                Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            ServiceManagementPage()));
-                              }
+                              Navigator.of(context).pushNamed(
+                                  ManagementHomePage.routeName);
                             },
                             child: Card(
                               color: Colors.blueGrey[50],
@@ -478,7 +463,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                       flex: 2,
                                       child: Container(
                                         child: Text(
-                                          managementBloc.user.email,
+                                          (managerLoginBloc.currentState
+                                          as ManagerLoggedIn)
+                                              .user
+                                              .email,
                                           style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 11),
@@ -503,7 +491,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               ),
                             ),
                           ),
-                          state is IsLoggedIn && managementBloc.user == null
+                          state is IsLoggedIn &&
+                              !(managerLoginBloc.currentState
+                              is ManagerLoggedIn)
                               ? _buildDrawerItem(() {
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) =>
@@ -591,13 +581,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     child: MainArea(),
                   ),
                   GestureDetector(
-                    child: AppBar(
-                      backgroundColor: Colors.grey[300],
+                    child: CustomAppBar(
+                      light: true,
                       leading: Padding(
                         padding: EdgeInsets.only(right: 14),
                         child: Icon(
                           Icons.search,
-                          color: AppColors.second_color,
+                          color: AppColors.main_color,
                         ),
                       ),
                       title: Container(
@@ -610,8 +600,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             borderRadius: BorderRadius.circular(4)),
                         child: Text(
                           'جستجو بین محصولات',
-                          style: TextStyle(
-                              fontSize: 12, color: Colors.grey[700]),
+                          style:
+                          TextStyle(fontSize: 12, color: Colors.grey[700]),
                           textAlign: TextAlign.center,
                         ),
                       ),

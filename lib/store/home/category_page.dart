@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/data_layer/products/products_count_in_category.dart';
 import 'package:store/store/products/product/products_bloc.dart';
 import 'package:store/store/products/product/products_bloc_event.dart';
 import 'package:store/store/structure/model.dart';
-import 'package:provider/provider.dart';
-import 'package:rxdart/rxdart.dart';
 
 class CategoryPage extends StatefulWidget {
   final Identifier _initialIdentifier;
   final VoidCallback goToNextPage;
   final bool onlyId;
   dynamic nextPageArgs;
+  final bool altColor;
 
   CategoryPage(this._initialIdentifier, this.goToNextPage,
-      {this.onlyId = false});
+      {this.onlyId = false, this.altColor = false});
 
   @override
   _CategoryPageState createState() => _CategoryPageState(_initialIdentifier);
 
-  static void launchProducts(
-      BuildContext context, Identifier id, VoidCallback goToNextPage) {
+  static void launchProducts(BuildContext context, Identifier id,
+      VoidCallback goToNextPage) {
     Provider.of<ProductsBloc>(context).dispatch(LoadProducts(id));
     goToNextPage();
   }
@@ -42,12 +44,13 @@ class _CategoryPageState extends State<CategoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: CustomAppBar(
+        altBackground: widget.altColor,
         title: StreamBuilder<Identifier>(
           stream: _currentIdentifier,
           builder: (context, snapshot) {
             return Text(
-                snapshot.data != null ? snapshot.data.getName() ?? '' : '');
+                snapshot.data != null ? snapshot.data.name ?? '' : '');
           },
         ),
         leading: new IconButton(
@@ -74,57 +77,60 @@ class _CategoryPageState extends State<CategoryPage> {
         builder: (context, snapshot) {
           return new ListView(
               children: ListTile.divideTiles(
-                      context: context,
-                      color: Colors.black26,
-                      tiles: (snapshot.data is AllPets
-                          ? (snapshot.data as AllPets)
-                              .pets
-                              .map((pet) => GestureDetector(
-                                    onTap: () {
-                                      _currentIdentifier.add(pet);
-                                      _allPetsPage = snapshot.data;
-                                    },
-                                    child:
-                                        CategoryItem(pet, widget.goToNextPage),
-                                  ))
-                              .toList()
-                          : snapshot.data is StructPet
-                              ? (snapshot.data as StructPet)
-                                  .categories
-                                  .map((cat) => GestureDetector(
-                                        onTap: () {
-                                          if (cat.subCategories.isEmpty) {
-                                            CategoryPage.launchProducts(context,
-                                                cat, widget.goToNextPage);
-                                          } else {
-                                            _currentIdentifier.add(cat);
-                                            _petPage = snapshot.data;
-                                          }
-                                          print("new cat : $cat");
-                                        },
-                                        child: CategoryItem(
-                                            cat, widget.goToNextPage),
-                                      ))
-                                  .toList()
-                              : snapshot.data is StructCategory &&
-                                      (snapshot.data as StructCategory)
-                                          .subCategories
-                                          .isNotEmpty
-                                  ? (snapshot.data as StructCategory)
-                                      .subCategories
-                                      .map((subCat) => GestureDetector(
-                                            onTap: () {
-                                              CategoryPage.launchProducts(
-                                                  context,
-                                                  subCat,
-                                                  widget.goToNextPage);
-                                              _categoryPage = snapshot.data;
-                                            },
-                                            child: CategoryItem(
-                                                subCat, widget.goToNextPage),
-                                          ))
-                                      .toList()
-                                  : [Container()]))
+                  context: context,
+                  color: Colors.black26,
+                  tiles: (snapshot.data is AllPets
+                      ? (snapshot.data as AllPets)
+                      .pets
+                      .map((pet) =>
+                      GestureDetector(
+                        onTap: () {
+                          _currentIdentifier.add(pet);
+                          _allPetsPage = snapshot.data;
+                        },
+                        child:
+                        CategoryItem(pet, widget.goToNextPage),
+                      ))
+                      .toList()
+                      : snapshot.data is StructPet
+                      ? (snapshot.data as StructPet)
+                      .categories
+                      .map((cat) =>
+                      GestureDetector(
+                        onTap: () {
+                          if (cat.subCategories.isEmpty) {
+                            CategoryPage.launchProducts(context,
+                                cat, widget.goToNextPage);
+                          } else {
+                            _currentIdentifier.add(cat);
+                            _petPage = snapshot.data;
+                          }
+                          print("new cat : $cat");
+                        },
+                        child: CategoryItem(
+                            cat, widget.goToNextPage),
+                      ))
+                      .toList()
+                      : snapshot.data is StructCategory &&
+                      (snapshot.data as StructCategory)
+                          .subCategories
+                          .isNotEmpty
+                      ? (snapshot.data as StructCategory)
+                      .subCategories
+                      .map((subCat) =>
+                      GestureDetector(
+                        onTap: () {
+                          CategoryPage.launchProducts(
+                              context,
+                              subCat,
+                              widget.goToNextPage);
+                          _categoryPage = snapshot.data;
+                        },
+                        child: CategoryItem(
+                            subCat, widget.goToNextPage),
+                      ))
+                      .toList()
+                      : [Container()]))
                   .toList());
         },
       ),
@@ -141,7 +147,7 @@ class CategoryItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Text(_identifier.getName()),
+      leading: Text(_identifier.name),
       trailing: SizedBox(
         height: 43,
         width: 43,
@@ -155,8 +161,9 @@ class CategoryItem extends StatelessWidget {
               return Container();
             } else {
               return GestureDetector(
-                onTap: () => CategoryPage.launchProducts(
-                    context, _identifier, goToNextPage),
+                onTap: () =>
+                    CategoryPage.launchProducts(
+                        context, _identifier, goToNextPage),
                 child: Container(
                   alignment: Alignment.center,
                   decoration: BoxDecoration(

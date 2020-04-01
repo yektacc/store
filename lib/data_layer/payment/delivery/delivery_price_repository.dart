@@ -14,7 +14,7 @@ class DeliveryPriceRepository {
     if (response is SuccessResponse) {
 
       var tariffJson = List<Map<String, dynamic>>.from(response.data);
-      Tariff t = Tariff.fromJson(tariffJson[0]);
+      Tariff t = Tariff.fromJson(tariffJson [0]);
 
       if (weight > t.tariff2) {
         return (t.tariff1 + (weight - t.tariff2.toDouble()) * t.tariff3).toInt();

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/store/products/detail/product_detail_model.dart';
 import 'package:store/store/products/favorites/favorites_bloc.dart';
-import 'package:provider/provider.dart';
+import 'package:store/store/products/favorites/model.dart';
 
 import 'favorite_event_state.dart';
 
 class AddToFavorite extends StatelessWidget {
-  final DetailedProduct product;
+  final DetailedProduct detailProduct;
   FavoriteBloc _bloc;
 
-  AddToFavorite(this.product);
+  AddToFavorite(this.detailProduct);
 
   @override
   Widget build(BuildContext context) {
@@ -25,25 +26,20 @@ class AddToFavorite extends StatelessWidget {
       child: BlocBuilder(
         bloc: _bloc,
         builder: (context, FavoriteState state) {
-          print('alsdjflaksdjdfla' + state.toString());
+          print('favorite state: ' + state.toString());
 
           if (state is FavoritesLoading) {
             return Container(
-              alignment: Alignment.center,
-              child: Icon(
-                Icons.favorite,
-                color: AppColors.grey[400],
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 22),
+
             );
           } else if (state is FavoritesLoaded) {
-            print('i8yei23yi23y');
-            if (state.detailedProducts.isEmpty) {
+            if (state.products.isEmpty) {
               return _buildItem(false);
             } else {
-              print('asdlfijalsdjdflaksdjdflkakjsddf');
-              if (state.detailedProducts.contains(product)) {
-                return _buildItem(true);
+              if (state.products.map((p) => p.id).contains(detailProduct.id)) {
+                var favProduct = state.products.firstWhere((
+                    favProduct) => favProduct.id == detailProduct.id);
+                return _buildItem(true, identifier: favProduct.identifier);
               } else {
                 return _buildItem(false);
               }
@@ -58,15 +54,15 @@ class AddToFavorite extends StatelessWidget {
     );
   }
 
-  Widget _buildItem(bool selected) {
+  Widget _buildItem(bool selected, {FavoriteIdentifier identifier}) {
+    assert(selected == false || identifier != null);
+
     return GestureDetector(
       onTap: () {
         if (!selected) {
-          print('sdfj');
-          _bloc.dispatch(AddFavorite(product));
+          _bloc.dispatch(AddFavorite(detailProduct));
         } else {
-          print('ksjfkdjkfjdkf');
-          _bloc.dispatch(RemoveFavorite(int.parse(product.id)));
+          _bloc.dispatch(RemoveFavorite(identifier.id));
         }
       },
       child: Container(
@@ -75,7 +71,7 @@ class AddToFavorite extends StatelessWidget {
         alignment: Alignment.center,
         child: Icon(
           Icons.favorite,
-          color: selected ? AppColors.second_color : Colors.grey[400],
+          color: selected ? AppColors.main_color : Colors.grey[400],
         ),
         padding: EdgeInsets.symmetric(horizontal: 22),
       ),

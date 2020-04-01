@@ -2,9 +2,21 @@ import 'package:equatable/equatable.dart';
 import 'package:quiver/core.dart';
 
 abstract class Identifier extends Equatable {
+  Identifier();
+
   int getId();
 
-  String getName();
+  String get name;
+}
+
+class NAIdentifier extends Identifier {
+  @override
+  int getId() => -1;
+
+  NAIdentifier();
+
+  @override
+  String get name => '';
 }
 
 class StructPet extends Identifier {
@@ -22,9 +34,6 @@ class StructPet extends Identifier {
   @override
   int getId() => id;
 
-  @override
-  String getName() => nameFA;
-
   StructPet(this.nameFA, this.nameEN, this.id, this.categories);
 
   @override
@@ -37,9 +46,13 @@ class StructPet extends Identifier {
         petJson["basecategory_id"],
         (petJson["subcategories"] as List)
             .map((value) =>
-                StructCategory.fromJson(value, petJson["basecategory_id"]))
+            StructCategory.fromJson(value,
+                petJson["basecategory_id"], petJson["basecategory_name_fa"]))
             .toList());
   }
+
+  @override
+  String get name => nameFA;
 }
 
 class StructCategory extends Identifier {
@@ -47,16 +60,14 @@ class StructCategory extends Identifier {
   final String nameFA;
   final String nameEN;
   final int petId;
+  final String petName;
   final List<StructSubCategory> subCategories;
 
-  StructCategory(
-      this.id, this.nameFA, this.nameEN, this.subCategories, this.petId);
+  StructCategory(this.id, this.nameFA, this.nameEN, this.subCategories,
+      this.petId, this.petName);
 
   @override
   int getId() => id;
-
-  @override
-  String getName() => nameFA;
 
   @override
   int get hashCode => hash3(nameFA, nameEN, id);
@@ -67,33 +78,41 @@ class StructCategory extends Identifier {
       other.id == this.id &&
       this.petId == other.petId;
 
-  factory StructCategory.fromJson(Map<String, dynamic> json, int petId) {
+  factory StructCategory.fromJson(Map<String, dynamic> json,
+      int petId,
+      String petName,) {
     return StructCategory(
         json["subcategory_id"],
         json["subcategory_name_fa"],
         json["subcategory_name_en"],
         (json["product_types"] as List)
-            .map((value) => StructSubCategory.fromJson(
-                value, petId, json["subcategory_id"]))
+            .map((value) =>
+            StructSubCategory.fromJson(value, petId,
+                json["subcategory_id"], petName, json["subcategory_name_fa"]))
             .toList(),
-        petId);
+        petId,
+        petName);
   }
+
+  @override
+  // TODO: implement name
+  String get name => '$petName $nameFA';
 }
 
 class StructSubCategory extends Identifier {
   final int id;
   final int petId;
   final int catId;
+  final String petName;
+  final String catName;
   final String nameFA;
   final String nameEN;
 
-  StructSubCategory(this.id, this.nameFA, this.nameEN, this.petId, this.catId);
+  StructSubCategory(this.id, this.nameFA, this.nameEN, this.petId, this.catId,
+      this.petName, this.catName);
 
   @override
   int getId() => id;
-
-  @override
-  String getName() => nameFA;
 
   @override
   int get hashCode => hash3(nameFA, nameEN, id);
@@ -105,11 +124,18 @@ class StructSubCategory extends Identifier {
       this.petId == other.petId &&
       this.catId == other.catId;
 
-  factory StructSubCategory.fromJson(
-      Map<String, dynamic> json, int petId, int catId) {
+  factory StructSubCategory.fromJson(Map<String, dynamic> json, int petId,
+      int catId, String petName, String catName) {
     return StructSubCategory(json["type_id"], json["type_name_fa"],
-        json["type_name_en"], petId, catId);
+        json["type_name_en"],
+        petId,
+        catId,
+        petName,
+        catName);
   }
+
+  @override
+  String get name => '$petName $catName $nameFA';
 }
 
 class CategoryItem {
@@ -134,17 +160,16 @@ class AllPets extends Identifier {
   }
 
   @override
-  String getName() {
-    return "همه حیوانات";
-  }
+  // TODO: implement name
+  String get name => "همه حیوانات";
 }
 
 class AllItems extends Identifier {
   @override
-  String getName() => "همه محصولات";
-
-  @override
   int getId() {
     return 0;
   }
+
+  @override
+  String get name => "همه محصولات";
 }

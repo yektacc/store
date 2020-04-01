@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/store/products/brands/brands_bloc.dart';
 import 'package:store/store/products/brands/brands_event_state.dart';
-import 'package:provider/provider.dart';
-import 'package:rxdart/rxdart.dart';
 
 import 'filter.dart';
 import 'filtered_products_bloc.dart';
@@ -101,14 +101,14 @@ class _SortSelectionState extends State<SortSelection> {
               borderRadius: BorderRadius.circular(30),
               color: Colors.grey[100],
               border:
-                  selected ? Border.all(color: AppColors.second_color) : null),
+              selected ? Border.all(color: AppColors.main_color) : null),
           child: Row(
             children: <Widget>[
               Container(
                 child: Icon(
                   Icons.done,
                   size: 19,
-                  color: selected ? AppColors.second_color : Colors.grey[400],
+                  color: selected ? AppColors.main_color : Colors.grey[400],
                 ),
                 margin: EdgeInsets.only(right: 10),
               ),
@@ -347,7 +347,7 @@ class _BrandsAreaState extends State<BrandsArea> {
               borderRadius: BorderRadius.circular(30),
               color: Colors.grey[100],
               border:
-                  selected ? Border.all(color: AppColors.second_color) : null),
+              selected ? Border.all(color: AppColors.main_color) : null),
           child: Row(
             children: <Widget>[
               Expanded(

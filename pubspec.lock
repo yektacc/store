@@ -684,8 +684,8 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "4211b0ff7e7fc0896e06a6a868fd68e9a32e6c34"
-      url: "https://github.com/khashayarmotarjemi/simple_slider.git"
+      resolved-ref: "669883bdcc9635673c4ebe14d34e6b96733b1299"
+      url: "https://github.com/khashayarmotarjemi/simple_slider"
     source: git
     version: "0.0.2"
   sky_engine:
@@ -784,6 +784,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.6"
+  uni_links:
+    dependency: "direct main"
+    description:
+      name: uni_links
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.0"
   url_launcher:
     dependency: "direct main"
     description:

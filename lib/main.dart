@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:store/data_layer/centers/centers_repository.dart';
 import 'package:store/data_layer/centers/service_repository.dart';
 import 'package:store/data_layer/fcm/fcm_token_repository.dart';
-import 'package:store/data_layer/management/create_product_repo.dart';
 import 'package:store/data_layer/management/seller_request_repository.dart';
 import 'package:store/data_layer/order/paid_orders_repository.dart';
 import 'package:store/data_layer/province/province_repository.dart';
@@ -15,6 +14,8 @@ import 'package:store/services/centers/centers_bloc.dart';
 import 'package:store/services/chat/inbox_manager.dart';
 import 'package:store/services/lost_pets/lost_pets_bloc.dart';
 import 'package:store/services/lost_pets/lost_pets_repository.dart';
+import 'package:store/store/checkout/checkout_bloc.dart';
+import 'package:store/store/checkout/coupon/coupon_repository.dart';
 import 'package:store/store/info/info_client.dart';
 import 'package:store/store/landing/landing_bloc.dart';
 import 'package:store/store/location/address/address_bloc.dart';
@@ -30,9 +31,8 @@ import 'package:store/store/login_register/profile/profile_bloc.dart';
 import 'package:store/store/login_register/profile/profile_repository.dart';
 import 'package:store/store/login_register/register/register_bloc.dart';
 import 'package:store/store/login_register/register/register_interactor.dart';
-import 'package:store/store/management/management_bloc.dart';
-import 'package:store/store/payment/coupon/coupon_bloc.dart';
-import 'package:store/store/payment/coupon/coupon_repository.dart';
+import 'package:store/store/management/management_login_bloc.dart';
+import 'package:store/store/order/order_bloc.dart';
 import 'package:store/store/products/brands/brands_bloc.dart';
 import 'package:store/store/products/cart/cart_bloc.dart';
 import 'package:store/store/products/comments/comments_repository.dart';
@@ -65,9 +65,9 @@ Future main() async {
   Net net = Net();
 
   // repositories
-  final ProductsRepository _productRepo = ProductsRepository(net);
   final SearchInteractor _searchInteractor = SearchInteractor();
   final StructureRepository _structureRepo = StructureRepository(net);
+  final ProductsRepository _productRepo = ProductsRepository(net);
   final LoginRepository _loginInteractor = LoginRepository(net);
   final RegisterInteractor _registerInteractor = RegisterInteractor(net);
   final ProfileRepository _profileRepo = ProfileRepository(net);
@@ -103,10 +103,14 @@ Future main() async {
   final AddressBloc _addressBloc = AddressBloc(_addressRepo);
   final CentersRepository _centersRepo = CentersRepository(_provinceRepo, net);
   final CentersBloc _centersBloc = CentersBloc(_centersRepo);
-  final ManagementRepository _sellerRepo = ManagementRepository(net);
-  final PreviousOrdersRepository _ordersRepo = PreviousOrdersRepository(net);
-  final ManagementBloc _managementBloc = ManagementBloc(
-      _sellerRepo, CreateProductRepository(), _ordersRepo, _fcmRepo);
+  final ManagementRepository _managementRepo = ManagementRepository(net);
+  final OrdersRepository _ordersRepo = OrdersRepository(net);
+  final ManagerLoginBloc _managerLoginBloc =
+  ManagerLoginBloc(_managementRepo, _fcmRepo);
+  /*final ShopManagementBloc _shopManagementBloc =
+      ShopManagementBloc(_managementRepo, _fcmRepo);*/
+  final OrderBloc _orderBloc =
+  OrderBloc(_ordersRepo, _loginStatusBloc, _managerLoginBloc);
 
   final SearchBloc _searchBloc =
   SearchBloc(_productRepo, _searchInteractor, _centersRepo);
@@ -114,35 +118,44 @@ Future main() async {
   final ProductsCountRepository _countRepo =
       ProductsCountRepository(_productRepo, _structureBloc);
   final SpecialProductsRepository _bestSellerRepo =
-  SpecialProductsRepository(net);
+  SpecialProductsRepository(net, _structureRepo);
   final ServicesRepository _servicesRepository = ServicesRepository(net);
   final AdsRepository _adsRepo = AdsRepository(net);
-  final DeliveryPriceRepository _deliveryPostRepo =
+  final DeliveryPriceRepository _deliveryPriceRepo =
       DeliveryPriceRepository(net);
   final TagsRepository _tagsRepository = TagsRepository(net, _detailRepo);
 
-  final OrderRepository _orderRepo = OrderRepository(net);
+  final SaveOrderRepository _orderRepo = SaveOrderRepository(net);
 
   final CartRepository _cartRepo = CartRepository(net, _detailRepo);
   final ProductPicturesRepository _picturesRepo =
       ProductPicturesRepository(net);
 
   final SiteInfoRepository _siteInfoRepository = SiteInfoRepository(net);
-  final FavoriteBloc _favoriteBloc = FavoriteBloc(
-      _loginStatusBloc, FavoriteRepository(_detailRepo), _detailRepo);
+  final FavoriteRepository _favoritesRepo = FavoriteRepository(net);
+  final FavoriteBloc _favoriteBloc =
+  FavoriteBloc(_loginStatusBloc, _favoritesRepo, _productRepo);
   final CommentsRepository _commentsRepo = CommentsRepository(net);
   final UserPetRepository _userPetRepository = UserPetRepository(net);
   final UserPetBloc _userPetBloc =
   UserPetBloc(_userPetRepository, _loginStatusBloc);
   final LandingBloc _landingBloc = LandingBloc(_provinceBloc, _structureBloc);
-  final CouponRepository _couponRepo = CouponRepository();
-  final CouponBloc _couponBloc = CouponBloc(_couponRepo);
+  final CouponRepository _couponRepo = CouponRepository(net);
+//  final CouponBloc _couponBloc = CouponBloc(_couponRepo);
 
   final SellerRequestRepository _sellerRequestRepo =
   SellerRequestRepository(net);
 
   final InboxManager _inboxManager =
-  InboxManager(_loginStatusBloc, _managementBloc, net);
+  InboxManager(_loginStatusBloc, _managerLoginBloc, net);
+  final CheckoutBloc _checkoutBloc = CheckoutBloc(
+      _deliveryPriceRepo,
+      _cartRepo,
+      _loginStatusBloc,
+      _centersRepo,
+      _detailRepo,
+      _orderRepo,
+      _couponRepo);
 
   runApp(App([
     Provider<Net>.value(value: net),
@@ -165,7 +178,7 @@ Future main() async {
     Provider<CentersBloc>.value(value: _centersBloc),
     Provider<AddressBloc>.value(value: _addressBloc),
     Provider<BrandsBloc>.value(value: _brandsBloc),
-    Provider<ManagementRepository>.value(value: _sellerRepo),
+    Provider<ManagementRepository>.value(value: _managementRepo),
     Provider<ProductsCountRepository>.value(value: _countRepo),
     Provider<ProvinceRepository>.value(value: _provinceRepo),
     Provider<SpecialProductsRepository>.value(value: _bestSellerRepo),
@@ -173,25 +186,26 @@ Future main() async {
     Provider<LostPetsRepository>.value(value: _lostPetsRepo),
     Provider<AdsRepository>.value(value: _adsRepo),
     Provider<ProductDetailRepository>.value(value: _detailRepo),
-    Provider<DeliveryPriceRepository>.value(value: _deliveryPostRepo),
+    Provider<DeliveryPriceRepository>.value(value: _deliveryPriceRepo),
     Provider<StructureRepository>.value(value: _structureRepo),
     Provider<TagsRepository>.value(value: _tagsRepository),
     Provider<CartRepository>.value(value: _cartRepo),
-    Provider<OrderRepository>.value(value: _orderRepo),
+    Provider<SaveOrderRepository>.value(value: _orderRepo),
     Provider<ProductPicturesRepository>.value(value: _picturesRepo),
     Provider<BrandsRepository>.value(value: _brandsRepository),
     Provider<CentersRepository>.value(value: _centersRepo),
-    Provider<PreviousOrdersRepository>.value(value: _ordersRepo),
+    Provider<OrdersRepository>.value(value: _ordersRepo),
     Provider<SiteInfoRepository>.value(value: _siteInfoRepository),
     Provider<ProductsRepository>.value(value: _productRepo),
     Provider<FavoriteBloc>.value(value: _favoriteBloc),
     Provider<CommentsRepository>.value(value: _commentsRepo),
-    Provider<ManagementBloc>.value(value: _managementBloc),
+    Provider<ManagerLoginBloc>.value(value: _managerLoginBloc),
     Provider<UserPetBloc>.value(value: _userPetBloc),
     Provider<LandingBloc>.value(value: _landingBloc),
-    Provider<CouponBloc>.value(value: _couponBloc),
     Provider<SellerRequestRepository>.value(value: _sellerRequestRepo),
     Provider<FcmTokenRepository>.value(value: _fcmRepo),
     Provider<InboxManager>.value(value: _inboxManager),
+    Provider<CheckoutBloc>.value(value: _checkoutBloc),
+//    Provider<ShopManagementBloc>.value(value: _shopManagementBloc),
   ]));
 }

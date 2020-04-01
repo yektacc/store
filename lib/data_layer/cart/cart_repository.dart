@@ -1,18 +1,18 @@
 import 'dart:core';
 
 import 'package:json_annotation/json_annotation.dart';
-import 'package:store/store/products/cart/cart_product.dart';
+import 'package:store/store/products/cart/model.dart';
 import 'package:store/store/products/detail/product_detail_repository.dart';
 
 import '../netclient.dart';
 
 part 'cart_repository.g.dart';
 
-
 // abcde
 class CartRepository {
   final Net _client;
   final ProductDetailRepository _detailRepo;
+
   CartRepository(this._client, this._detailRepo);
 
   Future<List<CartItem>> fetch(String sessionId) async {
@@ -26,11 +26,12 @@ class CartRepository {
     }
   }
 
-  String _getCartItemFormatted(CartProductWithSaleItem item) {
-    return '{ "item_id" : ${item.saleItemId} , "quantity" : ${item.cartProduct.count}}';
-  }
+  String _getCartItemFormatted(CartProductWithSaleItem item) =>
+      '{ "item_id" : ${item.saleItemId} , "quantity" : ${item.cartProduct
+          .count}, "unit_price" : ${item.cartProduct.product.price.amount
+          .toString()} }';
 
-  Future<String> sendCart(
+  Future<OrderInfo> sendCart(
       String sessionId, List<CartProduct> cartProducts, String total) async {
     var mappedList = cartProducts.map((cartProduct) async {
       var saleItemId = await _detailRepo.getProductSaleItemId(
@@ -45,8 +46,8 @@ class CartRepository {
 
     String cartItems = list.fold(
         '',
-        (prev, cp) =>
-            _getCartItemFormatted(cp) + (prev == '' ? '' : ',') + prev);
+            (prev, product) =>
+        _getCartItemFormatted(product) + (prev == '' ? '' : ',') + prev);
 
     String cartItemsParam = '{ "items" :[$cartItems]}';
 
@@ -54,13 +55,14 @@ class CartRepository {
         body: {
           'session_id': sessionId,
           'cart_items': cartItemsParam,
-          'total_amount': total
+          'total_amount': total,
+          'request_type': 'app'
         },
         cacheEnabled: false);
     if (response is SuccessResponse) {
-      return response.data['order_code'];
+      return OrderInfo(response.data['order_code'], response.data['order_id']);
     } else {
-      return '';
+      return null;
     }
   }
 
@@ -96,4 +98,11 @@ class CartProductWithSaleItem {
   final int saleItemId;
 
   CartProductWithSaleItem(this.cartProduct, this.saleItemId);
+}
+
+class OrderInfo {
+  final String orderCode;
+  final int orderId;
+
+  OrderInfo(this.orderCode, this.orderId);
 }

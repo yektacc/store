@@ -10,7 +10,7 @@ class ZarinPalClient {
 
     Map data = {
       "MerchantID": "f2fe5ae0-99fe-11e8-aa9d-005056a205be",
-      "CallbackURL": "www.google.com",
+      "CallbackURL": "epet24://open-epet-app",
       "Amount": request.amount,
       "Description": "test"
     };

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 
 class NewCommentWgt extends StatefulWidget {
   final int saleItemId;
@@ -32,12 +33,9 @@ class _NewCommentWgtState extends State<NewCommentWgt> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'ثبت نظر',
-          style: TextStyle(color: AppColors.main_color,fontSize: 16),
-        ),
-        backgroundColor: Colors.grey[50],
+      appBar: CustomAppBar(
+        titleText: 'ثبت نظر',
+        light: true,
         elevation: 0,
         leading: IconButton(
           icon: Icon(

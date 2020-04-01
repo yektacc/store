@@ -7,6 +7,7 @@ class Address {
   final int provinceId;
   final String fullName;
   final String phone;
+  final bool editable;
 
   Address(
     this.id,
@@ -16,7 +17,7 @@ class Address {
     this.provinceId,
     this.fullName,
     this.phone,
-    this.postalCode,
+      this.postalCode, this.editable,
   );
 }
 

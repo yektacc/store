@@ -24,8 +24,9 @@ class LoadingProducts extends ProductsState {
 
 class ProductsLoaded extends ProductsState {
   final List<Product> products;
+  final Identifier identifier;
 
-  ProductsLoaded(this.products);
+  ProductsLoaded(this.products, this.identifier);
 
   @override
   String toString() {

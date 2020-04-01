@@ -5,13 +5,13 @@ import 'package:persian_datepicker/persian_datepicker.dart';
 import 'package:persian_datepicker/persian_datetime.dart';
 import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
+import 'package:store/common/widgets/app_widgets.dart';
+import 'package:store/store/checkout/zarin_pal/client.dart';
 import 'package:store/store/location/provinces/model.dart';
-import 'package:store/store/payment/zarin_pal/client.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'lost_pets_bloc.dart';
 import 'lost_pets_event_state.dart';
-import 'lost_pets_page.dart';
 import 'lost_pets_repository.dart';
 import 'model.dart';
 
@@ -83,17 +83,10 @@ class _FCRequestPageState extends State<FCRequestPage> {
               )
             : null,
         floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,*/
-        appBar: AppBar(
-          title: Padding(
-            padding: EdgeInsets.only(right: 10),
-            child: Text(
-              "ثبت درخواست جدید",
-              style: TextStyle(fontSize: 16, color: AppColors.main_color),
-            ),
-          ),
+        appBar: CustomAppBar(
+          titleText: "ثبت درخواست جدید",
           elevation: 0,
-          backgroundColor: Colors.grey[100],
-          iconTheme: IconThemeData(color: AppColors.main_color),
+          light: true,
         ),
         body: currentType == null
             ? Container(
@@ -512,13 +505,16 @@ class _FCRequestPageState extends State<FCRequestPage> {
 
 //                          print(gDate);
 
-                          PersianDateTime persianDT = PersianDateTime(jalaaliDateTime: dateController.text);
-                          String finalDate =  persianDT.toGregorian() + " ${currentTime.hour}:${currentTime.minute}:${currentTime.second}";
+                          PersianDateTime persianDT = PersianDateTime(
+                              jalaaliDateTime: dateController.text);
+                          String finalDate = persianDT.toGregorian() +
+                              " ${currentTime.hour}:${currentTime
+                                  .minute}:${currentTime.second}";
                           print('final date: ' + finalDate);
 
                           _bloc.dispatch(RegisterLostPet(LostPet(
                               city: currentCity,
-                              lostDate: finalDate ,
+                              lostDate: finalDate,
                               name: currentName,
                               age: currentAge.toString(),
                               reqType: currentType,

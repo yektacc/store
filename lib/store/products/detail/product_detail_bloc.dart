@@ -39,12 +39,4 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
       yield ProductDetailFailure();
     }
   }
-
-/*Stream<ProductDetailState> _mapLoadPopularToState(
-      LoadPopularProductDetail event) async* {
-    yield LoadingProductDetail();
-    await for (final snapshot in _repository.load(event.identifier)) {
-      yield ProductDetailLoaded(snapshot);
-    }
-  }*/
 }

@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/data_layer/products/product_pictures_repository.dart';
 import 'package:store/store/home/product_grid_list.dart';
 import 'package:store/store/login_register/login/login_page.dart';
@@ -24,7 +25,6 @@ import 'package:store/store/products/detail/product_detail_model.dart';
 import 'package:store/store/products/detail/product_detail_repository.dart';
 import 'package:store/store/products/favorites/favorite_widget.dart';
 import 'package:store/store/products/product/product.dart';
-import 'package:store/store/products/product/product_item_wgt.dart';
 import 'package:store/store/products/product/products_repository.dart';
 
 class DetailPageArgs {
@@ -59,22 +59,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   ProductDetailRepository _detailRepository;
 
   DetailedProduct _detailedProduct;
-  SellerProduct _currentSeller;
+  DetailSeller _currentSeller;
   ProductVariant _currentVariant;
   String _imgUrl;
 
-  final List<SellerProduct> allSellers = [];
+  final List<DetailSeller> allSellers = [];
 
   final BehaviorSubject<bool> loading = BehaviorSubject.seeded(false);
 
-  _switchSeller(SellerProduct newSeller) {
+  _switchSeller(DetailSeller newSeller) {
     setState(() {
       _currentSeller = newSeller;
     });
     _flashPage();
   }
 
-  SellerProduct _getCurrentSeller() {
+  DetailSeller _getCurrentSeller() {
     return allSellers.firstWhere((sp) => sp == _currentSeller);
   }
 
@@ -102,7 +102,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         StoreThumbnail(_currentSeller.shopId, _currentSeller.name),
         _detailedProduct.subCategory,
         price: _currentSeller.salePrice,
-        brand: 'unspecified',
+        brand: _detailedProduct.brand,
         imgUrl: widget.imgUrl ?? '');
   }
 
@@ -130,11 +130,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
     return Scaffold(
       backgroundColor: Colors.grey[300],
-      appBar: AppBar(
-        title: Text(
-          "جزییات محصول",
-          style: TextStyle(fontSize: 15),
-        ),
+      appBar: CustomAppBar(
+        titleText: "جزییات محصول",
         actions: <Widget>[
           Container(
             width: 70,
@@ -142,7 +139,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               bloc: Provider.of<CartBloc>(context),
               builder: (context, CartState state) {
                 if (state is CartLoaded) {
-                  return CartButton(state.count);
+                  return CartButton(state.cart.count);
                 } else {
                   return CartButton(0);
                 }
@@ -175,7 +172,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             }
 
                             print('all sellers: ' +
-                                allSellers.map((s) => s.shopId.toString())
+                                allSellers
+                                    .map((s) => s.shopId.toString())
                                     .toList()
                                     .toString() +
                                 '\n initial seller Id: ${widget
@@ -184,8 +182,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             _currentSeller = allSellers[0];
                             allSellers.forEach((sp) {
                               if (sp.shopId == widget.initialSellerId) {
-                                _currentSeller = allSellers.firstWhere(
-                                        (sp) =>
+                                _currentSeller = allSellers.firstWhere((sp) =>
                                     sp.shopId == widget.initialSellerId);
                               }
                             });
@@ -263,10 +260,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                             child: Align(
                                               alignment: Alignment.centerLeft,
                                               child: Text(
-                                                  /*widget.exProduct
-                                                      .getCheapest()
-                                                      .brand ??*/
-                                                  'widget.brand'),
+                                                  _getCurrentProduct().brand),
                                             ),
                                           ),
                                           Container(
@@ -301,7 +295,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                       ),
                                     ),
                                     Divider(),
-
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
@@ -332,15 +325,14 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                       child: Icon(
                                                         Icons.store,
                                                         size: 17,
-                                                        color: AppColors
-                                                            .main_color,
+                                                        color: Colors.grey[600],
                                                       ),
                                                     ),
                                                     Text(
                                                       _currentSeller.name,
                                                       style: TextStyle(
-                                                          color: AppColors
-                                                              .main_color,
+                                                          color:
+                                                          Colors.grey[700],
                                                           fontSize: 12),
                                                     ),
                                                   ],
@@ -372,11 +364,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                     Text(
                                                       _currentSeller.city,
                                                       style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          fontSize: 11,
-                                                          color: AppColors
-                                                              .main_color),
+                                                        fontWeight:
+                                                        FontWeight.bold,
+                                                        fontSize: 11,
+                                                        color: Colors.grey[700],
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
@@ -401,88 +393,53 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                     ),
                                     Divider(),
                                     Container(
-                                      child: Row(
-                                        children: <Widget>[
-                                          Container(
-                                            alignment: Alignment.centerRight,
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            CommentsPage(
-                                                                _currentSeller
-                                                                    .saleItemId)));
-                                              },
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                    color: AppColors.main_color,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20)),
-                                                margin:
-                                                    EdgeInsets.only(left: 12),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  children: <Widget>[
-                                                    Padding(
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                              vertical: 6,
-                                                              horizontal: 15),
-                                                      child: Text(
-                                                        "نظرات کاربران",
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 12, top: 4),
-                                                      child: Icon(
-                                                        Icons.insert_comment,
-                                                        size: 20,
-                                                        color: Colors.white,
-                                                      ),
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: GestureDetector(
-                                              onTap: _showSubmitScore,
-                                              child: Container(
-                                                alignment: Alignment.centerLeft,
-                                                margin:
-                                                    EdgeInsets.only(left: 10),
-                                                child: RatingBarIndicator(
-                                                  textDirection:
-                                                      TextDirection.ltr,
-                                                  unratedColor:
-                                                      Colors.grey[400],
-                                                  rating: 2.75,
-                                                  itemBuilder:
-                                                      (context, index) => Icon(
-                                                    Icons.star,
-                                                    color: AppColors.main_color,
+                                      decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          borderRadius: BorderRadius.only(
+                                              bottomRight: Radius.circular(4),
+                                              bottomLeft:
+                                              Radius.circular(4))),
+                                      alignment: Alignment.centerLeft,
+                                      child: Container(
+                                        child: Row(
+                                          children: <Widget>[
+                                            Expanded(
+                                              child: GestureDetector(
+                                                onTap: _showSubmitScore,
+                                                child: Container(
+                                                  alignment:
+                                                  Alignment.centerLeft,
+                                                  margin: EdgeInsets.only(
+                                                      left: 10),
+                                                  child: RatingBarIndicator(
+                                                    textDirection:
+                                                    TextDirection.ltr,
+                                                    unratedColor:
+                                                    Colors.grey[400],
+                                                    rating: 2.75,
+                                                    itemBuilder:
+                                                        (context, index) =>
+                                                        Icon(
+                                                          Icons.star,
+                                                          color: AppColors
+                                                              .main_color,
+                                                        ),
+                                                    itemCount: 5,
+                                                    itemSize: 25.0,
+                                                    direction:
+                                                    Axis.horizontal,
                                                   ),
-                                                  itemCount: 5,
-                                                  itemSize: 25.0,
-                                                  direction: Axis.horizontal,
                                                 ),
                                               ),
-                                            ),
-                                          )
-                                        ],
+                                            )
+                                          ],
+                                        ),
+                                        alignment: Alignment.centerRight,
+                                        padding: EdgeInsets.only(
+                                            bottom: 10, right: 8),
                                       ),
-                                      alignment: Alignment.centerRight,
-                                      padding:
-                                          EdgeInsets.only(bottom: 10, right: 8),
                                     ),
+                                    _buildAddToCartWidget(),
                                   ],
                                 ),
                               ),
@@ -490,7 +447,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 margin: EdgeInsets.symmetric(
                                     vertical: 8, horizontal: 13),
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 2),
                                   child: Column(
                                     children: <Widget>[
                                       state.detailedProduct.description != null
@@ -512,133 +468,85 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                               ),
                                             )
                                           : Container(),
-                                      Divider(),
                                       Container(
+                                        decoration: BoxDecoration(
+                                            color: Colors.grey[100],
+                                            borderRadius: BorderRadius.only(
+                                                bottomRight: Radius.circular(4),
+                                                bottomLeft:
+                                                Radius.circular(4))),
+                                        alignment: Alignment.centerLeft,
                                         child: Container(
-                                          child: Center(
-                                            child: Column(
-                                              children: <Widget>[
-                                                Container(
-                                                  child: Align(
-                                                    alignment:
-                                                        Alignment.centerRight,
-                                                    child: Text(
-                                                      "اضافه کردن به سبد خرید ",
-                                                      style: TextStyle(
-                                                          fontSize: 14,
-                                                          color: Colors.green),
+                                          child: Row(
+                                            children: <Widget>[
+                                              Container(
+                                                alignment:
+                                                Alignment.centerRight,
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    Navigator.of(context).push(
+                                                        MaterialPageRoute(
+                                                            builder: (
+                                                                context) =>
+                                                                CommentsPage(
+                                                                    _currentSeller
+                                                                        .saleItemId)));
+                                                  },
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                        color: AppColors
+                                                            .main_color,
+                                                        borderRadius:
+                                                        BorderRadius
+                                                            .circular(20)),
+                                                    margin: EdgeInsets.only(
+                                                        left: 12),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .start,
+                                                      children: <Widget>[
+                                                        Padding(
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                              vertical: 6,
+                                                              horizontal:
+                                                              15),
+                                                          child: Text(
+                                                            "نظرات کاربران",
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white),
+                                                          ),
+                                                        ),
+                                                        Padding(
+                                                          padding:
+                                                          EdgeInsets.only(
+                                                              left: 12,
+                                                              top: 4),
+                                                          child: Icon(
+                                                            Icons
+                                                                .insert_comment,
+                                                            size: 20,
+                                                            color: Colors.white,
+                                                          ),
+                                                        )
+                                                      ],
                                                     ),
                                                   ),
                                                 ),
-                                                Container(
-                                                  margin:
-                                                      EdgeInsets.only(top: 10),
-                                                  alignment:
-                                                      Alignment.centerLeft,
-                                                  child: BlocBuilder(
-                                                      bloc:
-                                                          Provider.of<CartBloc>(
-                                                              context),
-                                                      builder: (context,
-                                                          CartState state) {
-                                                        return BuyingCountWgt(
-                                                          (CountWgtEvent e) {
-                                                            if (e ==
-                                                                CountWgtEvent
-                                                                    .ADD) {
-                                                              Provider.of<CartBloc>(
-                                                                      context)
-                                                                  .dispatch(Add(
-                                                                      _getCurrentProduct()));
-                                                            } else {
-                                                              Provider.of<CartBloc>(
-                                                                      context)
-                                                                  .dispatch(Remove(
-                                                                      _getCurrentProduct()));
-                                                            }
-                                                          },
-                                                          initialCount: Provider
-                                                                      .of<CartBloc>(
-                                                                          context)
-                                                                  .getCount(
-                                                                      _getCurrentProduct()) ??
-                                                              0,
-                                                        );
-                                                      }),
-                                                )
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
+                                          alignment: Alignment.centerRight,
+                                          padding: EdgeInsets.only(
+                                              bottom: 14, top: 14, right: 8),
                                         ),
                                       )
                                     ],
                                   ),
                                 ),
                               ),
-                              /* state.detailedProduct.description != null
-                        ? Card(
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                            vertical: 8, horizontal: 13),
-                        child: Column(
-                          children: <Widget>[
-                            Padding(
-                              padding: EdgeInsets.only(top: 10),
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Text('توضیحات : '),
-                            ),
-                            Container(
-                              height: 10,
-                            ),
-                            Text(state.detailedProduct.description,maxLines: 3,)
-                          ],
-                        ),
-                      ),
-                    )*/
-
-                              /*new Card(
-                      child: Container(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 8, horizontal: 13),
-                        child: Row(
-                          children: <Widget>[
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Text("فروشنده :"),
-                            ),
-                            Container(
-                              width: 8,
-                            ),
-                            FlatButton(
-                              shape: RoundedRectangleBorder(
-                                  side:
-                                      BorderSide(color: AppColors.main_color)),
-                              onPressed: () {},
-                              child: Row(
-                                children: <Widget>[
-                                  Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 5),
-                                  ),
-                                  Text(state.detailedProduct.variants[0]
-                                      .sellers[0].name),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                margin: EdgeInsets.symmetric(horizontal: 9),
-                                child: Text(state.detailedProduct.variants[0]
-                                    .sellers[0].city),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    )*/
-
                               allSellers.length != 1
                                   ? Column(
                                       children: <Widget>[
@@ -728,6 +636,97 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     }
   }
 
+  int _getCountInCart() {
+    var cartBloc = Provider.of<CartBloc>(context);
+
+    if (cartBloc.currentState is CartLoaded) {
+      var cart = (cartBloc.currentState as CartLoaded).cart;
+      var products = cart.products.map((cp) => cp.product);
+      if (products.contains(_getCurrentProduct())) {
+        return cart.products
+            .firstWhere((cp) => cp.product == _getCurrentProduct())
+            .count;
+      } else {
+        return 0;
+      }
+    } else {
+      return 0;
+    }
+  }
+
+  Widget _buildAddToCartWidget() {
+    var cartBloc = Provider.of<CartBloc>(context);
+
+    return BlocBuilder<CartBloc, CartState>(
+      bloc: cartBloc,
+      builder: (context, state) {
+        return Container(
+          height: 76,
+          padding: EdgeInsets.only(right: 8, bottom: 8, top: 8),
+          child: Row(
+            children: <Widget>[
+              Card(
+                elevation: 6,
+                child: Container(
+                  height: 56,
+                  width: 60,
+                  child: GestureDetector(
+                    onTap: () {
+                      cartBloc.dispatch(Add(_getCurrentProduct()));
+                    },
+                    child: _getCountInCart() == 0
+                        ? Icon(
+                      Icons.add_shopping_cart,
+                      size: 32,
+                      color: AppColors.main_color,
+                    )
+                        : Icon(
+                      Icons.add,
+                      size: 35,
+                      color: AppColors.main_color,
+                    ),
+                  ),
+                ),
+              ),
+              _getCountInCart() == 0
+                  ? Container()
+                  : Card(
+                elevation: 2,
+                child: Container(
+                  width: 60,
+                  height: 56,
+                  child: GestureDetector(
+                    onTap: () {
+                      cartBloc.dispatch(Remove(_getCurrentProduct()));
+                    },
+                    child: Icon(
+                      Icons.remove,
+                      size: 35,
+                      color: AppColors.main_color,
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                  child: Container(
+                      padding: EdgeInsets.only(left: 50),
+                      alignment: Alignment.centerLeft,
+                      child: _getCountInCart() == 0
+                          ? Container()
+                          : Text(
+                        _getCountInCart().toString() + " عدد ",
+                        style: TextStyle(
+                            fontSize: 22,
+                            color: AppColors.second_color,
+                            fontWeight: FontWeight.bold),
+                      ))),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildScoreSubmissionDialog(Function(int score) onClick) {
     final double initialRate = 3;
     double currentRating = initialRate;
@@ -794,7 +793,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 
-  Widget _getSellerItem(SellerProduct seller) {
+  Widget _getSellerItem(DetailSeller seller) {
     if (seller.shopId == _currentSeller.shopId) {
       return Container();
     } else {
@@ -851,7 +850,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           Expanded(
                             child: Card(
                               elevation: 6,
-                              color: AppColors.main_color,
+                              color: AppColors.second_color,
                               margin: EdgeInsets.only(
                                   right: 8, left: 8, bottom: 8, top: 4),
                               child: Container(

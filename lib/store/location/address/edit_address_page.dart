@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:store/common/constants.dart';
-import 'package:store/data_layer/province/province_repository.dart';
-import 'package:store/services/lost_pets/lost_pets_page.dart';
-import 'package:store/store/location/provinces/model.dart';
 import 'package:provider/provider.dart';
+import 'package:store/common/constants.dart';
+import 'package:store/common/widgets/app_widgets.dart';
+import 'package:store/common/widgets/form_fields.dart';
+import 'package:store/data_layer/province/province_repository.dart';
+import 'package:store/store/location/provinces/model.dart';
 
 import 'address_bloc.dart';
 import 'address_bloc_event.dart';
@@ -70,7 +71,9 @@ class _AddressAddEditPageState extends State<AddressAddEditPage> {
     }
 
     return new Scaffold(
-        appBar: AppBar(),
+        appBar: CustomAppBar(
+          titleText: widget.edit ? 'ویرایش آدرس' : 'ایجاد آدرس',
+        ),
         body: Container(
           color: Colors.grey[200],
           child: new Form(
@@ -82,7 +85,9 @@ class _AddressAddEditPageState extends State<AddressAddEditPage> {
                 ),
                 new Container(
                   color: Colors.grey[50],
-                  child: TextFormField(
+                  child: FormFields.text('نام', fullNameController,
+                      icon: Icons
+                          .person) /*TextFormField(
                     style: TextStyle(fontSize: 13),
                     controller: fullNameController,
                     textAlign: TextAlign.center,
@@ -96,53 +101,18 @@ class _AddressAddEditPageState extends State<AddressAddEditPage> {
                       }
                       return null;
                     },
-                  ),
-                  padding: EdgeInsets.only(left: 30, right: 20, top: 12),
+                  )*/
+                  ,
                 ),
                 new Container(
-                    color: Colors.grey[50],
-                    child: TextFormField(
-                      style: TextStyle(fontSize: 13),
-                      keyboardType: TextInputType.phone,
-                      controller: phoneController,
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                          icon: Icon(Icons.phone),
-                          hintText: "شماره موبایل",
-                          hintStyle: TextStyle(fontSize: 13)),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'شماره موبایل وارد نشده است';
-                        } else if (!(value.startsWith("09") &&
-                                value.length == 11 ||
-                            value.startsWith("+989") && value.length == 13 ||
-                            value.startsWith("00989") && value.length == 14)) {
-                          return 'شماره موبایل وارد شده صحیح نمی باشد';
-                        }
-                        return null;
-                      },
-                    ),
-                    padding: EdgeInsets.only(left: 30, right: 20, top: 12)),
+                  color: Colors.grey[50],
+                  child: FormFields.phone(controller: phoneController),
+                ),
                 new Container(
-                    color: Colors.grey[50],
-                    child: TextFormField(
-                      style: TextStyle(fontSize: 13),
-                      keyboardType: TextInputType.phone,
-                      controller: postalCodeController,
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                          icon: Icon(Icons.local_post_office),
-                          hintText: "کد پستی ",
-                          hintStyle: TextStyle(fontSize: 13)),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'کد پستی وارد نشده است';
-                        }
-                        return null;
-                      },
-                    ),
-                    padding: EdgeInsets.only(
-                        left: 30, right: 20, top: 12, bottom: 10)),
+                  color: Colors.grey[50],
+                  child: FormFields.text('کد پستی', postalCodeController,
+                      icon: Icons.local_post_office),
+                ),
                 new Container(
                   color: Colors.grey[50],
                   child: ProvinceCitySelectionRow(
@@ -153,8 +123,6 @@ class _AddressAddEditPageState extends State<AddressAddEditPage> {
                     initialCity: currentCity,
                     initialProvince: currentProvince,
                   ),
-                  padding:
-                      EdgeInsets.only(left: 30, right: 20, top: 12, bottom: 12),
                 ),
                 cityErr
                     ? Container(
@@ -169,10 +137,12 @@ class _AddressAddEditPageState extends State<AddressAddEditPage> {
                     : Container(),
                 new Container(
                   color: Colors.grey[100],
-                  child: TextFormField(
+                  child: FormFields.big('آدرس',
+                      addressController) /*TextFormField(
+                    textAlignVertical: TextAlignVertical.center,
                     style: TextStyle(fontSize: 13),
                     keyboardType: TextInputType.multiline,
-                    maxLines: 2,
+                    maxLines: 3,
                     controller: addressController,
                     textAlign: TextAlign.right,
                     decoration: InputDecoration(
@@ -185,8 +155,8 @@ class _AddressAddEditPageState extends State<AddressAddEditPage> {
                       }
                       return null;
                     },
-                  ),
-                  padding: EdgeInsets.only(left: 30, right: 20, top: 12),
+                  )*/
+                  ,
                 ),
                 new Container(
                   color: Colors.grey[50],
@@ -208,7 +178,8 @@ class _AddressAddEditPageState extends State<AddressAddEditPage> {
                                         currentProvince.id,
                                         fullNameController.text,
                                         phoneController.text,
-                                        postalCodeController.text),
+                                        postalCodeController.text,
+                                        true),
                                     1));
                             Navigator.pop(context);
                           } else {
@@ -224,7 +195,7 @@ class _AddressAddEditPageState extends State<AddressAddEditPage> {
                             Navigator.pop(context);
                           }
 
-                         /* Provider.of<AddressBloc>(context).dispatch(
+                          /* Provider.of<AddressBloc>(context).dispatch(
                               FetchAddresses(widget.sessionId,
                                   forceUpdate: true));*/
                         }

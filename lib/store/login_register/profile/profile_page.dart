@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:store/common/loading_widget.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_bloc.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_event_state.dart';
 import 'package:store/store/login_register/forgetpass/forget_pass_page.dart';
@@ -39,11 +40,8 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "پروفایل",
-            style: TextStyle(fontSize: 16),
-          ),
+        appBar: CustomAppBar(
+          titleText: "پروفایل",
         ),
         body: BlocBuilder(
             bloc: profileBloc,

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/store/products/cart/cart_bloc.dart';
 import 'package:store/store/products/product/product.dart';
 import 'package:store/store/products/product/product_item_wgt.dart';
 import 'package:store/store/products/special/special_products_repository.dart';
-import 'package:provider/provider.dart';
 
 class SpecialProductsPage extends StatefulWidget {
   final SpecialProductType type;
@@ -20,8 +21,8 @@ class _SpecialProductsPageState extends State<SpecialProductsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(appBarTitle),
+      appBar: CustomAppBar(
+        titleText: appBarTitle,
       ),
       body: Container(
         child: FutureBuilder<List<Product>>(

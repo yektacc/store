@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/store/home/category_page.dart';
 import 'package:store/store/products/product/products_page.dart';
 import 'package:store/store/structure/structure_bloc.dart';
 import 'package:store/store/structure/structure_event_state.dart';
-import 'package:provider/provider.dart';
 
 import 'home_page.dart';
 
@@ -32,7 +32,7 @@ class _PetSelectionState extends State<PetSelection> {
                   children: state.pets
                       .map(
                         (pet) => PetItem(
-                            title: pet.getName(),
+                        title: pet.name,
                             color: AppColors.colors[state.pets.indexOf(pet)],
                             icon: AppIcons.pets[state.pets.indexOf(pet)],
                             onTap: () {

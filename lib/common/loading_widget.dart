@@ -13,3 +13,14 @@ class LoadingIndicator extends StatelessWidget {
     );
   }
 }
+
+
+class LightLoadingIndicator extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SpinKitFadingCube(
+      color: AppColors.light_loading_indicator_color,
+      size: 50.0,
+    );
+  }
+}

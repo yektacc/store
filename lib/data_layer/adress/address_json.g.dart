@@ -17,7 +17,8 @@ AddressData _$AddressDataFromJson(Map<String, dynamic> json) {
     json['province_id'] as int,
     json['district_name'] as String,
     json['remained'] as String,
-    json['postal_code'].toString()
+      json['postal_code'].toString(),
+      json['editable'] as int
   );
 }
 

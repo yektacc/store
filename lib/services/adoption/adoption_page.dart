@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/store/location/provinces/model.dart';
 
 import 'model.dart';
@@ -14,8 +15,8 @@ class _AdoptionsPageState extends State<AdoptionsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("سرپرستی"),
+      appBar: CustomAppBar(
+        titleText: "سرپرستی",
       ),
       body: Container(
         child: ListView(

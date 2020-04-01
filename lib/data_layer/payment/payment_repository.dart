@@ -21,11 +21,13 @@ class PaymentRepo {
     }
   }
 
-  Future<bool> savePayment(int refId, String status, String sessionId) async {
+  Future<bool> savePayment(int refId, int amount, String status,
+      String sessionId) async {
     PostResponse response = await _client.post(EndPoint.SAVE_PAYMENT_INFO,
         body: {
           'ref_id': refId.toString(),
           'status': status,
+          'amount': amount.toString(),
           'session_id': sessionId
         });
     if (response is SuccessResponse) {

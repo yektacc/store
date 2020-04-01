@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:store/common/constants.dart';
+import 'package:persian_datepicker/persian_datetime.dart';
 import 'package:quiver/core.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:store/common/constants.dart';
 
 class DayOfMonth {
   final int day;
@@ -30,14 +31,34 @@ class DayOfMonth {
 }
 
 class DeliveryTimePicker extends StatefulWidget {
-  final List<DayOfMonth> availableDaysOfMonth;
+  final List<DayOfMonth> availableDaysOfMonth = [];
   final BehaviorSubject<List<DayOfMonth>> selectedDay;
   final BehaviorSubject<int> selectedHourFrom;
   final BehaviorSubject<int> selectedHourTo;
   final VoidCallback onNextTapped;
 
-  DeliveryTimePicker(this.availableDaysOfMonth, this.selectedDay,
-      this.selectedHourFrom, this.selectedHourTo, this.onNextTapped);
+  DeliveryTimePicker(this.selectedDay, this.selectedHourFrom,
+      this.selectedHourTo, this.onNextTapped) {
+    var persianDateTime = PersianDateTime();
+
+    var day1 = persianDateTime.add(Duration(days: 1));
+    var day2 = persianDateTime.add(Duration(days: 2));
+    var day3 = persianDateTime.add(Duration(days: 3));
+    var day4 = persianDateTime.add(Duration(days: 4));
+    var day5 = persianDateTime.add(Duration(days: 5));
+    var day6 = persianDateTime.add(Duration(days: 6));
+    var day7 = persianDateTime.add(Duration(days: 7));
+
+    this.availableDaysOfMonth.addAll([
+      DayOfMonth(day1.jalaaliDay, day1.jalaaliMonth, day1.jalaaliMonthName),
+      DayOfMonth(day2.jalaaliDay, day2.jalaaliMonth, day2.jalaaliMonthName),
+      DayOfMonth(day3.jalaaliDay, day3.jalaaliMonth, day3.jalaaliMonthName),
+      DayOfMonth(day4.jalaaliDay, day4.jalaaliMonth, day4.jalaaliMonthName),
+      DayOfMonth(day5.jalaaliDay, day5.jalaaliMonth, day5.jalaaliMonthName),
+      DayOfMonth(day6.jalaaliDay, day6.jalaaliMonth, day6.jalaaliMonthName),
+      DayOfMonth(day7.jalaaliDay, day7.jalaaliMonth, day7.jalaaliMonthName),
+    ]);
+  }
 
   @override
   _DeliveryTimePickerState createState() => _DeliveryTimePickerState();
@@ -154,7 +175,8 @@ class _DeliveryTimePickerState extends State<DeliveryTimePicker> {
                                   }
 
                                   var items;
-                                  if (hourToSnp.data != -1) {
+                                  if (hourToSnp.data != null &&
+                                      hourToSnp.data != -1) {
                                     items = [
                                           -1,
                                           7,

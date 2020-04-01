@@ -18,7 +18,6 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
       yield AddressesLoading();
       List<Address> addresses = await _addressRepository.getAll(event.sessionId,
           forceUpdate: event.forceUpdate);
-      print('sssssss3ss' + addresses[0].address);
 
       yield AddressesLoaded(addresses);
     } else if (event is AddAddress) {

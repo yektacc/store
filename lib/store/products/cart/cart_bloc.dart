@@ -3,7 +3,7 @@ import 'package:store/store/products/detail/product_detail_repository.dart';
 import 'package:store/store/products/product/product.dart';
 
 import 'cart_bloc_event.dart';
-import 'cart_product.dart';
+import 'model.dart';
 
 class CartBloc extends Bloc<CartEvent, CartState> {
   final List<CartProduct> _products = [];
@@ -14,14 +14,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   @override
   CartState get initialState => CartLoading();
 
-  int getTotalCount() {
-    int count = 0;
-    _products.forEach((cp) {
-      count += cp.count;
-    });
-
-    return count;
-  }
+/*  int getTotalCount() {
+ 
+  }*/
 
   int getCount(Product product) {
     if (_cartContainsProduct(product)) {
@@ -31,7 +26,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     }
   }
 
-  int getTotal() {
+  /* int getTotal() {
     int total = 0;
 
     _products.forEach((cp) {
@@ -39,7 +34,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     });
 
     return total;
-  }
+  }*/
 
   @override
   Stream<CartState> mapEventToState(CartEvent event) async* {
@@ -48,12 +43,12 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       if (_products.isEmpty) {
         yield CartEmpty();
       } else {
-        yield CartLoaded(_products, getTotalCount(), getTotal());
+        yield CartLoaded(Cart(_products));
       }
     } else if (event is Add) {
       yield CartLoading();
       _addProduct(event.product);
-      yield CartLoaded(_products, getTotalCount(), getTotal());
+      yield CartLoaded(Cart(_products));
     } else if (event is Clear) {
       yield CartLoading();
       _products.clear();
@@ -69,7 +64,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         yield CartEmpty();
       } else {
         print("11111111112");
-        yield CartLoaded(_products, getTotalCount(), getTotal());
+        yield CartLoaded(Cart(_products));
       }
     }
   }

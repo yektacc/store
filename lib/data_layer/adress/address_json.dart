@@ -34,8 +34,12 @@ class AddressData {
   @JsonKey(name: 'postal_code')
   final String postalCode;
 
+  @JsonKey(name: 'editable')
+  final int editable;
+
   AddressData(this.id, this.name, this.phone, this.provinceName, this.cityName,
-      this.cityId, this.provinceId, this.districtName, this.remained, this.postalCode);
+      this.cityId, this.provinceId, this.districtName, this.remained,
+      this.postalCode, this.editable);
 
   factory AddressData.fromJson(Map<String, dynamic> json) =>
       _$AddressDataFromJson(json);

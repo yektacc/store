@@ -1,45 +1,54 @@
+import 'package:store/data_layer/netclient.dart';
 import 'package:store/store/products/detail/product_detail_model.dart';
-import 'package:store/store/products/detail/product_detail_repository.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import 'model.dart';
 
 class FavoriteRepository {
-  final ProductDetailRepository _detailRepo;
-  final List<DetailedProduct> list = [];
+//  final ProductDetailRepository _detailRepo;
+  final Net _net;
 
-  FavoriteRepository(this._detailRepo);
+//  final List<FavoriteProduct> list = [];
 
-  Future<List<DetailedProduct>> getAll(String sessionId) async {
-    var products = await _getProductIDs();
-    var mappedList = products.map((productId) async {
-      return await _detailRepo.load(productId.toString());
-    }).toList();
+  FavoriteRepository(this._net);
 
-    List<DetailedProduct> list = await Future.wait(mappedList);
+  Future<List<FavoriteIdentifier>> getAll(int appUserID) async {
+    var res = await _net.post(EndPoint.GET_FAVORITES,
+        body: {
+          'app_user_id': appUserID.toString(),
+        },
+        cacheEnabled: false);
 
-    return list;
-  }
+    if (res is SuccessResponse) {
+      var list = List<Map<String, dynamic>>.from(res.data);
 
-  Future<bool> add(DetailedProduct product, String sessionId) async {
-    var products = await _getProductIDs();
-    print("kkokokkk" + products.toString());
-
-    if (products.contains(product.id)) {
-      return true;
+      return list.map((json) => FavoriteIdentifier.fromJson(json)).toList();
     } else {
-      products.add(int.parse(product.id));
-      _saveProducts(products);
-      return true;
+      return [];
     }
   }
 
-  Future<bool> remove(int productId, String sessionId) async {
-    _removeProduct(productId);
-    return true;
+  Future<bool> add(DetailedProduct product, int appUserID) async {
+    var res = _net.post(EndPoint.ADD_FAVORITE,
+        body: {
+          'app_user_id': appUserID.toString(),
+          'basecategory_id': product.subCategory.petId.toString(),
+          'subcategory_id': product.subCategory.catId.toString(),
+          'type_id': product.subCategory.id.toString(),
+          'prd_product_id': product.id.toString()
+        },
+        cacheEnabled: false);
+
+    return res is SuccessResponse;
   }
 
-  final key1 = 'items';
+  Future<bool> remove(int favoriteId, int appUserID) async =>
+      await _net.post(EndPoint.DELETE_FAVORITE,
+          body: {'app_user_id': appUserID, 'id': favoriteId},
+          cacheEnabled: false) is SuccessResponse;
 
-  Future<List<int>> _getProductIDs() async {
+//  final key1 = 'items';
+
+/* Future<List<int>> _getProductIDs() async {
     final prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey(key1)) {
       List<String> items = prefs.getStringList(key1);
@@ -56,10 +65,9 @@ class FavoriteRepository {
 
   _removeProduct(int id) async {
     var products = await _getProductIDs();
-    if(products.contains(id)){
+    if (products.contains(id)) {
       products.removeWhere((item) => item == id);
       await _saveProducts(products);
     }
-
-  }
+  }*/
 }

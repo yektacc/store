@@ -14,9 +14,15 @@ class ProductListItem extends StatelessWidget {
   final Product _product;
   final int _initialCount;
   final bool _purchasable;
+  Widget header;
 
-  ProductListItem(this._product, this._initialCount, {bool purchasable = true})
-      : this._purchasable = purchasable;
+  ProductListItem(this._product, this._initialCount,
+      {bool purchasable = true, Widget header})
+      : this._purchasable = purchasable {
+    header != null
+        ? this.header = header
+        : this.header = Container();
+  }
 
 /*  ProductListItem.fromExtended(ExtendedProduct extendedProduct, this._initialCount) {
     this._product = ExtendedProduct.ofProduct()
@@ -36,96 +42,104 @@ class ProductListItem extends StatelessWidget {
         );
       },
       child: new Card(
-        child: Container(
-          height: 200,
-          child: new Row(
-            children: <Widget>[
-              new Expanded(
-                flex: 1,
-                child: Container(
-                  padding: EdgeInsets.only(left: 10),
-                  child: Container(
-                    padding: EdgeInsets.only(left: 10),
-                    child: _product.imgUrl != null
-                        ? Helpers.image(_product.imgUrl)
-                        : FutureBuilder<List<ProductPicture>>(
-                            future:
-                                Provider.of<ProductPicturesRepository>(context)
+        child: Column(
+          children: <Widget>[
+            this.header,
+            Container(
+              height: 200,
+              child: new Row(
+                children: <Widget>[
+                  new Expanded(
+                    flex: 1,
+                    child: Container(
+                      padding: EdgeInsets.only(left: 10),
+                      child: Container(
+                        padding: EdgeInsets.only(left: 10),
+                        child: _product.imgUrl != null
+                            ? Helpers.image(_product.imgUrl)
+                            : FutureBuilder<List<ProductPicture>>(
+                            future: Provider.of<ProductPicturesRepository>(
+                                context)
                                     .fetch(int.parse(_product.id)),
                             builder: (context, snapshot) {
-                              if (snapshot != null && snapshot.data != null &&
+                              if (snapshot != null &&
+                                  snapshot.data != null &&
                                   snapshot.data.isNotEmpty) {
-                                return Helpers.image(snapshot.data[0].imageURL);
+                                return Helpers.image(
+                                    snapshot.data[0].imageURL);
                               } else {
                                 return Container();
                               }
                             }),
-                  ),
-                ),
-              ),
-              new Expanded(
-                flex: 2,
-                child: new Column(
-                  children: <Widget>[
-                    Expanded(
-                        flex: 2,
-                        child: Center(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: Text(
-                              "${_product.name}",
-                              style: TextStyle(fontSize: 13),
-                            ),
-                          ),
-                        )),
-                    Container(
-                      height: 28,
-                      alignment: Alignment.centerRight,
-                      child: RatingBarIndicator(
-                        rating: 2.75,
-                        itemBuilder: (context, index) => Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                        ),
-                        itemCount: 5,
-                        itemSize: 18.0,
-                        direction: Axis.horizontal,
                       ),
                     ),
-                    Divider(),
-                    Expanded(
-                      flex: 1,
-                      child: _product.price is PriceNotAvailable
-                          ? Container()
-                          : Align(
-                              alignment: Alignment.centerLeft,
+                  ),
+                  new Expanded(
+                    flex: 2,
+                    child: new Column(
+                      children: <Widget>[
+                        Expanded(
+                            flex: 2,
+                            child: Center(
                               child: Container(
-                                padding: EdgeInsets.only(left: 20),
-                                child: Text(_product.price.formatted(),
-                                    style: TextStyle(
-                                        fontSize: 14, color: Colors.green)),
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                child: Text(
+                                  "${_product.name}",
+                                  style: TextStyle(fontSize: 13),
+                                ),
                               ),
+                            )),
+                        Container(
+                          height: 28,
+                          alignment: Alignment.centerRight,
+                          child: RatingBarIndicator(
+                            rating: 2.75,
+                            itemBuilder: (context, index) =>
+                                Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                ),
+                            itemCount: 5,
+                            itemSize: 18.0,
+                            direction: Axis.horizontal,
+                          ),
+                        ),
+                        Divider(),
+                        Expanded(
+                          flex: 1,
+                          child: _product.price is PriceNotAvailable
+                              ? Container()
+                              : Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              padding: EdgeInsets.only(left: 20),
+                              child: Text(_product.price.formatted(),
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.green)),
                             ),
+                          ),
+                        ),
+                        _purchasable
+                            ? BuyingCountWgt(
+                              (CountWgtEvent e) {
+                            if (e == CountWgtEvent.ADD) {
+                              Provider.of<CartBloc>(context)
+                                  .dispatch(Add(_product));
+                            } else {
+                              Provider.of<CartBloc>(context)
+                                  .dispatch(Remove(_product));
+                            }
+                          },
+                          initialCount: _initialCount,
+                        )
+                            : Container()
+                      ],
                     ),
-                    _purchasable
-                        ? BuyingCountWgt(
-                            (CountWgtEvent e) {
-                              if (e == CountWgtEvent.ADD) {
-                                Provider.of<CartBloc>(context)
-                                    .dispatch(Add(_product));
-                              } else {
-                                Provider.of<CartBloc>(context)
-                                    .dispatch(Remove(_product));
-                              }
-                            },
-                            initialCount: _initialCount,
-                          )
-                        : Container()
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            )
+          ],
         ),
       ),
     );

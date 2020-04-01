@@ -111,7 +111,14 @@ class TagsRepository {
           tagProduct.variantId.toString(),
           tagProduct.titleFa,
           StoreThumbnail(tagProduct.sellerId.toString(), tagProduct.sellerName),
-          StructSubCategory(1, '', '', 1, 1),
+          StructSubCategory(
+              1,
+              '',
+              '',
+              0,
+              0,
+              '',
+              ''),
           imgUrl: tagProduct.img,
           price: Price(tagProduct.salePrice.toString()));
     }).toList();

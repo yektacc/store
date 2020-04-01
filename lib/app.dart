@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
+import 'package:store/store/checkout/delivery/delivery_page.dart';
+import 'package:store/store/checkout/payment/payment_page.dart';
 import 'package:store/store/home/home_page.dart';
+import 'package:store/store/location/address/address_page.dart';
 import 'package:store/store/login_register/login/login_page.dart';
 import 'package:store/store/login_register/profile/profile_page.dart';
 import 'package:store/store/login_register/register/register_page.dart';
+import 'package:store/store/management/management_home_page.dart';
 import 'package:store/store/management/model.dart';
-import 'package:store/store/management/service/service_management_page.dart';
-import 'package:store/store/management/shop/create_product_page.dart';
-import 'package:store/store/management/shop/seller_add_product_page.dart';
-import 'package:store/store/management/shop/shop_management_page.dart';
+import 'package:store/store/management/seller/shop_add_product_page.dart';
+import 'package:store/store/management/seller/shop_create_product_page.dart';
 import 'package:store/store/products/cart/cart_page.dart';
 import 'package:store/store/products/detail/product_detail_page.dart';
 import 'package:store/store/products/product/products_page.dart';
@@ -34,10 +36,17 @@ class _AppState extends State<App> {
         child: MaterialApp(
           title: 'epet24',
           theme: ThemeData(
-              primaryColor: AppColors.second_color,
-              primarySwatch: Colors.red,
               fontFamily: "IranSans",
-              textTheme: TextTheme(body1: TextStyle(fontSize: 13))),
+              primaryColor: AppColors.main_color_mat,
+              primarySwatch: Colors.green,
+              textTheme: Theme
+                  .of(context)
+                  .textTheme
+                  .apply(
+                fontFamily: "IranSans",
+                bodyColor: AppColors.text_main,
+                displayColor: Colors.pink,
+              )),
           localizationsDelegates: [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
@@ -83,14 +92,31 @@ class _AppState extends State<App> {
                 return MaterialPageRoute(builder: (context) => ProductsPage());
                 break;
 
-              case ShopManagementPage.routeName:
+              case ManagementHomePage.routeName:
                 return MaterialPageRoute(
-                    builder: (context) => ShopManagementPage());
+                    builder: (context) => ManagementHomePage());
                 break;
 
-              case ServiceManagementPage.routeName:
+            /*  case ShopManagementPage.routeName:
+                return MaterialPageRoute(
+                    builder: (context) => ShopManagementPage());
+                break;*/
+
+            /* case ServiceManagementPage.routeName:
                 return MaterialPageRoute(
                     builder: (context) => ServiceManagementPage());
+                break;*/
+
+              case AddressPage.routeName:
+                return MaterialPageRoute(builder: (context) => AddressPage());
+                break;
+
+              case DeliveryPage.routeName:
+                return MaterialPageRoute(builder: (context) => DeliveryPage());
+                break;
+
+              case PaymentPage.routeName:
+                return MaterialPageRoute(builder: (context) => PaymentPage());
                 break;
 
               case CreateProductPage.routeName:
@@ -104,11 +130,11 @@ class _AppState extends State<App> {
                 );
                 break;
 
-              case SellerAddProductsPage.routeName:
+              case ShopAddProductsPage.routeName:
                 final ShopIdentifier arg = settings.arguments;
                 return MaterialPageRoute(
                   builder: (context) {
-                    return SellerAddProductsPage(
+                    return ShopAddProductsPage(
                       shop: arg,
                     );
                   },

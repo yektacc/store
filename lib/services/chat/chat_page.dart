@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:store/common/constants.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/services/chat/chat_bloc.dart';
 import 'package:store/services/chat/model.dart';
 
@@ -28,11 +29,8 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.title,
-          style: TextStyle(fontSize: 16),
-        ),
+      appBar: CustomAppBar(
+        titleText: widget.title,
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -144,8 +142,10 @@ class _ChatPageState extends State<ChatPage> {
       margin: EdgeInsets.symmetric(vertical: 5),
       padding: EdgeInsets.symmetric(vertical: 6, horizontal: 5),
       color: Colors.grey[100],
-      child: Text(day.toString() + '/' + month.toString(),
-        style: TextStyle(color: Colors.blue),),
+      child: Text(
+        day.toString() + '/' + month.toString(),
+        style: TextStyle(color: Colors.blue),
+      ),
     );
   }
 }

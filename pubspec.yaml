@@ -14,7 +14,7 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.6.0 <3.0.0"
 
 dependencies:
   flutter_localizations:
@@ -57,7 +57,10 @@ dependencies:
   flutter_picker: 1.1.0
   firebase_crashlytics: 0.1.2+5
   simple_slider:
-    git: https://github.com/khashayarmotarjemi/simple_slider.git
+    git: https://github.com/khashayarmotarjemi/simple_slider
+  uni_links: 0.2.0
+
+
   #  cloud_firestore: 0.13.0+1
 
 

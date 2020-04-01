@@ -1,9 +1,8 @@
 import 'package:meta/meta.dart';
 import 'package:store/common/bloc_state_event.dart';
-import 'package:store/store/payment/delivery/delivery_page.dart';
 import 'package:store/store/products/product/product.dart';
 
-import 'cart_product.dart';
+import 'model.dart';
 
 @immutable
 abstract class CartEvent extends BlocEvent {}
@@ -27,9 +26,8 @@ class CartLoadedWithDeliveryItems extends CartLoaded {
 
   CartLoadedWithDeliveryItems(
       List<CartProduct> products, int count, int total, this.deliveryItems)
-      : super(products, count, total);
+      : super(Cart(products));
 }
-
 
 /*class CartLoadedWithDeliveryItems extends CartLoaded {
   final List<DeliveryItem> deliveryItems;
@@ -40,11 +38,11 @@ class CartLoadedWithDeliveryItems extends CartLoaded {
 }*/
 
 class CartLoaded extends CartState {
-  final List<CartProduct> products;
-  final int total;
-  final int count;
+  /*final List<CartProduct> products;
+  final int total;*/
+  final Cart cart;
 
-  CartLoaded(this.products, this.count, this.total);
+  CartLoaded(this.cart);
 
   @override
   String toString() {

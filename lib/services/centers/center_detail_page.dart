@@ -8,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_slider/simple_slider.dart';
 import 'package:store/common/constants.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/data_layer/centers/centers_repository.dart';
 import 'package:store/data_layer/centers/service_repository.dart';
 import 'package:store/data_layer/netclient.dart';
@@ -35,12 +36,9 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: CustomAppBar(
         elevation: 0,
-        backgroundColor: Colors.grey[200],
-        iconTheme: IconThemeData(
-          color: AppColors.main_color, //change your color here
-        ),
+        light: true,
         title: Text(
           widget.center.name,
           overflow: TextOverflow.ellipsis,
@@ -180,7 +178,7 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                                               (err) => 3.0),
                                           itemBuilder: (context, index) => Icon(
                                             Icons.star,
-                                            color: AppColors.second_color,
+                                            color: AppColors.main_color,
                                           ),
                                           itemCount: 5,
                                           itemSize: 25.0,
@@ -219,7 +217,7 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                             child: Container(
                               padding: EdgeInsets.all(5),
                               margin: EdgeInsets.only(top: 5, bottom: 5),
-                              child: AppIcons.showOnMap(AppColors.second_color),
+                              child: AppIcons.showOnMap(AppColors.main_color),
                             ),
                           ),
                           onTap: () {

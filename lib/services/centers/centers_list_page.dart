@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/services/centers/center_detail_page.dart';
 import 'package:store/services/centers/centers_event_state.dart';
 import 'package:store/services/centers/filter_widget.dart';
@@ -90,9 +91,9 @@ class _CenterPageState extends State<CenterPage> {
                     Icons.filter_list,
                     color: Colors.white,
                   ),
-                  backgroundColor: AppColors.second_color,
+                    backgroundColor: AppColors.main_color
                 ),
-                appBar: AppBar(
+                appBar: CustomAppBar(
                   actions: <Widget>[
                     IconButton(
                       icon: Icon(Icons.search),
@@ -104,10 +105,7 @@ class _CenterPageState extends State<CenterPage> {
                       },
                     ),
                   ],
-                  title: Text(name,
-                      style: TextStyle(
-                        fontSize: 16.0,
-                      )),
+                  titleText: name,
                 ),
                 body: ListView(
                   children: state.centers
@@ -116,8 +114,8 @@ class _CenterPageState extends State<CenterPage> {
                 ));
           } else {
             return Scaffold(
-              appBar: AppBar(
-                title: Text(name),
+              appBar: CustomAppBar(
+                titleText: name,
               ),
               body: Center(
                 child: Text('مرکزی پیدا نشد'),
@@ -221,7 +219,7 @@ class _ClinicItemWgtState extends State<ClinicItemWgt> {
                             double.parse(widget._item.score, (err) => 3.0),
                             itemBuilder: (context, index) => Icon(
                               Icons.star,
-                              color: AppColors.second_color,
+                              color: AppColors.main_color,
                             ),
                             itemCount: 5,
                             itemSize: 16.0,

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
+import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/store/home/home_page.dart';
 import 'package:store/store/login_register/register/register_bloc.dart';
 import 'package:store/store/login_register/register/register_event_state.dart';
-import 'package:provider/provider.dart';
 
 class RegisterPage extends StatefulWidget {
   RegisterBloc _bloc;
@@ -40,8 +41,9 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     return new Scaffold(
-        appBar: AppBar(
+        appBar: CustomAppBar(
           elevation: 0,
+          titleText: 'ثبت‌نام',
         ),
         body: Container(
           color: AppColors.main_color,
@@ -144,12 +146,15 @@ class _RegisterPageState extends State<RegisterPage> {
                                 width: 100,
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                    color: AppColors.main_color,
+                                    color: Colors.white,
+                                    border: Border.all(
+                                        color: AppColors.main_color),
                                     borderRadius:
                                         BorderRadius.all(Radius.circular(30))),
                                 child: Text(
                                   'ثبت نام',
-                                  style: TextStyle(fontSize: 13),
+                                  style: TextStyle(fontSize: 13,
+                                      color: AppColors.main_color),
                                 ),
                               ),
                             ),
@@ -249,7 +254,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   );
                 } else if (state is LoadingRegister) {
                   return Center(
-                    child: new Center(child: LoadingIndicator()),
+                    child: new Center(child: LightLoadingIndicator()),
                   );
                 } else {
                   return Container(

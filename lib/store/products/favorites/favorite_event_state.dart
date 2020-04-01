@@ -1,8 +1,7 @@
-import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:store/common/bloc_state_event.dart';
 import 'package:store/store/products/detail/product_detail_model.dart';
-import 'package:store/store/products/product/product.dart';
+import 'package:store/store/products/favorites/model.dart';
 
 @immutable
 abstract class FavoriteEvent extends BlocEvent {}
@@ -31,14 +30,15 @@ class NotAvailable extends FavoriteState {
 }
 
 class FavoritesLoaded extends FavoriteState {
-  final List<DetailedProduct> detailedProducts;
-  final List<Product> products;
+/*  final List<DetailedProduct> detailedProducts;
+  final List<Product> products;*/
+  final List<FavoriteProduct> products;
 
-  FavoritesLoaded(this.detailedProducts, this.products);
+  FavoritesLoaded(this.products);
 
   @override
   String toString() {
-    return " STATE: user is logged in : $detailedProducts";
+    return " STATE: favorites loaded : $products";
   }
 }
 
@@ -48,13 +48,13 @@ class FetchFavorites extends FavoriteEvent {
 }
 
 class AddFavorite extends FavoriteEvent {
-  final DetailedProduct favoriteProduct;
+  final DetailedProduct detailProduct;
 
-  AddFavorite(this.favoriteProduct);
+  AddFavorite(this.detailProduct);
 }
 
 class RemoveFavorite extends FavoriteEvent {
-  final int productId;
+  final int favoriteID;
 
-  RemoveFavorite(this.productId);
+  RemoveFavorite(this.favoriteID);
 }
