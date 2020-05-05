@@ -48,12 +48,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     yield (LoadingLoginAttempt());
     var res = await _interactor.attemptLastLogin();
     print("last login bloc: $res");
-
-  /*  if(user != null) {
-      dispatch(AttemptLogin(user.phoneNo, user.password));
-    }*/
-
-
     if (res is LoginSuccessfulResponse) {
       yield (LoginSuccessful(res.user));
     } else if (res is LoginFailedResponse) {
@@ -77,9 +71,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     } else if (event is Logout) {
       yield* _mapAttemptLogoutToState(event);
     }
-    /*else if (event is Reset) {
-      yield (LoginFailed(LoginError.NOT_LOGGED_IN));
-    }*/
   }
 
   @override

@@ -28,6 +28,25 @@ class InfoSubmission extends RegisterState {
   String toString() {
     return " STATE: initial state";
   }
+
+  String getErrorText() {
+    switch (currentError) {
+      case RegisterError.PHONE_NUMBER_EXISTS:
+        return "با این شماره موبایل قبلا ثبت نام شده است";
+        break;
+      case RegisterError.OTP_INCORRECT:
+        return "کد وارد شده صحیح نمی‌باشد";
+        break;
+      case RegisterError.UNKNOWN_ERROR_INFO:
+        return "خطای نامشخص در ثبت نام";
+        break;
+      case RegisterError.UNKNOWN_ERROR_OTP:
+        return "خطا نامشخص در کد تایید";
+        break;
+      default:
+        return 'خطا نامشخص';
+    }
+  }
 }
 
 class OtpSubmission extends RegisterState {

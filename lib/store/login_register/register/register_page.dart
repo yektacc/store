@@ -86,6 +86,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           color: Colors.white,
                           child: TextFormField(
                             obscureText: true,
+                            textDirection: TextDirection.ltr,
                             controller: passController,
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
@@ -106,6 +107,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           color: Colors.white,
                           child: TextFormField(
                             obscureText: true,
+                            textDirection: TextDirection.ltr,
                             controller: passConfController,
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
@@ -125,7 +127,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               EdgeInsets.only(left: 50, right: 20, top: 12),
                         ),
                         state.currentError != null
-                            ? Text(state.currentError.toString())
+                            ? Text(state.getErrorText())
                             : Container(),
                         new Container(
                           color: Colors.white,
@@ -147,13 +149,14 @@ class _RegisterPageState extends State<RegisterPage> {
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                     color: Colors.white,
-                                    border: Border.all(
-                                        color: AppColors.main_color),
+                                    border:
+                                    Border.all(color: AppColors.main_color),
                                     borderRadius:
                                         BorderRadius.all(Radius.circular(30))),
                                 child: Text(
                                   'ثبت نام',
-                                  style: TextStyle(fontSize: 13,
+                                  style: TextStyle(
+                                      fontSize: 13,
                                       color: AppColors.main_color),
                                 ),
                               ),

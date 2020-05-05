@@ -65,6 +65,8 @@ class _AddressItemState extends State<AddressItem> {
               height: 88,
               child: Row(
                 children: <Widget>[
+                  Center(child: Text(
+                    '    انتخاب  ', style: TextStyle(fontSize: 11),),),
                   Expanded(
                     child: Container(
                       child: Column(

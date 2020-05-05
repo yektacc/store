@@ -4,14 +4,16 @@ import 'package:quiver/core.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:store/common/constants.dart';
 
-class DayOfMonth {
+class PersianDayOfMonth {
   final int day;
   final int month;
-  final String monthName;
+  final int year;
 
   @override
   bool operator ==(other) {
-    return other is DayOfMonth && day == other.day && month == other.month;
+    return other is PersianDayOfMonth &&
+        day == other.day &&
+        month == other.month;
   }
 
   @override
@@ -21,18 +23,52 @@ class DayOfMonth {
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
+      'year': year,
       'day': day,
       'month': month,
-      'month_name': monthName
+//      'month_name': monthName,
     };
   }
 
-  DayOfMonth(this.day, this.month, this.monthName);
+  PersianDayOfMonth(this.day, this.month, this.year);
+}
+
+class GregorianDayOfMonth {
+  final int day;
+  final int month;
+  final int year;
+
+  @override
+  bool operator ==(other) {
+    return other is GregorianDayOfMonth &&
+        day == other.day &&
+        month == other.month;
+  }
+
+  factory GregorianDayOfMonth.fromPersian(PersianDayOfMonth dom) {
+    return Helpers.getGregorianDate(dom);
+  }
+
+  @override
+  int get hashCode {
+    return hash2(day, month);
+  }
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'year': year,
+      'day': day,
+      'month': month,
+//      'month_name': monthName,
+    };
+  }
+
+  GregorianDayOfMonth(this.day, this.month, this.year);
 }
 
 class DeliveryTimePicker extends StatefulWidget {
-  final List<DayOfMonth> availableDaysOfMonth = [];
-  final BehaviorSubject<List<DayOfMonth>> selectedDay;
+  final List<PersianDayOfMonth> availableDaysOfMonth = [];
+  final BehaviorSubject<List<PersianDayOfMonth>> selectedDay;
   final BehaviorSubject<int> selectedHourFrom;
   final BehaviorSubject<int> selectedHourTo;
   final VoidCallback onNextTapped;
@@ -50,13 +86,13 @@ class DeliveryTimePicker extends StatefulWidget {
     var day7 = persianDateTime.add(Duration(days: 7));
 
     this.availableDaysOfMonth.addAll([
-      DayOfMonth(day1.jalaaliDay, day1.jalaaliMonth, day1.jalaaliMonthName),
-      DayOfMonth(day2.jalaaliDay, day2.jalaaliMonth, day2.jalaaliMonthName),
-      DayOfMonth(day3.jalaaliDay, day3.jalaaliMonth, day3.jalaaliMonthName),
-      DayOfMonth(day4.jalaaliDay, day4.jalaaliMonth, day4.jalaaliMonthName),
-      DayOfMonth(day5.jalaaliDay, day5.jalaaliMonth, day5.jalaaliMonthName),
-      DayOfMonth(day6.jalaaliDay, day6.jalaaliMonth, day6.jalaaliMonthName),
-      DayOfMonth(day7.jalaaliDay, day7.jalaaliMonth, day7.jalaaliMonthName),
+      PersianDayOfMonth(day1.jalaaliDay, day1.jalaaliMonth, day1.jalaaliYear),
+      PersianDayOfMonth(day2.jalaaliDay, day2.jalaaliMonth, day1.jalaaliYear),
+      PersianDayOfMonth(day3.jalaaliDay, day3.jalaaliMonth, day1.jalaaliYear),
+      PersianDayOfMonth(day4.jalaaliDay, day4.jalaaliMonth, day1.jalaaliYear),
+      PersianDayOfMonth(day5.jalaaliDay, day5.jalaaliMonth, day1.jalaaliYear),
+      PersianDayOfMonth(day6.jalaaliDay, day6.jalaaliMonth, day1.jalaaliYear),
+      PersianDayOfMonth(day7.jalaaliDay, day7.jalaaliMonth, day1.jalaaliYear),
     ]);
   }
 
@@ -84,7 +120,7 @@ class _DeliveryTimePickerState extends State<DeliveryTimePicker> {
             child: Text("روز دریافت"),
           ),
           Expanded(
-            child: StreamBuilder<List<DayOfMonth>>(
+            child: StreamBuilder<List<PersianDayOfMonth>>(
                 stream: widget.selectedDay,
                 builder: (context, snapshot) {
                   return Row(
@@ -135,7 +171,7 @@ class _DeliveryTimePickerState extends State<DeliveryTimePicker> {
                               icon: Icon(Icons.arrow_drop_down),
                               iconSize: 24,
                               elevation: 16,
-                              style: TextStyle(color: AppColors.main_color),
+                              style: TextStyle(color: AppColors.grey),
                               onChanged: widget.selectedHourTo.add,
                               items: [
                                 -1,
@@ -203,7 +239,7 @@ class _DeliveryTimePickerState extends State<DeliveryTimePicker> {
                                     iconSize: 24,
                                     elevation: 16,
                                     style:
-                                        TextStyle(color: AppColors.main_color),
+                                    TextStyle(color: AppColors.grey),
                                     onChanged: widget.selectedHourFrom.add,
                                     items: items == null
                                         ? null
@@ -235,7 +271,7 @@ class _DeliveryTimePickerState extends State<DeliveryTimePicker> {
 
 class DeliveryDayItem extends StatelessWidget {
   bool isSelected;
-  final DayOfMonth dom;
+  final PersianDayOfMonth dom;
 
   DeliveryDayItem(this.dom, this.isSelected);
 
@@ -257,7 +293,7 @@ class DeliveryDayItem extends StatelessWidget {
             ),
             Expanded(
               child: Text(
-                dom.monthName,
+                Helpers.getMonthName(dom.month),
                 style: TextStyle(
                     fontSize: 10,
                     color: isSelected ? Colors.white : Colors.black87),

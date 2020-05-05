@@ -93,7 +93,7 @@ class _ShopProductsPageState extends State<ShopProductsPage> {
             length: categoryTabsPrds.length,
             child: Scaffold(
                 appBar: CustomAppBar(
-                  altBackground: true,
+                  altMainColor: true,
                   title: Row(
                     children: <Widget>[
                       Text(

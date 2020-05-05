@@ -43,7 +43,7 @@ class ChatRepository {
         var chatId = Map.of(res.data)['chat_id'];
         return chatId;
       } else {
-        Helpers.errorToast();
+        Helpers.showErrorToast();
         return -1;
       }
 //      } else {
@@ -116,7 +116,7 @@ class ChatRepository {
 
       return messages;
     } else {
-      Helpers.errorToast();
+      Helpers.showErrorToast();
       return null;
     }
   }
@@ -170,7 +170,7 @@ class ChatRepository {
         return messages;
       }
     } else {
-      Helpers.errorToast();
+      Helpers.showErrorToast();
       return null;
     }
   }

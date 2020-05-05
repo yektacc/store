@@ -142,7 +142,7 @@ class _MainAreaState extends State<MainArea> {
                                     ],
                                   ),
                                   decoration: BoxDecoration(
-                                      color: AppColors.grey[200],
+                                      color: Colors.grey[200],
                                       borderRadius: BorderRadius.all(
                                           Radius.circular(10)))),
                             ),

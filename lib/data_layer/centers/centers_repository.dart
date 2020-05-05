@@ -146,13 +146,17 @@ class CentersRepository {
 
   Future<List<String>> getCenterImgUrl(String centerId) async {
     var response = await net
-        .post(EndPoint.GET_CENTER_PICTURES, body: {'center_id': centerId});
+        .post(EndPoint.GET_CENTER_PICTURES, body: {'center_id': centerId},
+        cacheEnabled: false);
     if (response is SuccessResponse) {
       List<Map<String, dynamic>> centerImages =
           new List<Map<String, dynamic>>.from(response.data);
 
       if (centerImages.isNotEmpty && centerImages[0].containsKey('image')) {
-        return centerImages.map((img) => img['image']).toList();
+        List<String> list = centerImages.map((img) => img['image'].toString())
+            .toList();
+        print('just before return' + list.toString());
+        return list;
       } else {
         return [];
       }

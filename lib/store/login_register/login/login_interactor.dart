@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:store/common/constants.dart';
 import 'package:store/data_layer/netclient.dart';
 import 'package:store/store/login_register/login/user.dart';
 
@@ -47,9 +48,14 @@ class LoginRepository {
   
   Future<LoginResponse> attemptLogin(String phoneNo, String password) async {
     var ip = await _getIp();
+    var normalizedPassword = Helpers.normalizePassword(password);
     
     var response = await net.post(EndPoint.LOG_IN,
-        body: {'mobile_number': phoneNo, 'password': password, 'client_ip': ip},
+        body: {
+          'mobile_number': phoneNo,
+          'password': normalizedPassword,
+          'client_ip': ip
+        },
         cacheEnabled: false);
 
     if (response is SuccessResponse) {
@@ -63,7 +69,7 @@ class LoginRepository {
         if (responseCode == 0) {
           var _user = User(
               phoneNo,
-              password,
+              normalizedPassword,
               loginData["session_id"].toString(),
               loginData['app_user_id']);
           await _saveUser(_user);

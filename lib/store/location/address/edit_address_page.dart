@@ -111,7 +111,16 @@ class _AddressAddEditPageState extends State<AddressAddEditPage> {
                 new Container(
                   color: Colors.grey[50],
                   child: FormFields.text('کد پستی', postalCodeController,
-                      icon: Icons.local_post_office),
+                      keyboardType: TextInputType.number,
+                      icon: Icons.local_post_office,
+                      validateOnSubmit: true,
+                      validator: (text) {
+                        if (Helpers.isNumeric(text) && text.length == 10) {
+                          return null;
+                        } else {
+                          return 'کدپستی وارد شده صحیح نمی‌باشد';
+                        }
+                      }),
                 ),
                 new Container(
                   color: Colors.grey[50],

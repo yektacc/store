@@ -68,6 +68,8 @@ class _CartPageState extends State<CartPage> {
 
     return Scaffold(
         appBar: CustomAppBar(
+          light: true,
+          elevation: 0,
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
@@ -77,11 +79,35 @@ class _CartPageState extends State<CartPage> {
             },
           ),
           actions: <Widget>[
-            IconButton(
-                icon: Icon(Icons.delete_forever),
-                onPressed: () {
-                  _cartBloc.dispatch(Clear());
-                })
+            BlocBuilder<CartBloc, CartState>(
+              bloc: _cartBloc,
+              builder: (context, state) {
+                if (state is CartLoaded && state.cart.count > 0) {
+                  return FlatButton(
+                      child: Row(
+                        children: <Widget>[
+                          Icon(
+                            Icons.delete_forever,
+                            color: AppColors.main_color,
+                          ),
+                          Container(
+                            padding: EdgeInsets.only(),
+                            child: Text(
+                              'حذف همه',
+                              style: TextStyle(
+                                  fontSize: 12, color: AppColors.main_color),
+                            ),
+                          )
+                        ],
+                      ),
+                      onPressed: () {
+                        _cartBloc.dispatch(Clear());
+                      });
+                } else {
+                  return Container();
+                }
+              },
+            )
           ],
           titleText: 'سبد خرید',
         ),
@@ -218,7 +244,6 @@ class _CartPageState extends State<CartPage> {
                     return Container(
                       height: 40,
                       width: 40,
-                      color: Colors.red,
                     );
                   }
                 }),

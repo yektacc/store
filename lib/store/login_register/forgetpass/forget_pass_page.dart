@@ -124,7 +124,7 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
         Container(
             color: Colors.white,
             child: FormFields.text(
-              "کد",
+              "کد تایید",
               otpController,
               noBorder: true,
               noIcon: true,
@@ -183,10 +183,9 @@ class _ForgetPassPageState extends State<ForgetPassPage> {
       children: <Widget>[
         Container(
             color: Colors.white,
-          child: FormFields.text(
+          child: FormFields.password(
             'رمز عبور جدید',
             newPassController,
-            obscure: true,
             noIcon: true,
             noBorder: true,
               validator: (value) {

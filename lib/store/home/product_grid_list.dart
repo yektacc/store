@@ -59,7 +59,7 @@ class _ProductGridListState extends State<ProductGridList> {
                             color: Colors.black54, fontWeight: FontWeight.bold),
                       ),
                       decoration: BoxDecoration(
-                          color: AppColors.grey[200],
+                          color: Colors.grey[200],
                           borderRadius: BorderRadius.all(Radius.circular(10)))),
                 ),
               ),

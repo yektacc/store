@@ -4,7 +4,7 @@
 //import 'package:store/data_layer/order/paid_orders_repository.dart';
 //import 'package:store/store/login_register/login_status/login_status_bloc.dart';
 //import 'package:store/store/login_register/login_status/login_status_event_state.dart';
-//import 'package:store/store/management/management_login_bloc.dart';
+//import 'package:store/store/management/manager_login_bloc.dart';
 //
 //import 'order_detail_bloc_event_state.dart';
 //

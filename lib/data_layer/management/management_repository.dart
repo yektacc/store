@@ -16,8 +16,10 @@ class ManagementRepository {
 
   Future<List<CenterIdentifier>> loginSeller(String email,
       String password) async {
+    var normalizedPassword = Helpers.normalizePassword(password);
     PostResponse response = await _client.post(EndPoint.SELLER_LOGIN,
-        body: {'email': email, 'password': password}, cacheEnabled: false);
+        body: {'email': email, 'password': normalizedPassword},
+        cacheEnabled: false);
     if (response is SuccessResponse) {
       var list = List<Map<String, dynamic>>.from(response.data);
       return list.map(_parseLogin).toList();
@@ -106,10 +108,10 @@ class ManagementRepository {
     }
   }
 
-  Future<bool> submitProducts(
-      List<PricingProduct> products, String sellerId) async {
+  Future<bool> submitProducts(List<PricingProduct> products,
+      String sellerId) async {
     var submitProducts =
-        products.map((p) async => await submitProduct(p, sellerId)).toList();
+    products.map((p) async => await submitProduct(p, sellerId)).toList();
 
     List<bool> results = await Future.wait(submitProducts);
 
@@ -242,8 +244,7 @@ class ShopProduct {
   final String categoryName;
   final String subCatName;
 
-  ShopProduct(
-      this.id,
+  ShopProduct(this.id,
       this.prdSaleId,
       this.variantId,
       this.sellerId,

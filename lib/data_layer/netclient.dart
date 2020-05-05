@@ -109,6 +109,7 @@ class Net {
             if (res.data is Map) {
               jsonBody = Map<String, dynamic>.from(res.data);
             } else {
+              print('rawresdata: ${res.data}');
               jsonBody = json.decode(res.data);
             }
           } else {
@@ -193,23 +194,6 @@ class Net {
     var nextRetryAfter = 0;
 
     Dio dio = Dio();
-
-//    dio.interceptors.add(InterceptorsWrapper(onResponse: (Response response) {
-//      // Do some pre processing before returning the response data
-//      return response; // continue
-//    }, onError: (DioError e) {
-//      // Do some pre processing when the request fails
-//      print(e);
-//      /*
-//      if (e.response.statusCode == 429) {
-//        nextRetryAfter = int.parse(e.response.headers['retry-after'].first,
-//            onError: (_) => 0);
-//        print(
-//            'retry afterr ${e.response.realUri}:' + nextRetryAfter.toString());
-//      }*/
-//      err = true;
-//      return e; //continue
-//    }));
 
     while (first || err && remainedTries > 0) {
       first = false;
@@ -316,13 +300,17 @@ enum EndPoint {
   SEEN_CHAT,
   GET_CONTACT_INFO,
   SAVE_TRANSACTION,
+  GET_TRANSACTION,
   SEND_COUPON,
   GET_FAVORITES,
   ADD_FAVORITE,
   DELETE_FAVORITE,
   PAYMENT_FINAL_TRANSACTION,
   ORDER_PRODUCT_PACKED,
-  ORDER_SENT
+  ORDER_SENT,
+  CHECK_PACKING,
+  SUBMIT_PRODUCT_RETURN,
+  GET_RETURN_REQUESTS
 }
 
 String getSubUrl(EndPoint endPoint) {
@@ -541,6 +529,9 @@ String getSubUrl(EndPoint endPoint) {
     case EndPoint.SAVE_TRANSACTION:
       subUrl = 'prdordersellertransaction';
       break;
+    case EndPoint.GET_TRANSACTION:
+      subUrl = 'getprdordersellertransaction';
+      break;
     case EndPoint.SEND_COUPON:
       subUrl = 'sendcouponcode';
       break;
@@ -556,16 +547,23 @@ String getSubUrl(EndPoint endPoint) {
     case EndPoint.DELETE_FAVORITE:
       subUrl = 'deleteappuserprdlike';
       break;
-
     case EndPoint.PAYMENT_FINAL_TRANSACTION:
       subUrl = 'formfinancialtransaction';
       break;
-
     case EndPoint.ORDER_PRODUCT_PACKED:
-    // TODO: Handle this case.
+      subUrl = 'orderpackingtime';
       break;
     case EndPoint.ORDER_SENT:
-    // TODO: Handle this case.
+      subUrl = 'ordertransfer';
+      break;
+    case EndPoint.CHECK_PACKING:
+      subUrl = 'getprdorderitemlist';
+      break;
+    case EndPoint.SUBMIT_PRODUCT_RETURN:
+      subUrl = 'sendorderreturnrequest';
+      break;
+    case EndPoint.GET_RETURN_REQUESTS:
+      subUrl = 'getorder';
       break;
   }
   return subUrl;

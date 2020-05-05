@@ -18,6 +18,17 @@ class SMWaitingForLogin extends ManagerLoginState {
   }
 }
 
+class SMWaitingForLoginWithError extends SMWaitingForLogin {
+  final String error;
+
+  SMWaitingForLoginWithError(this.error);
+
+  @override
+  String toString() {
+    return "STATE: waiting for login";
+  }
+}
+
 class ManagerLoggedIn extends ManagerLoginState {
 /*  final List<ShopIdentifier> shops;
   final List<ServiceIdentifier> services;*/

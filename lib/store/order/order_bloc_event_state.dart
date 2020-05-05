@@ -61,3 +61,15 @@ class OrderPacked extends OrderEvent {
 
   OrderPacked(this.comment, this.orderId, this.sellerId);
 }
+
+class SubmitProductReturn extends OrderEvent {
+  final OrderProductInfo product;
+  final String comment;
+
+  SubmitProductReturn(this.product, this.comment);
+
+  @override
+  String toString() {
+    return 'submit product return event : $product';
+  }
+}

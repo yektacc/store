@@ -63,6 +63,8 @@ class _AddressPageState extends State<AddressPage> {
 
     return Scaffold(
         appBar: CustomAppBar(
+          light: true,
+          elevation: 0,
           titleText: 'انتخاب آدرس',
         ),
         body: BlocBuilder<CheckoutBloc, CheckoutState>(
@@ -137,35 +139,30 @@ class _AddressPageState extends State<AddressPage> {
                                   color: Colors.grey[50],
                                 ),
                                 margin: EdgeInsets.only(),
-                                height: 66,
-                                child: Center(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-//                  borderRadius: BorderRadius.all(Radius.circular(18)),
-                                    ),
-                                    height: 66,
-                                    width: 140,
-                                    child: Row(
-                                      children: <Widget>[
-                                        Expanded(
-                                          flex: 1,
-                                          child: Icon(
-                                            Icons.add_location,
-                                            color: AppColors.main_color,
-                                            size: 25,
-                                          ),
+                                height: 60,
+                                child: Container(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Container(
+                                        child: Icon(
+                                          Icons.add_location,
+                                          color: AppColors.main_color,
+                                          size: 25,
                                         ),
-                                        Expanded(
-                                          flex: 7,
-                                          child: Text(
-                                            "     آدرس جدید",
-                                            style: TextStyle(
-                                                color: AppColors.main_color,
-                                                fontSize: 14),
-                                          ),
-                                        )
-                                      ],
-                                    ),
+                                        margin: EdgeInsets.only(left: 3),
+                                      ),
+                                      Container(
+                                        child: Text(
+                                          "آدرس جدید",
+                                          style: TextStyle(
+                                              color: AppColors.main_color,
+                                              fontSize: 14),
+                                        ),
+                                        margin: EdgeInsets.only(right: 3),
+
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
@@ -183,19 +180,24 @@ class _AddressPageState extends State<AddressPage> {
                                 SubmitAddress(_addressSelectionWgt.selected));
                             _sub ??= _checkoutBloc.state.listen((state) {
                               if (state is OrderWithDeliveryInf) {
-                                Navigator.of(context).pushNamed(
-                                    DeliveryPage.routeName);
+                                Navigator.of(context)
+                                    .pushNamed(DeliveryPage.routeName);
                               }
                             });
+                          } else {
+                            Helpers.showToast(
+                                'لطفا آدرس مورد نظر را انتخاب کنید');
                           }
                         },
                         child: Hero(
                             tag: "bottom_bar",
                             child: GotoDeliveryBottomBar(
+                              /*
                                 _addressSelectionWgt != null &&
-                                    _addressSelectionWgt.selected != null
+                                        _addressSelectionWgt.selected != null
                                     ? true
-                                    : false)),
+                                    : false*/
+                            )),
                       )
                     ],
                   ),
@@ -228,40 +230,41 @@ class _AddressPageState extends State<AddressPage> {
 }
 
 class GotoDeliveryBottomBar extends StatelessWidget {
-  final bool enabled;
+//  final bool enabled;
 
-  GotoDeliveryBottomBar(this.enabled);
+  GotoDeliveryBottomBar();
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 56,
-      color: enabled ? AppColors.main_color : Colors.grey[100],
+      color: AppColors.main_color,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
+          Container(
+            margin: EdgeInsets.only(left: 3),
+            alignment: Alignment.centerLeft,
+            child: Icon(Icons.local_shipping, color: Colors.white),
+          ),
+          Container(
+            margin: EdgeInsets.only(right: 3),
+            alignment: Alignment.centerRight,
+            child: Text(
+              "نحوه ارسال",
+              style: TextStyle(color: Colors.white, fontSize: 14),
+            ),
+          )
+          /* Container()
+
           Expanded(
             flex: 4,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.only(left: 8),
-                child: Icon(Icons.local_shipping,
-                    color: enabled ? Colors.white : Colors.grey[500]),
-              ),
-            ),
+            child: ,
           ),
           Expanded(
             flex: 7,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                "  نحوه ارسال",
-                style: TextStyle(
-                    color: enabled ? Colors.white : AppColors.main_color,
-                    fontSize: 14),
-              ),
-            ),
-          ),
+            child: ,
+          ),*/
         ],
       ),
     );

@@ -41,6 +41,22 @@ class LoginFailed extends LoginState {
   String toString() {
     return "STATE: not logged in";
   }
+
+  String getErrorText() {
+    switch (error) {
+      case LoginError.CREDENTIALS_MISMATCH:
+        return 'نام کاربری یا کلمه عبور صحیح نمی‌باشد';
+        break;
+      case LoginError.NOT_LOGGED_IN:
+        return '';
+        break;
+      case LoginError.UNKNOWN_ERROR:
+        return 'خطا در ورود به حساب کاربری';
+        break;
+      default:
+        return 'خطا در ورود به حساب کاربری';
+    }
+  }
 }
 
 class LogoutSuccessful extends LoginState {

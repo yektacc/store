@@ -54,7 +54,7 @@ class _ShopAddProductsPageState extends State<ShopAddProductsPage> {
               Helpers.showToast('تغییرات با موفقیت ثبت شد');
               Navigator.pop(context);
             } else {
-              Helpers.errorToast();
+              Helpers.showErrorToast();
             }
           }
         },
@@ -64,7 +64,7 @@ class _ShopAddProductsPageState extends State<ShopAddProductsPage> {
         ),
       ),
       appBar: CustomAppBar(
-        altBackground: true,
+        altMainColor: true,
         titleText: "قیمت دهی",
       ),
       body: new BlocBuilder(

@@ -4,7 +4,7 @@ import 'lost_pets_repository.dart';
 
 class LostPet {
   String name;
-  LostPetReqType reqType;
+  FCReqType reqType;
   AnimalType animalType;
   String age;
   String imgUrl;

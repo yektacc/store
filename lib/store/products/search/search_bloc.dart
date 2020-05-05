@@ -5,6 +5,8 @@ import 'package:meta/meta.dart';
 import 'package:store/common/bloc_state_event.dart';
 import 'package:store/data_layer/centers/centers_repository.dart';
 import 'package:store/services/centers/model.dart';
+import 'package:store/store/products/filter/filtered_products_bloc.dart';
+import 'package:store/store/products/filter/filtered_products_bloc_event.dart';
 import 'package:store/store/products/product/product.dart';
 import 'package:store/store/products/product/products_repository.dart';
 import 'package:store/store/products/search/search_interactor.dart';
@@ -15,6 +17,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final CentersRepository _centersRepository;
   final SearchInteractor _interactor;
   StreamSubscription _streamSubscription;
+  final FilteredProductsBloc _filteredProductsBloc;
 
   @override
   void onEvent(SearchEvent event) {
@@ -28,7 +31,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     print(stacktrace);
   }
 
-  SearchBloc(this._productsRepo, this._interactor, this._centersRepository);
+  SearchBloc(this._productsRepo, this._interactor, this._centersRepository,
+      this._filteredProductsBloc);
 
   @override
   SearchState get initialState => LoadingResults();
@@ -49,26 +53,28 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       SearchProducts event) async* {
     yield LoadingResults();
 
-    await for (final allProducts in _productsRepo.load(event.identifier)) {
-      print('loaded all products : ${event.identifier.name} $allProducts');
-      var result = _interactor.search(allProducts, event.query);
+    var filteredPState = _filteredProductsBloc.currentState;
+    if (filteredPState is FilteredProductsLoaded) {
+      var products = filteredPState.filteredProducts;
+      var result = _interactor.search(products, event.query);
 
       if (result.isEmpty) {
         yield NoResult();
       } else {
         yield ProductSearchLoaded(result);
       }
-    }
+    } else {
+      await for (final allProducts in _productsRepo.load(event.identifier)) {
+        print('loaded all products : ${event.identifier.name} $allProducts');
+        var result = _interactor.search(allProducts, event.query);
 
-    /*  if (_productsRepo.currentState is ProductsLoaded) {
-      List<Product> results =
-          (_productsRepo.currentState as ProductsLoaded).products;
-      if (results.isEmpty) {
-        yield NoResult();
-      } else {
-        yield SearchLoaded(_interactor.search(results, event.query));
+        if (result.isEmpty) {
+          yield NoResult();
+        } else {
+          yield ProductSearchLoaded(result);
+        }
       }
-    }*/
+    }
   }
 }
 

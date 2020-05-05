@@ -9,6 +9,10 @@
         android:name="com.epet24store.shop.App"
         android:label="epet24"
         android:icon="@mipmap/launcher_icon">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyARTvd6KBngFaXRUY7ROhJPZZ1h3JjNHIk" />
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

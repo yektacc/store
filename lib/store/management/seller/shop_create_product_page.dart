@@ -84,7 +84,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        altBackground: true,
+        altMainColor: true,
         titleText: 'ثبت کالای جدید',
       ),
       body: SingleChildScrollView(
@@ -347,7 +347,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                         Helpers.showToast('محصول شما ثبت شد');
                         Navigator.of(context).pop();
                       } else {
-                        Helpers.errorToast();
+                        Helpers.showErrorToast();
                       }
                     }
                   },

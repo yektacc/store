@@ -12,11 +12,14 @@ class UserPetRepository {
         cacheEnabled: false, body: {'app_users_id': appUserId.toString()});
     if (response is SuccessResponse) {
       try {
-        List petJson = List<Map<String, dynamic>>.from(response.data);
-        return UserPet.fromJson(petJson[0]);
+        List petList = List<Map<String, dynamic>>.from(response.data);
+        if (petList.isEmpty) {
+          return UninitiatedPet();
+        } else {
+          return UserPet.fromJson(petList[0]);
+        }
       } catch (e) {
         print('Error parsin UserPet json' + e);
-        return NotSetUserPet();
       }
     } else {
       print("Error loading user pet $response");
@@ -118,6 +121,16 @@ class UserPet {
   }
 }
 
-class NotSetUserPet extends UserPet {
-  NotSetUserPet() : super(-1, -1, '', '', 0, 0, 0, 0);
+class UninitiatedPet extends UserPet {
+  UninitiatedPet()
+      : super(
+    -1,
+    -1,
+    '',
+    '',
+    -1,
+    -1,
+    -1,
+    -1,
+  );
 }

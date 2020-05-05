@@ -2,16 +2,15 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:store/data_layer/order/paid_orders_repository.dart';
-import 'package:store/store/login_register/login_status/login_status_bloc.dart';
-import 'package:store/store/login_register/login_status/login_status_event_state.dart';
-import 'package:store/store/management/management_login_bloc.dart';
 
 import 'order_product_bloc_event_state.dart';
 
-class OrderProductBloc extends Bloc<OrderProductEvent, OrderProductState> {
+class PackingBloc extends Bloc<OrderProductEvent, OrderProductState> {
   final OrdersRepository _ordersRepository;
-  final LoginStatusBloc _loginStatusBloc;
-  final ManagerLoginBloc _managerLoginBloc;
+
+//  final LoginStatusBloc _loginStatusBloc;
+
+//  final ManagerLoginBloc _managerLoginBloc;
   StreamSubscription _loginSubscription;
 
   final OrderProductInfo _product;
@@ -27,47 +26,32 @@ class OrderProductBloc extends Bloc<OrderProductEvent, OrderProductState> {
     print(stacktrace);
   }
 
-  OrderProductBloc(this._ordersRepository, this._loginStatusBloc,
-      this._managerLoginBloc, this._product);
+  PackingBloc(this._ordersRepository, this._product);
 
   @override
   OrderProductState get initialState {
-    if (_product.packed) {
-      return ProductIsPacked(_product);
-    } else {
-      return ProductNotPacked(_product);
-    }
+    return OrderProductLoading();
   }
 
   @override
   Stream<OrderProductState> mapEventToState(OrderProductEvent event) async* {
-    if (event is CheckProductPacking) {
-      yield ProductPackingLoading(_product);
-      var loginState = _loginStatusBloc.currentState;
-      if (loginState is IsLoggedIn) {
-        var orderDelivery =
-            await _ordersRepository.checkOrderProductDelivery(_product);
-        if (orderDelivery) {
-          yield ProductIsPacked(_product);
-        } else {
-          yield ProductNotPacked(_product);
-        }
+    if (event is GetPackingInfo) {
+      yield OrderProductLoading();
+      var orderDelivery =
+      await _ordersRepository.checkOrderProductDelivery(_product);
+      if (orderDelivery) {
+        yield IsPacked(_product);
       } else {
-        print('error: user not logged in to get orders');
+        yield NotPacked(_product);
       }
     } else if (event is ProductPacked) {
-      yield ProductPackingLoading(_product);
-      var loginState = _loginStatusBloc.currentState;
-      if (loginState is IsLoggedIn) {
-        var orderDelivery = await _ordersRepository.productPacked(
-            _product.orderId, _product.itemId);
-        if (orderDelivery) {
-          yield ProductIsPacked(_product);
-        } else {
-          yield ProductNotPacked(_product);
-        }
+      yield OrderProductLoading();
+      var orderDelivery = await _ordersRepository.productPacked(
+          _product.orderId, _product.itemId);
+      if (orderDelivery) {
+        yield IsPacked(_product);
       } else {
-        print('error: user not logged in to get orders');
+        yield NotPacked(_product);
       }
     }
   }

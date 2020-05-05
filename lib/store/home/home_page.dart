@@ -15,12 +15,14 @@ import 'package:store/store/login_register/profile/profile_bloc.dart';
 import 'package:store/store/login_register/profile/profile_bloc_event_state.dart';
 import 'package:store/store/login_register/profile/profile_page.dart';
 import 'package:store/store/management/management_home_page.dart';
-import 'package:store/store/management/management_login_bloc.dart';
 import 'package:store/store/management/management_login_event_state.dart';
+import 'package:store/store/management/manager_login_bloc.dart';
 import 'package:store/store/management/manager_login_page.dart';
 import 'package:store/store/management/seller/shop_request_form.dart';
 import 'package:store/store/order/order_page.dart';
+import 'package:store/store/products/cart/cart_bloc.dart';
 import 'package:store/store/products/cart/cart_page.dart';
+import 'package:store/store/products/detail/product_detail_page.dart';
 import 'package:store/store/products/favorites/favorites_page.dart';
 import 'package:store/store/products/filter/filtered_products_bloc.dart';
 import 'package:store/store/products/product/products_bloc.dart';
@@ -166,16 +168,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         },
       ),*/
       actions: <Widget>[
+        CartButton(Provider.of<CartBloc>(context)),
         IconButton(
           onPressed: () {
             Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => LandingPage()));
           },
           icon: (Icon(
-            Icons.assignment,
+            Icons.home,
             color: Colors.grey[700],
           )),
-        )
+        ),
         /*Container(
           width: 70,
           child: BlocBuilder(
@@ -634,24 +637,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Future<bool> _onWillPop() async {
-    return (await showDialog(
-      context: context,
-      builder: (context) =>
-      new AlertDialog(
-        content: new Text('آیا می‌خواهید از اپ خارج شوید؟'),
-        actions: <Widget>[
-          new FlatButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: new Text('خیر'),
+    /* return (await showDialog(
+          context: context,
+          builder: (context) => new AlertDialog(
+            content: new Text('آیا می‌خواهید از اپ خارج شوید؟'),
+            actions: <Widget>[
+              new FlatButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: new Text('خیر'),
+              ),
+              new FlatButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: new Text('بله'),
+              ),
+            ],
           ),
-          new FlatButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: new Text('بله'),
-          ),
-        ],
-      ),
-    )) ??
+        )) ??
         false;
+  */
+    Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => LandingPage()));
+    return true;
   }
 }
 

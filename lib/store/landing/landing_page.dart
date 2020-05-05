@@ -12,7 +12,7 @@ import 'package:store/store/login_register/login/login_bloc.dart';
 import 'package:store/store/login_register/login/login_event_state.dart';
 import 'package:store/store/login_register/login_status/login_status_bloc.dart';
 import 'package:store/store/login_register/login_status/login_status_event_state.dart';
-import 'package:store/store/management/management_login_bloc.dart';
+import 'package:store/store/management/manager_login_bloc.dart';
 import 'package:store/store/management/management_login_event_state.dart';
 
 class LandingPage extends StatefulWidget {
@@ -235,7 +235,7 @@ class _LandingPageState extends State<LandingPage> {
                         child: new GestureDetector(
                           onTap: () {
                             Navigator.of(context)
-                                .pushReplacementNamed(HomePage.routeName);
+                                .pushNamed(HomePage.routeName);
                           },
                           child: new Container(
                               margin: EdgeInsets.only(top: 7, bottom: 7),
@@ -500,7 +500,7 @@ class _LandingPageState extends State<LandingPage> {
         .firebaseMessaging
         .configure(
       onMessage: (Map<String, dynamic> message) async {
-        print("fcm: onMessage: $message");
+        print(" fcm: onMessage: $message");
       },
       onLaunch: (Map<String, dynamic> message) async {
         print("fcm: onLaunch: $message");

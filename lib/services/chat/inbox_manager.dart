@@ -3,8 +3,8 @@ import 'package:store/services/chat/inbox_bloc.dart';
 import 'package:store/services/chat/inbox_event_state.dart';
 import 'package:store/store/login_register/login_status/login_status_bloc.dart';
 import 'package:store/store/login_register/login_status/login_status_event_state.dart';
-import 'package:store/store/management/management_login_bloc.dart';
 import 'package:store/store/management/management_login_event_state.dart';
+import 'package:store/store/management/manager_login_bloc.dart';
 import 'package:store/store/management/model.dart';
 
 import 'model.dart';

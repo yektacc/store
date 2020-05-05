@@ -1,4 +1,3 @@
-import 'package:http/http.dart' as http;
 import 'package:store/data_layer/netclient.dart';
 import 'package:store/data_layer/province/province_repository.dart';
 import 'package:store/store/location/provinces/model.dart';
@@ -39,7 +38,7 @@ class LostPetsRepository {
       List<LostPetRaw> lostPetsRaw =
           lostPetsJsonList.map((p) => LostPetRaw.fromJson(p)).toList();
 
-      List<LostPetReqType> categories = await getCategories() ?? [];
+      List<FCReqType> categories = await getCategories() ?? [];
       List<AnimalType> animalTypes = await getAnimalTypes() ?? [];
 
       return lostPetsRaw.map((rlp) {
@@ -53,7 +52,7 @@ class LostPetsRepository {
         city = provinceCity.city;
         province = provinceCity.province;
 
-        LostPetReqType reqType;
+        FCReqType reqType;
 
         categories.forEach((c) {
           if (c.id == rlp.requestTypeId) {
@@ -86,7 +85,7 @@ class LostPetsRepository {
     } else {}
   }
 
-  Future<List<LostPetReqType>> getCategories() async {
+  Future<List<FCReqType>> getCategories() async {
    /* String categoriesUrl =
         'http://51.254.65.54/epet24/public/api/getfccategories';
 
@@ -103,7 +102,7 @@ class LostPetsRepository {
           new List<Map<String, dynamic>>.from(res.data);
 
       var results =
-          categoriesJsonList.map((c) => LostPetReqType.fromJson(c)).toList();
+      categoriesJsonList.map((c) => FCReqType.fromJson(c)).toList();
 
       return results;
     } else {
@@ -267,16 +266,16 @@ class LostPetRaw {
   }
 }
 
-class LostPetReqType {
+class FCReqType {
   final int id;
   final String name;
   final String image;
   final int fee;
 
-  LostPetReqType(this.id, this.name, this.image, this.fee);
+  FCReqType(this.id, this.name, this.image, this.fee);
 
-  factory LostPetReqType.fromJson(Map<String, dynamic> categoryJson) {
-    return LostPetReqType(categoryJson['id'], categoryJson['category_name'],
+  factory FCReqType.fromJson(Map<String, dynamic> categoryJson) {
+    return FCReqType(categoryJson['id'], categoryJson['category_name'],
         categoryJson['category_image'], categoryJson['fee']);
   }
 }

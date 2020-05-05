@@ -9,6 +9,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/common/widgets/app_widgets.dart';
+import 'package:store/common/widgets/simple_slider.dart';
 import 'package:store/data_layer/products/product_pictures_repository.dart';
 import 'package:store/store/home/product_grid_list.dart';
 import 'package:store/store/login_register/login/login_page.dart';
@@ -78,8 +79,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     return allSellers.firstWhere((sp) => sp == _currentSeller);
   }
 
-  Future<String> _getImgUrl() async {
-    if (widget.imgUrl != null && widget.imgUrl != '') {
+  Future<List<ProductPicture>> _getImgUrl() async {
+    var imgs = await Provider.of<ProductPicturesRepository>(context)
+        .fetch(int.parse(widget.productId));
+    if (imgs.isNotEmpty) {
+      return imgs;
+//        return widget.imgUrl;
+    } else {
+      return [];
+    }
+    /*if (widget.imgUrl != null && widget.imgUrl != '') {
       return widget.imgUrl;
     } else {
       var img = await Provider.of<ProductPicturesRepository>(context)
@@ -90,7 +99,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       } else {
         return '';
       }
-    }
+    }*/
 //    return widget.imgUrl;
   }
 
@@ -133,19 +142,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       appBar: CustomAppBar(
         titleText: "جزییات محصول",
         actions: <Widget>[
-          Container(
-            width: 70,
-            child: BlocBuilder(
-              bloc: Provider.of<CartBloc>(context),
-              builder: (context, CartState state) {
-                if (state is CartLoaded) {
-                  return CartButton(state.cart.count);
-                } else {
-                  return CartButton(0);
-                }
-              },
-            ),
-          )
+          CartButton(Provider.of<CartBloc>(context), light: true),
+          Padding(
+            padding: EdgeInsets.only(right: 14),
+          ),
         ],
       ),
       body: StreamBuilder(
@@ -205,8 +205,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 child: Column(
                                   children: <Widget>[
                                     Container(
-                                      height: 300,
-                                      child: FutureBuilder<String>(
+                                      height: 350,
+                                      child:
+                                      FutureBuilder<List<ProductPicture>>(
                                         future: _getImgUrl(),
                                         builder: (context, snapshot) {
                                           if (snapshot != null &&
@@ -218,8 +219,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                 vertical: 12,
                                               ),
                                               width: double.infinity,
-                                              child: CachedNetworkImage(
-                                                imageUrl: snapshot.data,
+                                              child: ImageSliderWidget(
+                                                imageUrls: snapshot.data
+                                                    .map((img) => img.imageURL)
+                                                    .toList(),
+                                                imageBorderRadius:
+                                                BorderRadius.circular(0.0),
+                                                imageHeight: 280,
                                               ),
                                             );
                                           } else {
@@ -397,8 +403,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                           color: Colors.grey[100],
                                           borderRadius: BorderRadius.only(
                                               bottomRight: Radius.circular(4),
-                                              bottomLeft:
-                                              Radius.circular(4))),
+                                              bottomLeft: Radius.circular(4))),
                                       alignment: Alignment.centerLeft,
                                       child: Container(
                                         child: Row(
@@ -409,8 +414,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                 child: Container(
                                                   alignment:
                                                   Alignment.centerLeft,
-                                                  margin: EdgeInsets.only(
-                                                      left: 10),
+                                                  margin:
+                                                  EdgeInsets.only(left: 10),
                                                   child: RatingBarIndicator(
                                                     textDirection:
                                                     TextDirection.ltr,
@@ -421,13 +426,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                                         (context, index) =>
                                                         Icon(
                                                           Icons.star,
-                                                          color: AppColors
-                                                              .main_color,
+                                                          color:
+                                                          AppColors.main_color,
                                                         ),
                                                     itemCount: 5,
                                                     itemSize: 25.0,
-                                                    direction:
-                                                    Axis.horizontal,
+                                                    direction: Axis.horizontal,
                                                   ),
                                                 ),
                                               ),
@@ -808,7 +812,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               children: <Widget>[
                 Expanded(
                   flex: 8,
-                  child: FutureBuilder<String>(
+                  child: FutureBuilder<List<ProductPicture>>(
                     future: _getImgUrl(),
                     builder: (context, snapshot) {
                       if (snapshot != null &&
@@ -817,7 +821,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         return Container(
                             padding: EdgeInsets.symmetric(vertical: 14),
                             child: CachedNetworkImage(
-                              imageUrl: snapshot.data,
+                              imageUrl: snapshot.data[0].imageURL,
                             ));
                       } else {
                         return Container();
@@ -913,28 +917,56 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 }
 
 class CartButton extends StatelessWidget {
-  final int cartCount;
+  int cartCount = 0;
+  final bool light;
 
-  CartButton(this.cartCount);
+  CartButton(CartBloc cartBloc, {this.light = false});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: new IconButton(
-              icon: Icon(Icons.shopping_cart),
-              onPressed: () {
-                Navigator.of(context).popAndPushNamed(CartPage.routeName);
-              }),
-        ),
-        Expanded(
+    return BlocBuilder(
+      bloc: Provider.of<CartBloc>(context),
+      builder: (context, CartState state) {
+        if (state is CartLoaded) {
+          cartCount = state.cart.count;
+        } else {
+          cartCount = 0;
+        }
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).popAndPushNamed(CartPage.routeName);
+          },
           child: Container(
-            child: cartCount != 0 ? Text(cartCount.toString()) : Container(),
-            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: Row(
+              children: <Widget>[
+                cartCount != 0
+                    ? Container(
+                  height: 22,
+                  width: 22,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(30)),
+                      color: light ? Colors.white : AppColors.main_color),
+                  child: Text(
+                    cartCount.toString(),
+                    style: TextStyle(
+                        color:
+                        light ? AppColors.main_color : Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11.5),
+                  ),
+                  margin: EdgeInsets.symmetric(horizontal: 4),
+                )
+                    : Container(),
+                Icon(
+                  Icons.shopping_cart,
+                  color: light ? Colors.white : AppColors.grey,
+                )
+              ],
+            ),
           ),
-        )
-      ],
+        );
+      },
     );
   }
 }

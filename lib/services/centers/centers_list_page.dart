@@ -80,19 +80,18 @@ class _CenterPageState extends State<CenterPage> {
             ];
             return Scaffold(
                 floatingActionButton: FloatingActionButton(
-                  onPressed: () {
-                    showModalBottomSheet(
-                        context: context,
-                        builder: (BuildContext bc) {
-                          return widget.filterWidget;
-                        });
-                  },
-                  child: Icon(
-                    Icons.filter_list,
-                    color: Colors.white,
-                  ),
-                    backgroundColor: AppColors.main_color
-                ),
+                    onPressed: () {
+                      showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext bc) {
+                            return widget.filterWidget;
+                          });
+                    },
+                    child: Icon(
+                      Icons.filter_list,
+                      color: Colors.white,
+                    ),
+                    backgroundColor: AppColors.main_color),
                 appBar: CustomAppBar(
                   actions: <Widget>[
                     IconButton(
@@ -160,12 +159,20 @@ class _ClinicItemWgtState extends State<ClinicItemWgt> {
             new Column(
               children: <Widget>[
                 Container(
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey[200]),
-                      borderRadius: BorderRadius.circular(3)),
                   margin: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
                   width: 110,
-                  child: Helpers.image(widget._item.logoUrl),
+                  child: widget._item.logoUrl != ''
+                      ? Helpers.image(widget._item.logoUrl)
+                      : Container(
+                    width: 110,
+                    height: 110,
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.store,
+                      size: 80,
+                      color: Colors.grey[100],
+                    ),
+                  ),
                 ),
               ],
             ),

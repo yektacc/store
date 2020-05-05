@@ -5,11 +5,9 @@ class ServicesRepository {
 
   ServicesRepository(this.net);
 
-  Stream<List<Service>> getCenterServices(int departmentId) async* {
-    PostResponse response = await net.post(
-      EndPoint.GET_CENTER_SERVICES,
-        body: {'center_department_id': 61}
-    );
+  Future<List<Service>> getCenterServices(int departmentId) async {
+    PostResponse response = await net
+        .post(EndPoint.GET_CENTER_SERVICES, body: {'center_department_id': 61});
 
     print(response);
 
@@ -22,14 +20,14 @@ class ServicesRepository {
       services.addAll(items.split(';').map(parse).toList());
 
       print("services: " + services.toString());
-      yield services;
+      return services;
     } else {
-      yield [];
+      return [];
     }
   }
 
-  Service parse(/*Map<String, dynamic> json*/String name) {
-    return Service(-1, -1, /*json['service_id']*/name, -1, -1);
+  Service parse(/*Map<String, dynamic> json*/ String name) {
+    return Service(-1, -1, /*json['service_id']*/ name, -1, -1);
   }
 }
 
@@ -42,7 +40,7 @@ class Service {
 
   Service(this.id, this.departmentId, this.name, this.costMin, this.costMax);
 
-  /*factory Service.fromJson(Map<String, dynamic> json) {
+/*factory Service.fromJson(Map<String, dynamic> json) {
     return Service(
       json['id'],
       json['center_department_id'],

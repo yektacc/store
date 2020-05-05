@@ -185,7 +185,7 @@ class _CreditCardPageState extends State<CreditCardPage> {
                       mergedNumbers = merged;
                     });
                   } else {
-                    Helpers.errorToast();
+                    Helpers.showErrorToast();
                   }
                 });
               } else {

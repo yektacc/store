@@ -26,7 +26,7 @@ class UserPetBloc extends Bloc<UserPetEvent, UserPetState> {
         print('before handling pet');
         print('user pet in bloc:' + pet.toString());
 
-        if (pet is NotSetUserPet) {
+        if (pet is UninitiatedPet) {
           yield UserPetNotSet();
         } else {
           yield UserPetLoaded(pet);
@@ -47,14 +47,14 @@ class UserPetBloc extends Bloc<UserPetEvent, UserPetState> {
             event.typeId,
             event.sterilization);
 
-        if (pet is NotSetUserPet) {
+        if (pet is UninitiatedPet) {
           var success = await _userPetRepository.send(updatedPet);
           if (success) {
             Helpers.changeSuccessfulToast();
             yield (UserPetLoaded(
                 await _userPetRepository.get(loginState.user.appUserId)));
           } else {
-            Helpers.errorToast();
+            Helpers.showErrorToast();
             yield (UserPetNotSet());
           }
         } else {
@@ -64,7 +64,7 @@ class UserPetBloc extends Bloc<UserPetEvent, UserPetState> {
             yield (UserPetLoaded(
                 await _userPetRepository.get(loginState.user.appUserId)));
           } else {
-            Helpers.errorToast();
+            Helpers.showErrorToast();
             yield (UserPetLoaded(pet));
           }
         }
@@ -75,7 +75,7 @@ class UserPetBloc extends Bloc<UserPetEvent, UserPetState> {
         Helpers.changeSuccessfulToast('حیوان خانگی شما حذف شد');
         yield (UserPetNotSet());
       } else {
-        Helpers.errorToast();
+        Helpers.showErrorToast();
       }
     }
   }

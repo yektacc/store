@@ -65,28 +65,6 @@ class ZarinPalClient {
       return ZPVerifyErrorResponse();
     }
   }
-
-  Future<void> savePaymentInfo(
-      String orderCode, String refId, String status, String sessionId) async {
-    var url = AppUrls.api_url +
-        'savepaymentinfo' +
-        "?order_code=$orderCode&ref_id=$refId&status=$status&session_id=$sessionId";
-    print(url);
-    var res = await http.post(url);
-    var saveInfoData = json.decode(res.body)['data'];
-
-    print('payment ' + res.body);
-    print(saveInfoData);
-
-    print("login res code: " + saveInfoData["response_code"].toString());
-
-    if (saveInfoData["response_code"].toString() != null) {
-      int responseCode = int.parse(saveInfoData["response_code"].toString());
-      print("res int: " + responseCode.toString());
-    } else {
-      return;
-    }
-  }
 }
 
 class ZPRequest extends Equatable {}

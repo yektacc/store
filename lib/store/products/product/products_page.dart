@@ -33,16 +33,14 @@ class _ProductsPageState extends State<ProductsPage>
   BehaviorSubject<FilterTabState> isShownController =
       BehaviorSubject(sync: true);
 
-/*
-  GlobalKey<ScaffoldState> _key = GlobalKey();
-*/
   PersistentBottomSheetController _controller;
 
-  /*AnimationController animController;
-  Animation<Offset> filterPageOffset;*/
-
+  // only used for getting identifier name for appbar title
   ProductsBloc _productsBloc;
+
+  // main source of products
   FilteredProductsBloc _filteredProductsBloc;
+
   CartBloc _cartBloc;
 
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -332,49 +330,49 @@ class CartBottomBar extends StatelessWidget {
   }
 }
 
-class EntryItem extends StatelessWidget {
-  const EntryItem(
-    this.entry,
-    this.context,
-    this.hideDrawer,
-  );
-
-  final VoidCallback hideDrawer;
-  final BuildContext context;
-  final StructPet entry;
-
-  Widget _buildTiles(StructPet pet) {
-    if (pet.categories.isEmpty) return ListTile(title: Text(pet.nameFA));
-    return ExpansionTile(
-      backgroundColor: Colors.white,
-      key: PageStorageKey<StructPet>(pet),
-      title: FlatButton(
-          onPressed: () {
-            Provider.of<ProductsBloc>(context).dispatch(LoadProducts(pet));
-            hideDrawer();
-          },
-          child: Text(
-            pet.nameFA,
-            style: TextStyle(fontSize: 13),
-          )),
-      children: pet.categories
-          .map((cat) => ListTile(
-                onTap: () {
-                  Provider.of<ProductsBloc>(context)
-                      .dispatch(LoadProducts(cat));
-                  hideDrawer();
-                },
-                title: Text(cat.nameFA, style: TextStyle(fontSize: 12)),
-              ))
-          .toList(),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _buildTiles(entry);
-  }
-}
+//class EntryItem extends StatelessWidget {
+//  const EntryItem(
+//    this.entry,
+//    this.context,
+//    this.hideDrawer,
+//  );
+//
+//  final VoidCallback hideDrawer;
+//  final BuildContext context;
+//  final StructPet entry;
+//
+//  Widget _buildTiles(StructPet pet) {
+//    if (pet.categories.isEmpty) return ListTile(title: Text(pet.nameFA));
+//    return ExpansionTile(
+//      backgroundColor: Colors.white,
+//      key: PageStorageKey<StructPet>(pet),
+//      title: FlatButton(
+//          onPressed: () {
+//            Provider.of<ProductsBloc>(context).dispatch(LoadProducts(pet));
+//            hideDrawer();
+//          },
+//          child: Text(
+//            pet.nameFA,
+//            style: TextStyle(fontSize: 13),
+//          )),
+//      children: pet.categories
+//          .map((cat) => ListTile(
+//                onTap: () {
+//                  Provider.of<ProductsBloc>(context)
+//                      .dispatch(LoadProducts(cat));
+//                  hideDrawer();
+//                },
+//                title: Text(cat.nameFA, style: TextStyle(fontSize: 12)),
+//              ))
+//          .toList(),
+//    );
+//  }
+//
+//  @override
+//  Widget build(BuildContext context) {
+//    return _buildTiles(entry);
+//  }
+//}
 
 /*
 class CategoriesDrawer extends StatelessWidget {

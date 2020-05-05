@@ -80,16 +80,20 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
           yield OrderWithDeliveryInf(
               state.orderInfo, state.cart, event.address, deliveryInfo);
         } else {
-          Helpers.errorToast();
+          Helpers.showErrorToast();
         }
       } else {
         yield CheckoutNotLoggedIn();
       }
     } else if (event is SubmitDelivery) {
+      print('new event, current state: $currentState');
       var loginState = _loginStatusBloc.currentState;
 
       if (loginState is IsLoggedIn && currentState is OrderWithDeliveryInf) {
         var state = currentState as OrderWithDeliveryInf;
+
+        yield CheckoutLoading();
+
         var success = await _orderRepo.save(
             loginState.user.sessionId,
             state.orderInfo.orderCode,
@@ -134,19 +138,20 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
           var paymentState = (currentState as OrderPayment);
           yield CheckoutLoading();
 
-          var mappedList = paymentState.deliveryInfo.items.map((di) async {
-            return await _orderRepo.saveTransaction(
-                paymentState.orderInfo.orderId.toString(),
-                di.sellerId.toString(),
-                di.price.amount.toString());
-          }).toList();
+          /*var mappedList = paymentState.deliveryInfo.items.map((di) async {
+            return
+          }).toList();*/
+          var success = await _orderRepo.saveTransaction(
+              paymentState.orderInfo.orderId.toString(),
+              paymentState.deliveryInfo.items[0].sellerId.toString(),
+              paymentState.deliveryPrice.toString());
 
-          List<bool> successList = await Future.wait(mappedList);
+//          List<bool> successList = await Future.wait(mappedList);
 
-          bool allSuccess =
-              successList.fold(true, (prev, success) => prev && success);
+//          bool allSuccess =
+//              successList.fold(true, (prev, success) => prev && success);
 
-          if (allSuccess) {
+          if (success) {
             var res = await ZarinPalClient().getPaymentURL(
                 ZPPaymentRequest((paymentState.toPayAmount).toString()));
             if (res is ZPPaymentSuccessResponse) {
@@ -174,27 +179,40 @@ class CheckoutBloc extends Bloc<CheckoutEvent, CheckoutState> {
 
           if (res is ZPVerifySuccessResponse) {
 //            var res = _orderRepo.saveFinal(loginState.user.sessionId, orderCode)
-            var saveFinal = await _orderRepo.saveFinal(
-                loginState.user.sessionId,
-                gatewayState.orderInfo.orderCode,
-                gatewayState.address.id);
 
-            if (saveFinal != -1) {
-              var saveFinalTransaction =
-                  await _orderRepo.saveFinalTransaction(saveFinal);
-              if (saveFinalTransaction) {
-                yield PaymentSuccessful(
-                    gatewayState.deliveryInfo,
-                    gatewayState.cart,
-                    gatewayState.address,
-                    gatewayState.deliveryInfo);
+            var paymentId = await _orderRepo.savePaymentInfo(
+                res.refId,
+                gatewayState.amount,
+                '1',
+                loginState.user.sessionId,
+                gatewayState.orderInfo.orderCode);
+
+            if (paymentId != -1) {
+              var success = await _orderRepo.saveFinal(
+                  loginState.user.sessionId,
+                  gatewayState.orderInfo.orderCode,
+                  gatewayState.address.id);
+
+              if (success) {
+                var saveFinalTransaction =
+                await _orderRepo.saveFinalTransaction(paymentId);
+                if (saveFinalTransaction) {
+                  yield PaymentSuccessful(
+                      gatewayState.orderInfo,
+                      gatewayState.cart,
+                      gatewayState.address,
+                      gatewayState.deliveryInfo);
+                } else {
+                  Helpers.showToast(
+                      'خطا در پردازش نهایی سفارش: ' + gatewayState.authority);
+                }
               } else {
                 Helpers.showToast(
                     'خطا در پردازش نهایی سفارش: ' + gatewayState.authority);
               }
             }
           } else {
-            Helpers.errorToast();
+            Helpers.showErrorToast();
           }
 
           /*if (res is ZPPaymentSuccessResponse) {

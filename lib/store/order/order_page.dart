@@ -5,10 +5,12 @@ import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/common/widgets/app_widgets.dart';
+import 'package:store/common/widgets/buttons.dart';
+import 'package:store/common/widgets/form_fields.dart';
 import 'package:store/data_layer/order/paid_orders_repository.dart';
 import 'package:store/store/login_register/login_status/login_status_bloc.dart';
 import 'package:store/store/login_register/login_status/login_status_event_state.dart';
-import 'package:store/store/management/management_login_bloc.dart';
+import 'package:store/store/management/manager_login_bloc.dart';
 import 'package:store/store/management/model.dart';
 import 'package:store/store/order/order_bloc.dart';
 import 'package:store/store/order/order_bloc_event_state.dart';
@@ -20,7 +22,10 @@ class UserOrderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(titleText: 'سفارش‌های شما'),
+      appBar: CustomAppBar(
+        titleText: 'سفارش‌های شما',
+        light: true,
+      ),
       body: UserOrdersWidget(),
     );
   }
@@ -36,7 +41,8 @@ class ShopOrderPage extends StatelessWidget {
     return Scaffold(
       appBar: CustomAppBar(
         titleText: 'سفارش‌های شما',
-        altBackground: true,
+        light: true,
+        altMainColor: true,
       ),
       body: ShopOrdersWidget(identifier),
     );
@@ -74,9 +80,11 @@ class _ShopOrdersWidgetState extends State<ShopOrdersWidget> {
           builder: (context, state) {
             print('thestate:' + state.toString());
             if (state is OrdersLoaded) {
-              return OrdersVListWidget(state.orders);
+              return OrdersVListWidget(state.orders, _orderBloc);
             } else {
-              return LoadingIndicator();
+              return LoadingIndicator(
+                color: Colors.blueGrey,
+              );
             }
           },
         );
@@ -155,7 +163,7 @@ class _UserOrdersWidgetState extends State<UserOrdersWidget> {
           builder: (context, state) {
             print('thestate:' + state.toString());
             if (state is OrdersLoaded) {
-              return OrdersVListWidget(state.orders);
+              return OrdersVListWidget(state.orders, _orderBloc);
             } else {
               return LoadingIndicator();
             }
@@ -169,8 +177,9 @@ class _UserOrdersWidgetState extends State<UserOrdersWidget> {
 class OrdersVListWidget extends StatefulWidget {
   final List<PaidOrder> orders;
   final bool altColor;
+  final OrderBloc orderBloc;
 
-  OrdersVListWidget(this.orders, {this.altColor = false});
+  OrdersVListWidget(this.orders, this.orderBloc, {this.altColor = false});
 
   @override
   _OrdersVListWidgetState createState() => _OrdersVListWidgetState();
@@ -189,15 +198,26 @@ class _OrdersVListWidgetState extends State<OrdersVListWidget> {
     }
   }
 
+  bool isPacked(PaidOrder order) {
+    return order is ShopPaidOrder &&
+        order.sentInfo != null &&
+        order.sentInfo.sent;
+  }
+
   Widget _buildOrderItem(PaidOrder order) {
     return Card(
+        color: isPacked(order) ? Colors.green[100] : null,
         elevation: 5,
         margin: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         child: Column(
           children: <Widget>[
             Container(
               decoration: BoxDecoration(
-                  color: Colors.grey[500],
+                  color: isPacked(order)
+                      ? Colors.green[100]
+                      : order is UserPaidOrder
+                      ? AppColors.main_color
+                      : AppColors.second_color,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(4))),
               width: double.infinity,
               child: Row(
@@ -209,7 +229,8 @@ class _OrdersVListWidgetState extends State<OrdersVListWidget> {
                           padding: EdgeInsets.symmetric(horizontal: 8),
                           child: Icon(
                             Icons.store,
-                            color: AppColors.main_color,
+                            color:
+                            isPacked(order) ? Colors.black : Colors.white,
                             size: 18,
                           ),
                         ),
@@ -217,13 +238,16 @@ class _OrdersVListWidgetState extends State<OrdersVListWidget> {
                           padding: EdgeInsets.only(left: 10, right: 6),
                           child: Text(
                             order.shopName,
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(
+                                color: isPacked(order)
+                                    ? Colors.black
+                                    : Colors.white),
                           ),
                         ),
-                        Text(
-                          order.city ?? '',
-                          style: TextStyle(color: Colors.grey[300]),
-                        )
+//                        Text(
+//                          order.city ?? '',
+//                          style: TextStyle(color: isPacked(order) ? Colors.black : Colors.grey[300]),
+//                        )
                       ],
                     ),
                   ),
@@ -231,7 +255,11 @@ class _OrdersVListWidgetState extends State<OrdersVListWidget> {
                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                     child: Text(
                       order.total.formatted(),
-                      style: TextStyle(fontSize: 15, color: Colors.grey[100]),
+                      style: TextStyle(
+                          fontSize: 15,
+                          color: isPacked(order)
+                              ? Colors.black
+                              : Colors.grey[100]),
                     ),
                   )
                 ],
@@ -256,7 +284,7 @@ class _OrdersVListWidgetState extends State<OrdersVListWidget> {
                                     order.orderCode,
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: AppColors.main_color),
+                                        color: Colors.grey[600]),
                                   ),
                                 ),
                               )
@@ -276,7 +304,7 @@ class _OrdersVListWidgetState extends State<OrdersVListWidget> {
                                         order.orderDate.split(' ')[0]),
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        color: AppColors.grey[800]),
+                                        color: AppColors.grey),
                                   ),
                                 ),
                               )
@@ -293,8 +321,7 @@ class _OrdersVListWidgetState extends State<OrdersVListWidget> {
                                   alignment: Alignment.centerLeft,
                                   child: Text(
                                     order.address,
-                                    style:
-                                    TextStyle(color: AppColors.grey[800]),
+                                    style: TextStyle(color: AppColors.grey),
                                   ),
                                 ),
                               )
@@ -318,7 +345,11 @@ class _OrdersVListWidgetState extends State<OrdersVListWidget> {
                         EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                         child: Column(
                           children: order.products
-                              .map(_buildOrderProductWidget)
+                              .map(
+                                (p) =>
+                                _buildOrderProductWidget(
+                                    p, order is ShopPaidOrder),
+                          )
                               .toList(),
                         ),
                       )
@@ -332,20 +363,37 @@ class _OrdersVListWidgetState extends State<OrdersVListWidget> {
               alignment: Alignment.centerRight,
               height: 60,
               decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: isPacked(order)
+                      ? Colors.green[100]
+                      : Colors.grey[100],
                   borderRadius:
                   BorderRadius.vertical(bottom: Radius.circular(4))),
-              child: Row(
+              child: isPacked(order)
+                  ? Row(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Icon(Icons.done_outline),
+                  ),
+                  Container(
+                    padding: EdgeInsets.only(right: 6),
+                    child: Text(
+                        'ارسال شده در تاریخ:   ${Helpers.getPersianDate(
+                            order.sentInfo.sentDate)}'),
+                  )
+                ],
+              )
+                  : Row(
                 children: <Widget>[
                   GestureDetector(
-                    onTap: _orderSentButtonPressed,
+                    onTap: () => _orderSentButtonPressed(order),
                     child: Card(
                       margin: EdgeInsets.only(right: 12),
                       elevation: 7,
                       color: Colors.grey[50],
                       shape: RoundedRectangleBorder(
-                          borderRadius:
-                          BorderRadius.all(Radius.circular(15))),
+                          borderRadius: BorderRadius.all(
+                              Radius.circular(15))),
                       child: Row(
                         children: <Widget>[
                           Container(
@@ -378,26 +426,69 @@ class _OrdersVListWidgetState extends State<OrdersVListWidget> {
         ));
   }
 
-  _orderSentButtonPressed() {
-    showDialog(
+  _orderSentButtonPressed(ShopPaidOrder order) {
+    final TextEditingController controller = TextEditingController();
+
+    showModalBottomSheet(
+        isScrollControlled: true,
         context: context,
+        backgroundColor: Color.fromARGB(230, 255, 255, 255),
         builder: (context) {
-          return AlertDialog(
-            title: Text('پیام نهایی'),
-            content: Container(
+          return Container(
+            alignment: Alignment.center,
+            height: Helpers.getBodyHeight(context),
+            child: SingleChildScrollView(
               child: Column(
                 children: <Widget>[
                   Container(
                     height: 170,
-                    child: TextField(),
+                    child: FormFields.big(
+                      'پیام نهایی',
+                      controller,
+                    ),
                   ),
                   Container(
-                    height: 56,
-                    color: Colors.grey[200],
-                    child: FlatButton(
-                      onPressed: () {},
-                      child: Text('تایید'),
+                    margin: EdgeInsets.only(top: 10, bottom: 50),
+                    child: Buttons.simple('تایید', () {
+                      widget.orderBloc.dispatch(OrderPacked(controller.text,
+                          order.orderId, order.products[0].sellerId));
+                      Navigator.of(context).pop();
+                    }),
+                  )
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  _returnButtonPressed(Function(String) submitPressed) {
+    final TextEditingController controller = TextEditingController();
+
+    showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        backgroundColor: Color.fromARGB(230, 255, 255, 255),
+        builder: (context) {
+          return Container(
+            alignment: Alignment.center,
+            height: Helpers.getBodyHeight(context),
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: 170,
+                    child: FormFields.big(
+                      'پیام نهایی',
+                      controller,
                     ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(top: 10, bottom: 50),
+                    child: Buttons.simple('تایید', () {
+                      submitPressed(controller.text);
+                      Navigator.pop(context);
+                    }),
                   )
                 ],
               ),
@@ -414,12 +505,17 @@ class _OrdersVListWidgetState extends State<OrdersVListWidget> {
     );
   }
 
-  Widget _buildOrderProductWidget(OrderProductInfo product) {
-    var _orderProductBloc = OrderProductBloc(
-        Provider.of<OrdersRepository>(context),
-        Provider.of<LoginStatusBloc>(context),
-        Provider.of<ManagerLoginBloc>(context),
-        product);
+  Widget _buildReturnButton(Function(String) onPressed) {
+    return Padding(
+      padding: EdgeInsets.only(left: 7, right: 2),
+      child: Buttons.small('ثبت مرجوعی', () => _returnButtonPressed(onPressed)),
+    );
+  }
+
+  Widget _buildOrderProductWidget(OrderProductInfo product, bool shop) {
+    var _orderProductBloc =
+    PackingBloc(Provider.of<OrdersRepository>(context), product);
+    _orderProductBloc.dispatch(GetPackingInfo());
 
     return Container(
       padding: EdgeInsets.only(bottom: 10, top: 5),
@@ -427,22 +523,27 @@ class _OrdersVListWidgetState extends State<OrdersVListWidget> {
         children: <Widget>[
           Row(
             children: <Widget>[
-              BlocBuilder<OrderProductBloc, OrderProductState>(
+              shop
+                  ? BlocBuilder<PackingBloc, OrderProductState>(
                 bloc: _orderProductBloc,
                 builder: (context, state) {
-                  if (state is ProductIsPacked) {
+                  if (state is IsPacked) {
                     return _buildProductPackingIcon(true, () {});
-                  } else if (state is ProductNotPacked) {
+                  } else if (state is NotPacked) {
                     return _buildProductPackingIcon(false, () {
-                      _orderProductBloc.dispatch(ProductPacked(product));
+                      _orderProductBloc.dispatch(ProductPacked());
                     });
-                  } else if (state is ProductPackingLoading) {
-                    return LoadingIndicator();
+                  } else if (state is OrderProductLoading) {
+                    return SmallLoadingIndicator();
                   } else {
                     return Container();
                   }
                 },
-              ),
+              )
+                  : _buildReturnButton((comment) {
+                widget.orderBloc
+                    .dispatch(SubmitProductReturn(product, comment));
+              }),
               Expanded(
                 child: Text(product.name),
               ),
@@ -546,7 +647,7 @@ class _OrdersHListWidgetState extends State<OrdersHListWidget> {
                                     order.orderDate.split(' ')[0]),
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.grey[800]),
+                                    color: AppColors.grey),
                               ),
                             )
                           ],
@@ -566,7 +667,7 @@ class _OrdersHListWidgetState extends State<OrdersHListWidget> {
                               alignment: Alignment.centerLeft,
                               child: Text(
                                 order.city,
-                                style: TextStyle(color: AppColors.grey[800]),
+                                style: TextStyle(color: AppColors.grey),
                               ),
                             )
                           ],
@@ -578,7 +679,7 @@ class _OrdersHListWidgetState extends State<OrdersHListWidget> {
               ),
               Container(
                 decoration: BoxDecoration(
-                    color: AppColors.grey[300],
+                    color: Colors.grey[300],
                     borderRadius:
                     BorderRadius.vertical(bottom: Radius.circular(4))),
                 child: Row(

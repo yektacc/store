@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:store/common/constants.dart';
 import 'package:store/data_layer/fcm/fcm_token_repository.dart';
 import 'package:store/data_layer/management/management_repository.dart';
 import 'package:store/store/management/model.dart';
@@ -33,25 +34,33 @@ class ManagerLoginBloc extends Bloc<ManagerLoginEvent, ManagerLoginState> {
 
       print("center identifiers: " + identifiers.toString());
 
-      try {
-        var service = identifiers
-            .firstWhere((identifier) => identifier is ServiceIdentifier);
+      if (identifiers.isNotEmpty) {
+        try {
+          var service = identifiers
+              .firstWhere((identifier) => identifier is ServiceIdentifier);
 
-        if (service != null) {
-          _fcmRepo.updateManagerToken(service.id);
+          if (service != null) {
+            _fcmRepo.updateManagerToken(service.id);
+          }
+        } catch (e) {
+          print(e);
         }
-      } catch (e) {
-        print(e);
+
+        var user = ManagerUser(event.email, event.password, identifiers);
+        _managementRepo.saveManagerUser(user);
+
+        yield ManagerLoggedIn(user);
+      } else {
+        yield SMWaitingForLoginWithError(
+            'نام کاربری یا کلمه عبور صحیح نمی باشد');
       }
-
-      var user = ManagerUser(event.email, event.password, identifiers);
-      _managementRepo.saveManagerUser(user);
-
-      yield ManagerLoggedIn(user);
     } else if (event is LogoutManager) {
-      yield LoadingSMData();
-      _managementRepo.logout();
-      yield SMWaitingForLogin();
+      var res = await _managementRepo.logout();
+      if (res) {
+        yield SMWaitingForLogin();
+      } else {
+        Helpers.showErrorToast();
+      }
     } else if (event is InitiateManagerLogin) {
       print('ran initiation');
       var user = _getUserIfLoggedIn();

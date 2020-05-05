@@ -30,7 +30,6 @@ class FormFields {
   static Widget text(String title, TextEditingController controller,
       {IconData icon,
       bool validateOnSubmit = true,
-      bool obscure = false,
       TextInputType keyboardType = TextInputType.text,
       Key key,
       String Function(String) validator,
@@ -44,7 +43,6 @@ class FormFields {
     return Padding(
         padding: AppDimensions.defaultFormPadding,
         child: TextFormField(
-          obscureText: obscure,
           validator: validateOnSubmit
               ? (validator ??
                   (value) {
@@ -66,6 +64,44 @@ class FormFields {
               border: noBorder ? null : OutlineInputBorder(),
               labelText: title,
               prefixIcon: noIcon ? null : Icon(icon),
+              labelStyle: TextStyle(fontSize: _labelFontSize)),
+        ));
+  }
+
+  static Widget password(String title, TextEditingController controller,
+      {IconData icon,
+        TextInputType keyboardType = TextInputType.text,
+        Key key,
+        String Function(String) validator,
+        bool noBorder = false,
+        bool noIcon = false,
+        Function(String) onChange}) {
+    return Padding(
+        padding: AppDimensions.defaultFormPadding,
+        child: TextFormField(
+          obscureText: true,
+          controller: controller,
+          textAlign: TextAlign.center,
+          validator: (value) {
+            if (value.isEmpty) {
+              return 'رمز عبور وارد نشده است';
+            }
+            return null;
+          },
+          decoration: InputDecoration(
+              enabledBorder: noBorder
+                  ? null
+                  : OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.main_color)),
+              border: noBorder ? null : OutlineInputBorder(),
+              labelText: title,
+
+              hintText: "رمز عبور",
+              hintStyle: TextStyle(fontSize: 13,),
+              prefixIcon: noIcon ? null : Icon(
+                Icons.lock,
+                size: 22,
+              ),
               labelStyle: TextStyle(fontSize: _labelFontSize)),
         ));
   }

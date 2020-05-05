@@ -105,7 +105,7 @@ class _SellerRequestPageState extends State<SellerRequestPage> {
                             Navigator.pop(context);
                           });
                         } else {
-                          Helpers.errorToast();
+                          Helpers.showErrorToast();
                         }
                       }
                     }

@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/widgets/app_widgets.dart';
-import 'package:store/store/management/management_login_bloc.dart';
+import 'package:store/common/widgets/form_fields.dart';
 import 'package:store/store/management/management_login_event_state.dart';
+import 'package:store/store/management/manager_login_bloc.dart';
 
 import 'management_home_page.dart';
 
 class ManagerLoginPage extends StatefulWidget {
+  static const String routeName = 'managerlogin';
+
   @override
   _ManagerLoginPageState createState() => _ManagerLoginPageState();
 }
@@ -56,104 +59,83 @@ class _ManagerLoginPageState extends State<ManagerLoginPage> {
               color: AppColors.second_color,
               child: Container(
                 child: new Form(
-                  key: _formKey,
-                  child: new Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      new Container(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Container(
+                          margin: EdgeInsets.only(bottom: 50),
                           color: Colors.white,
-                          child: TextFormField(
-                            onChanged: (newText) {
-                              phoneController = newText;
-                            },
-                            textAlign: TextAlign.center,
-                            decoration: InputDecoration(
-                                icon: Icon(
-                                  Icons.person,
-                                  size: 22,
-                                ),
-                                hintStyle: TextStyle(fontSize: 13),
-                                hintText: "نام کاربری"),
-                            validator: (value) {
-                              if (value.isEmpty) {
-                                return 'نام کاربری وارد نشده است';
-                              }
-                              return null;
-                            },
-                          ),
-                          padding:
-                              EdgeInsets.only(left: 50, right: 20, top: 14)),
-                      Container(
-                        color: Colors.white,
-                        child: TextFormField(
-                          obscureText: true,
-                          controller: passController,
-                          textAlign: TextAlign.center,
-                          decoration: InputDecoration(
-                            icon: Icon(
-                              Icons.lock,
-                              size: 22,
-                            ),
-                            hintText: "رمز عبور",
-                            hintStyle: TextStyle(fontSize: 13),
-                          ),
-                          validator: (value) {
-                            if (value.isEmpty) {
-                              return 'رمز عبور وارد نشده است';
-                            }
-                            return null;
-                          },
-                        ),
-                        padding: EdgeInsets.only(left: 50, right: 20, top: 12),
-                      ),
-                      Container(
-                        color: Colors.white,
-                        width: double.infinity,
-                        padding: const EdgeInsets.only(top: 18.0, bottom: 18),
-                        child: Center(
-                          child: FlatButton(
-                            textColor: Colors.white,
-                            onPressed: () {
-                              if (_formKey.currentState.validate()) {
-                                _managerLoginBloc.dispatch(ShopManagerLogin(
-                                    phoneController,
-                                    passController.text.toString()));
-                              }
-                            },
-                            child: Container(
-                              height: 34,
-                              width: 100,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color: AppColors.second_color,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(30))),
-                              child: Text(
-                                'ورود',
-                                style: TextStyle(fontSize: 13),
+                          child: new Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              new Container(
+                                  child: FormFields.text('نام کاربری', null,
+                                      noBorder: true,
+                                      icon: Icons.person, onChange: (newText) {
+                                        phoneController = newText;
+                                      }, validator: (value) {
+                                        if (value.isEmpty) {
+                                          return 'نام کاربری وارد نشده است';
+                                        }
+                                        return null;
+                                      }),
+                                  padding: EdgeInsets.only(top: 14)),
+                              Container(
+                                child: FormFields.password(
+                                    'رمز عبور', passController,
+                                    noBorder: true),
+                                padding: EdgeInsets.only(),
                               ),
-                            ),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.only(
+                                    top: 18.0, bottom: 18),
+                                child: Center(
+                                  child: FlatButton(
+                                    textColor: Colors.white,
+                                    onPressed: () {
+                                      if (_formKey.currentState.validate()) {
+                                        _managerLoginBloc.dispatch(
+                                            ShopManagerLogin(
+                                                phoneController,
+                                                passController.text
+                                                    .toString()));
+                                      }
+                                    },
+                                    child: Container(
+                                      height: 34,
+                                      width: 100,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                          color: AppColors.second_color,
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(30))),
+                                      child: Text(
+                                        'ورود',
+                                        style: TextStyle(fontSize: 13),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.only(top: 25),
+                                child: Center(
+                                    child: error
+                                        ? Text(
+                                      "نام کاربری یا کلمه عبور صحیح نمی باشد!",
+                                      style: TextStyle(
+                                          color: AppColors.second_color,
+                                          fontWeight: FontWeight.bold),
+                                    )
+                                        : Container()),
+                              )
+                            ],
                           ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(bottom: 70),
-                      ),
-                      Container(
-                        padding: EdgeInsets.only(top: 25),
-                        child: Center(
-                            child: error
-                                ? Text(
-                                    "نام کاربری یا کلمه عبور صحیح نمی باشد!",
-                                    style: TextStyle(
-                                        color: AppColors.second_color,
-                                        fontWeight: FontWeight.bold),
-                                  )
-                                : Container()),
-                      )
-                    ],
-                  ),
-                ),
+                        )
+                      ],
+                    )),
               ),
             ),
           ),

@@ -12,7 +12,6 @@ import 'package:store/store/login_register/forgetpass/forget_pass_page.dart';
 
 import 'login_bloc.dart';
 import 'login_event_state.dart';
-import 'login_interactor.dart';
 
 class LoginPage extends StatefulWidget {
   LoginBloc _bloc;
@@ -23,14 +22,6 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-
-/*  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-*/ /*
-    Provider.of<LoginBloc>(context).dispatch(Reset());
-*/ /*
-  }*/
 
   final phoneController = TextEditingController();
   final passController = TextEditingController();
@@ -51,13 +42,11 @@ class _LoginPageState extends State<LoginPage> {
       widget._bloc = Provider.of<LoginBloc>(context);
     }
 
-/*
-    widget._bloc.event.listen((event) {
-      print("loginevent: $event");
-    });*/
-
     return Scaffold(
-        appBar: CustomAppBar(titleText: 'ورود', elevation: 0,),
+        appBar: CustomAppBar(
+          titleText: 'ورود',
+          elevation: 0,
+        ),
         body: new Container(
           child: SizedBox(
             width: double.infinity,
@@ -100,6 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                               Container(
                                 color: Colors.white,
                                 child: TextFormField(
+                                  textDirection: TextDirection.ltr,
                                   obscureText: true,
                                   controller: passController,
                                   textAlign: TextAlign.center,
@@ -146,7 +136,8 @@ class _LoginPageState extends State<LoginPage> {
                                               Radius.circular(30))),
                                       child: Text(
                                         'ورود',
-                                        style: TextStyle(fontSize: 13,
+                                        style: TextStyle(
+                                            fontSize: 13,
                                             color: AppColors.main_color),
                                       ),
                                     ),
@@ -193,14 +184,10 @@ class _LoginPageState extends State<LoginPage> {
                               Container(
                                 padding: EdgeInsets.only(top: 25),
                                 child: Center(
-                                    child: state.error ==
-                                            LoginError.CREDENTIALS_MISMATCH
-                                        ? Text(
-                                            "نام کاربری یا کلمه عبور صحیح نمی باشد!",
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          )
-                                        : Container()),
+                                    child: Text(
+                                      state.getErrorText(),
+                                      style: TextStyle(color: Colors.white),
+                                    )),
                               )
                             ],
                           ),

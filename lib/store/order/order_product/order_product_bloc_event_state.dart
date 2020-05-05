@@ -12,21 +12,19 @@ abstract class OrderProductState extends BlocState {
 
 // STATES *******************************
 
-class ProductPackingLoading extends OrderProductState {
-  final OrderProductInfo orderProduct;
-
-  ProductPackingLoading(this.orderProduct);
+class OrderProductLoading extends OrderProductState {
+  OrderProductLoading();
 
   @override
   String toString() {
-    return "STATE: product packing loading: $orderProduct";
+    return "STATE: product packing loading";
   }
 }
 
-class ProductIsPacked extends OrderProductState {
+class IsPacked extends OrderProductState {
   final OrderProductInfo orderProduct;
 
-  ProductIsPacked(this.orderProduct);
+  IsPacked(this.orderProduct);
 
   @override
   String toString() {
@@ -34,10 +32,10 @@ class ProductIsPacked extends OrderProductState {
   }
 }
 
-class ProductNotPacked extends OrderProductState {
+class NotPacked extends OrderProductState {
   final OrderProductInfo orderProduct;
 
-  ProductNotPacked(this.orderProduct);
+  NotPacked(this.orderProduct);
 
   @override
   String toString() {
@@ -47,24 +45,24 @@ class ProductNotPacked extends OrderProductState {
 
 // EVENTS *******************************
 
-class CheckProductPacking extends OrderProductEvent {
-  final OrderProductInfo orderProduct;
+class GetPackingInfo extends OrderProductEvent {
+//  final OrderProductInfo orderProduct;
 
-  CheckProductPacking(this.orderProduct);
+  GetPackingInfo(/*this.orderProduct*/);
 
   @override
   String toString() {
-    return "check product packing status: $orderProduct";
+    return "check product packing status";
   }
 }
 
 class ProductPacked extends OrderProductEvent {
-  final OrderProductInfo orderProduct;
-
-  ProductPacked(this.orderProduct);
+  ProductPacked();
 
   @override
   String toString() {
-    return "packing product: $orderProduct";
+    return "packing product";
   }
 }
+
+

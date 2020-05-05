@@ -1,3 +1,4 @@
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:store/data_layer/centers/centers_repository.dart';
@@ -31,7 +32,7 @@ import 'package:store/store/login_register/profile/profile_bloc.dart';
 import 'package:store/store/login_register/profile/profile_repository.dart';
 import 'package:store/store/login_register/register/register_bloc.dart';
 import 'package:store/store/login_register/register/register_interactor.dart';
-import 'package:store/store/management/management_login_bloc.dart';
+import 'package:store/store/management/manager_login_bloc.dart';
 import 'package:store/store/order/order_bloc.dart';
 import 'package:store/store/products/brands/brands_bloc.dart';
 import 'package:store/store/products/cart/cart_bloc.dart';
@@ -64,6 +65,10 @@ import 'data_layer/products/products_count_in_category.dart';
 Future main() async {
   Net net = Net();
 
+  // setting up crashylitics
+  Crashlytics.instance.enableInDevMode = true;
+  FlutterError.onError = Crashlytics.instance.recordFlutterError;
+
   // repositories
   final SearchInteractor _searchInteractor = SearchInteractor();
   final StructureRepository _structureRepo = StructureRepository(net);
@@ -78,7 +83,7 @@ Future main() async {
   final BrandsRepository _brandsRepository = BrandsRepository(net);
   final ProductsBloc _productsBloc = ProductsBloc(_productRepo);
   final FilteredProductsBloc _filteredProductsBloc =
-      FilteredProductsBloc(_productsBloc);
+  FilteredProductsBloc(_productsBloc);
   final StructureBloc _structureBloc = StructureBloc(_structureRepo);
   final CartBloc _cartBloc = CartBloc(_detailRepo);
   final RegisterBloc _registerBloc = RegisterBloc(_registerInteractor);
@@ -91,10 +96,10 @@ Future main() async {
   final ProvinceBloc _provinceBloc = ProvinceBloc(_provinceRepo);
   final MyLocationBloc _myLocationBloc = MyLocationBloc();
   final LostPetsRepository _lostPetsRepo =
-      LostPetsRepository(_provinceRepo, net);
+  LostPetsRepository(_provinceRepo, net);
   final LostPetsBloc _lostPetsBloc = LostPetsBloc(_lostPetsRepo);
   final AdoptionPetsBloc _adoptionPetsBloc =
-      AdoptionPetsBloc(_adoptionPetsRepo);
+  AdoptionPetsBloc(_adoptionPetsRepo);
   final ForgetPassBloc _forgetPassBloc = ForgetPassBloc(_forgetPassInteractor);
   final BrandsBloc _brandsBloc = BrandsBloc(_brandsRepository);
 
@@ -112,24 +117,24 @@ Future main() async {
   final OrderBloc _orderBloc =
   OrderBloc(_ordersRepo, _loginStatusBloc, _managerLoginBloc);
 
-  final SearchBloc _searchBloc =
-  SearchBloc(_productRepo, _searchInteractor, _centersRepo);
+  final SearchBloc _searchBloc = SearchBloc(
+      _productRepo, _searchInteractor, _centersRepo, _filteredProductsBloc);
 
   final ProductsCountRepository _countRepo =
-      ProductsCountRepository(_productRepo, _structureBloc);
+  ProductsCountRepository(_productRepo, _structureBloc);
   final SpecialProductsRepository _bestSellerRepo =
   SpecialProductsRepository(net, _structureRepo);
   final ServicesRepository _servicesRepository = ServicesRepository(net);
   final AdsRepository _adsRepo = AdsRepository(net);
   final DeliveryPriceRepository _deliveryPriceRepo =
-      DeliveryPriceRepository(net);
+  DeliveryPriceRepository(net);
   final TagsRepository _tagsRepository = TagsRepository(net, _detailRepo);
 
   final SaveOrderRepository _orderRepo = SaveOrderRepository(net);
 
   final CartRepository _cartRepo = CartRepository(net, _detailRepo);
   final ProductPicturesRepository _picturesRepo =
-      ProductPicturesRepository(net);
+  ProductPicturesRepository(net);
 
   final SiteInfoRepository _siteInfoRepository = SiteInfoRepository(net);
   final FavoriteRepository _favoritesRepo = FavoriteRepository(net);
@@ -206,6 +211,7 @@ Future main() async {
     Provider<FcmTokenRepository>.value(value: _fcmRepo),
     Provider<InboxManager>.value(value: _inboxManager),
     Provider<CheckoutBloc>.value(value: _checkoutBloc),
+    Provider<Net>.value(value: net)
 //    Provider<ShopManagementBloc>.value(value: _shopManagementBloc),
   ]));
 }

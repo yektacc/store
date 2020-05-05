@@ -30,7 +30,7 @@ class SpecialProductsRepository {
 
   Future<List<Product>> _getNewestProducts() async {
     final response = await _net.post(EndPoint.GET_FILTERED_PRODUCTS,
-        body: {'filter_type': 'best_sale'});
+        body: {'filter_type': 'newest'});
 
     if (response is SuccessResponse) {
       List<Map<String, dynamic>> list =
@@ -64,7 +64,8 @@ class SpecialProductsRepository {
 
   Future<List<Product>> _getSellerProducts() async {
     final response = await _net
-        .post(EndPoint.GET_FILTERED_PRODUCTS, body: {'filter_type': 'newest'});
+        .post(
+        EndPoint.GET_FILTERED_PRODUCTS, body: {'filter_type': 'best_sale'});
 
     if (response is SuccessResponse) {
       List<Map<String, dynamic>> list =

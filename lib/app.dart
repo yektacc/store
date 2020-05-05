@@ -10,6 +10,7 @@ import 'package:store/store/login_register/login/login_page.dart';
 import 'package:store/store/login_register/profile/profile_page.dart';
 import 'package:store/store/login_register/register/register_page.dart';
 import 'package:store/store/management/management_home_page.dart';
+import 'package:store/store/management/manager_login_page.dart';
 import 'package:store/store/management/model.dart';
 import 'package:store/store/management/seller/shop_add_product_page.dart';
 import 'package:store/store/management/seller/shop_create_product_page.dart';
@@ -96,6 +97,10 @@ class _AppState extends State<App> {
                 return MaterialPageRoute(
                     builder: (context) => ManagementHomePage());
                 break;
+
+              case ManagerLoginPage.routeName:
+                return MaterialPageRoute(
+                    builder: (context) => ManagerLoginPage());
 
             /*  case ShopManagementPage.routeName:
                 return MaterialPageRoute(

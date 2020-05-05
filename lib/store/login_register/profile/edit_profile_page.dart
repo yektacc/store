@@ -144,7 +144,7 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
                       textAlign: TextAlign.center,
                       decoration: InputDecoration(
                           icon: Icon(Icons.image_aspect_ratio),
-                          hintText: "کد ملی",
+                          hintText: " کد ملی جهت تحویل کالا (اختیاری)",
                           hintStyle: TextStyle(fontSize: 13)),
                       validator: (value) {
                         if (value.isEmpty) {

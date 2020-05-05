@@ -6,9 +6,9 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:simple_slider/simple_slider.dart';
 import 'package:store/common/constants.dart';
 import 'package:store/common/widgets/app_widgets.dart';
+import 'package:store/common/widgets/simple_slider.dart';
 import 'package:store/data_layer/centers/centers_repository.dart';
 import 'package:store/data_layer/centers/service_repository.dart';
 import 'package:store/data_layer/netclient.dart';
@@ -33,8 +33,20 @@ class CenterDetailPage extends StatefulWidget {
 }
 
 class _CenterDetailPageState extends State<CenterDetailPage> {
+  CentersRepository _centersRepository;
+
+  Future<List<String>> getImageUrls() async {
+    var list =
+    await _centersRepository.getCenterImgUrl(widget.center.id.toString());
+    print(list);
+    return list;
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_centersRepository == null) {
+      _centersRepository = Provider.of<CentersRepository>(context);
+    }
     return Scaffold(
       appBar: CustomAppBar(
         elevation: 0,
@@ -52,21 +64,20 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                 margin: EdgeInsets.only(bottom: 1, left: 1),
                 alignment: Alignment.center,
                 color: Colors.grey[200],
-                height: 170,
+                height: 240,
                 child: FutureBuilder<List<String>>(
-                    future: Provider.of<CentersRepository>(context)
-                        .getCenterImgUrl(widget.center.id.toString()),
+                    future: getImageUrls(),
                     builder: (context, snapshot) {
                       if (snapshot != null &&
                           snapshot.data != null &&
-                          snapshot.data != []) {
+                          snapshot.data.isNotEmpty) {
                         return ImageSliderWidget(
-                          imageUrls: [widget.center.logoUrl] + snapshot.data,
-                          imageBorderRadius: BorderRadius.circular(8.0),
+                          imageUrls: /*[widget.center.logoUrl] + */ snapshot
+                              .data,
+                          imageBorderRadius: BorderRadius.circular(0.0),
                         );
-
-//                        return Helpers.image(snapshot.data);
-                      } else if (snapshot.data == []) {
+                      } else if (snapshot.data != null &&
+                          snapshot.data.isEmpty) {
                         return Helpers.image(widget.center.logoUrl);
                       } else {
                         return Container();
@@ -87,110 +98,110 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                         children: <Widget>[
                           Expanded(
                               child: Row(
-                            children: <Widget>[
-                              Icon(
-                                Icons.location_city,
-                                color: Colors.grey,
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(right: 20),
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  widget.center.province.name,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                      color: Colors.grey[700]),
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(right: 20),
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  " - " + widget.center.city.name,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                      color: Colors.grey[700]),
-                                ),
-                              )
-                            ],
-                          )),
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.location_city,
+                                    color: Colors.grey,
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.only(right: 20),
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      widget.center.province.name,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          color: Colors.grey[700]),
+                                    ),
+                                  ),
+                                  Container(
+                                    margin: EdgeInsets.only(right: 20),
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      " - " + widget.center.city.name,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          color: Colors.grey[700]),
+                                    ),
+                                  )
+                                ],
+                              )),
                           Expanded(
                               child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              Container(
-                                child: Container(
-                                  alignment: Alignment.centerLeft,
-                                  child: BlocBuilder(
-                                    bloc: Provider.of<LoginStatusBloc>(context),
-                                    builder: (context, LoginStatusState state) {
-                                      return GestureDetector(
-                                        onTap: () {
-                                          if (state is IsLoggedIn) {
-                                            showDialog(
-                                                context: context,
-                                                builder: (context) =>
-                                                    _buildScoreSubmissionDialog((score) =>
-                                                        Provider.of<CentersRepository>(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  Container(
+                                    child: Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: BlocBuilder(
+                                        bloc: Provider.of<LoginStatusBloc>(context),
+                                        builder: (context, LoginStatusState state) {
+                                          return GestureDetector(
+                                            onTap: () {
+                                              if (state is IsLoggedIn) {
+                                                showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        _buildScoreSubmissionDialog((score) =>
+                                                            Provider.of<CentersRepository>(
                                                                 context)
-                                                            .submitCenterScore(
+                                                                .submitCenterScore(
                                                                 widget
                                                                     .center.id,
                                                                 score,
                                                                 state.user
                                                                     .sessionId)
-                                                            .then((success) {
-                                                          if (success) {
-                                                            Helpers.showToast(
-                                                                'امتیاز شما ثبت گردید.');
-                                                            Navigator.pop(
-                                                                context);
-                                                          } else {
-                                                            Fluttertoast.showToast(
-                                                                msg:
+                                                                .then((success) {
+                                                              if (success) {
+                                                                Helpers.showToast(
+                                                                    'امتیاز شما ثبت گردید.');
+                                                                Navigator.pop(
+                                                                    context);
+                                                              } else {
+                                                                Fluttertoast.showToast(
+                                                                    msg:
                                                                     "خطا در اتصال!",
-                                                                toastLength: Toast
-                                                                    .LENGTH_SHORT,
-                                                                gravity:
+                                                                    toastLength: Toast
+                                                                        .LENGTH_SHORT,
+                                                                    gravity:
                                                                     ToastGravity
                                                                         .BOTTOM,
-                                                                timeInSecForIos:
+                                                                    timeInSecForIos:
                                                                     1,
-                                                                backgroundColor:
+                                                                    backgroundColor:
                                                                     Colors.grey[
-                                                                        50],
-                                                                fontSize: 13.0);
-                                                          }
-                                                        })));
-                                          } else if (state is NotLoggedIn) {
-                                            Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        LoginPage()));
-                                          }
+                                                                    50],
+                                                                    fontSize: 13.0);
+                                                              }
+                                                            })));
+                                              } else if (state is NotLoggedIn) {
+                                                Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            LoginPage()));
+                                              }
+                                            },
+                                            child: RatingBarIndicator(
+                                              unratedColor: Colors.grey[400],
+                                              rating: double.parse(
+                                                  widget.center.score,
+                                                      (err) => 3.0),
+                                              itemBuilder: (context, index) => Icon(
+                                                Icons.star,
+                                                color: AppColors.main_color,
+                                              ),
+                                              itemCount: 5,
+                                              itemSize: 25.0,
+                                              direction: Axis.horizontal,
+                                            ),
+                                          );
                                         },
-                                        child: RatingBarIndicator(
-                                          unratedColor: Colors.grey[400],
-                                          rating: double.parse(
-                                              widget.center.score,
-                                              (err) => 3.0),
-                                          itemBuilder: (context, index) => Icon(
-                                            Icons.star,
-                                            color: AppColors.main_color,
-                                          ),
-                                          itemCount: 5,
-                                          itemSize: 25.0,
-                                          direction: Axis.horizontal,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              )
-                            ],
-                          ))
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ))
                         ],
                       ),
                     ),
@@ -201,45 +212,45 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
             widget.center.address == ''
                 ? Container()
                 : new Container(
-                    padding: EdgeInsets.only(top: 13, bottom: 8),
-                    color: AppColors.main_color,
-                    child: Row(
-                      children: <Widget>[
-                        GestureDetector(
-                          child: Container(
-                            height: 44,
-                            width: 44,
-                            margin: EdgeInsets.only(
-                                right: 4, left: 14, bottom: 10, top: 10),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(40),
-                                color: Colors.white),
-                            child: Container(
-                              padding: EdgeInsets.all(5),
-                              margin: EdgeInsets.only(top: 5, bottom: 5),
-                              child: AppIcons.showOnMap(AppColors.main_color),
-                            ),
-                          ),
-                          onTap: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return MapWgt(widget.center.location);
-                                });
-                          },
-                        ),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              "${widget.center.address}",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        )
-                      ],
+              padding: EdgeInsets.only(top: 13, bottom: 8),
+              color: Colors.grey[300],
+              child: Row(
+                children: <Widget>[
+                  GestureDetector(
+                    child: Container(
+                      height: 44,
+                      width: 44,
+                      margin: EdgeInsets.only(
+                          right: 4, left: 14, bottom: 10, top: 10),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(40),
+                          color: Colors.white),
+                      child: Container(
+                        padding: EdgeInsets.all(5),
+                        margin: EdgeInsets.only(top: 5, bottom: 5),
+                        child: AppIcons.showOnMap(AppColors.main_color),
+                      ),
                     ),
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return MapWgt(widget.center.location);
+                          });
+                    },
                   ),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        "${widget.center.address}",
+                        style: TextStyle(color: AppColors.main_color),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
             new Container(
               height: 46,
               padding: EdgeInsets.only(right: 16),
@@ -323,13 +334,13 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) =>
                                 ChatPage(
-                                ChatBloc(
-                                    ChatRepository(Provider.of<Net>(context),
-                                        ClientChatUser(state.user.appUserId),
-                                        sessionId: state.user.sessionId),
-                                    CenterChatUser(
-                                        widget.center.id.toString())),
-                                widget.center.name)));
+                                    ChatBloc(
+                                        ChatRepository(Provider.of<Net>(context),
+                                            ClientChatUser(state.user.appUserId),
+                                            sessionId: state.user.sessionId),
+                                        CenterChatUser(
+                                            widget.center.id.toString())),
+                                    widget.center.name)));
                       } else {
                         Navigator.push(
                             context,
@@ -397,7 +408,6 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
                 ? _buildWorkingDayWidget(widget.center.workingDays)
                 : Container(),
             Divider(),
-
             Container(
               child: Text(
                 "خدمات مرکز",
@@ -405,8 +415,8 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
               ),
               margin: EdgeInsets.only(right: 10, top: 10),
             ),
-            StreamBuilder(
-                stream: Provider.of<ServicesRepository>(context)
+            FutureBuilder(
+                future: Provider.of<ServicesRepository>(context)
                     .getCenterServices(widget.center.departmentId),
                 builder: (context, AsyncSnapshot<List<Service>> snapshot) {
                   if (snapshot.data != null && snapshot.data.isNotEmpty) {
@@ -440,86 +450,94 @@ class _CenterDetailPageState extends State<CenterDetailPage> {
 
   Widget _buildWorkingDayWidget(List<WorkingDay> wkds) {
     return Column(
-        children: wkds
-            .map((wkd) =>
-        wkd.days.isNotEmpty
-            ? Column(
-          children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            child: Text('روزهای کاری :'),
+            alignment: Alignment.centerRight,
+            padding: EdgeInsets.only(right: 24, top: 8),
+          )
+        ] +
+            wkds
+                .map((wkd) =>
+            wkd.days.isNotEmpty
+                ? Column(
               children: <Widget>[
-                Container(
-                  child: Icon(Icons.date_range,
-                      color: AppColors.main_color),
-                  margin: EdgeInsets.only(right: 10),
-                ),
-                Expanded(
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Wrap(
-                      children: wkd.days
-                          .map((d) =>
-                          Container(
-                            child: Text(d.toString()),
-                            margin:
-                            EdgeInsets.only(right: 1, top: 1),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 8),
-                            color: Colors.blueGrey[50],
-                          ))
-                          .toList(),
+                Divider(),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      child: Icon(Icons.date_range,
+                          color: Colors.grey[700]),
+                      margin: EdgeInsets.only(right: 10),
                     ),
-                  ),
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: Wrap(
+                          children: wkd.days
+                              .map((d) =>
+                              Container(
+                                child: Text(d.toString()),
+                                margin: EdgeInsets.only(
+                                    right: 1, top: 1),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 8),
+                                color: Colors.blueGrey[50],
+                              ))
+                              .toList(),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                Container(
-                  child: Icon(
-                    Icons.access_time,
-                    color: AppColors.main_color,
-                  ),
-                  margin: EdgeInsets.only(right: 10, left: 20),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  height: 60,
-                  margin: EdgeInsets.only(left: 14),
-                  child: Text(
-                    wkd.from.substring(0, 5),
-                    style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.main_color),
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  height: 60,
-                  margin: EdgeInsets.only(left: 14),
-                  child: Text("-"),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  height: 60,
-                  child: Text(
-                    wkd.to.substring(0, 5),
-                    style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.main_color),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(left: 30),
+                Row(
+                  children: <Widget>[
+                    Container(
+                      child: Icon(
+                        Icons.access_time,
+                        color: Colors.blueGrey,
+                      ),
+                      margin: EdgeInsets.only(right: 10, left: 20),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      height: 60,
+                      margin: EdgeInsets.only(left: 14),
+                      child: Text(
+                        wkd.from.substring(0, 5),
+                        style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.main_color),
+                      ),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      height: 60,
+                      margin: EdgeInsets.only(left: 14),
+                      child: Text("-"),
+                    ),
+                    Container(
+                      alignment: Alignment.center,
+                      height: 60,
+                      child: Text(
+                        wkd.to.substring(0, 5),
+                        style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.main_color),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 30),
+                    )
+                  ],
                 )
               ],
             )
-          ],
-        )
-            : Container())
-            .toList());
+                : Container())
+                .toList());
   }
 
   Widget _buildScoreSubmissionDialog(Function(int score) onClick) {

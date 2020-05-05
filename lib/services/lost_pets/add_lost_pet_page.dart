@@ -25,7 +25,7 @@ class FCRequestPage extends StatefulWidget {
 }
 
 class _FCRequestPageState extends State<FCRequestPage> {
-  LostPetReqType currentType;
+  FCReqType currentType;
   List<AnimalType> allTypes;
 
   LostPetsBloc _bloc;
@@ -35,6 +35,7 @@ class _FCRequestPageState extends State<FCRequestPage> {
   City currentCity;
   Province currentProvince;
   int currentGender;
+  int currentSterilization;
   DateTime currentTime;
   int currentAge;
   String currentLocation;
@@ -47,7 +48,7 @@ class _FCRequestPageState extends State<FCRequestPage> {
 
   final TextEditingController dateController = TextEditingController();
 
-  List<LostPetReqType> requestTypes;
+  List<FCReqType> requestTypes;
   final GlobalKey<FormBuilderState> _formKey = GlobalKey<FormBuilderState>();
 
   @override
@@ -66,12 +67,12 @@ class _FCRequestPageState extends State<FCRequestPage> {
 
     requestTypes = !widget.isAdoption
         ? [
-            LostPetReqType(2, "پیدا شده ها", "", 20000),
-            LostPetReqType(1, "گمشده ها", "", 10000),
+      FCReqType(2, "پیدا شده ها", "", 20000),
+      FCReqType(1, "گمشده ها", "", 10000),
           ]
         : [
-            LostPetReqType(3, "واگذاری سرپرستی", "", 10000),
-            LostPetReqType(4, "برعهده گیری سرپرستی", "", 20000),
+      FCReqType(3, "واگذاری سرپرستی", "", 10000),
+      FCReqType(4, "برعهده گیری سرپرستی", "", 20000),
           ];
 
     return Scaffold(
@@ -211,23 +212,29 @@ class _FCRequestPageState extends State<FCRequestPage> {
                                   currentCity = c;
                                 }),
                               ),
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 20),
+                              !widget.isAdoption
+                                  ? Container(
+                                padding:
+                                EdgeInsets.symmetric(horizontal: 20),
                                 child: FormBuilderTextField(
                                   onChanged: (text) {
                                     currentLocation = text;
                                   },
-                                  attribute: "age",
+                                  attribute: "location",
                                   decoration: InputDecoration(
-                                      labelText: "محلِ گم شدن / پیدا شدن",
+                                      labelText: currentType.id == 1
+                                          ? "محلِ گم شدن"
+                                          : 'محل پیدا شدن',
                                       hintStyle: TextStyle(fontSize: 13),
-                                      labelStyle: TextStyle(fontSize: 13)),
+                                      labelStyle:
+                                      TextStyle(fontSize: 13)),
                                   validators: [
                                     FormBuilderValidators.numeric(),
                                     FormBuilderValidators.max(70),
                                   ],
                                 ),
-                              ),
+                              )
+                                  : Container(),
                               new Container(
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 20, vertical: 20),
@@ -329,25 +336,49 @@ class _FCRequestPageState extends State<FCRequestPage> {
                               ],
                             )
                           : Container(
-                              padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: FormBuilderTextField(
-                                onChanged: (text) {
-                                  currentPhone = text;
-                                },
-                                attribute: "ag",
-                                keyboardType: TextInputType.phone,
-                                decoration: InputDecoration(
-                                    labelText: "وضعیت عقیم سازی",
-                                    hintStyle: TextStyle(fontSize: 13),
-                                    labelStyle: TextStyle(fontSize: 13)),
-                                validators: [
-                                  FormBuilderValidators.numeric(),
-                                  FormBuilderValidators.max(70),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 20),
+                        child: Row(
+                          children: <Widget>[
+                            Text(
+                              "وضعیت عقیم سازی: ",
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            Expanded(
+                              child: Container(
+                                alignment: Alignment.centerRight,
+                                child: RadioButtonGroup(
+                                  labelStyle: TextStyle(fontSize: 11),
+                                  orientation: GroupedButtonsOrientation
+                                      .HORIZONTAL,
+                                  labels: [
+                                    "    نمی دانم    ",
+                                    "   عقیم شده   ",
+                                    "   عقیم نشده   ",
+                                  ],
+                                  onSelected: (selected) {
+                                    switch (selected) {
+                                      case "    نمی دانم    ":
+                                        currentSterilization = 0;
+                                        break;
+
+                                      case "   عقیم شده   ":
+                                        currentSterilization = 2;
+                                        break;
+
+                                      case "   عقیم نشده   ":
+                                        currentSterilization = 1;
+                                        break;
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
                                 ],
                               ),
                             ),
                       new Container(
-                        margin: EdgeInsets.only(top: 30, bottom: 40),
+                        margin: EdgeInsets.only(top: 30, bottom: 5),
                         child: new Row(
                           children: <Widget>[
                             Expanded(
@@ -369,31 +400,32 @@ class _FCRequestPageState extends State<FCRequestPage> {
                                 ),
                               ),
                             ),
+                            currentType.id == 3 || currentType.id == 1 ?
                             Expanded(
                                 child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: FormBuilderTextField(
-                                onChanged: (text) {
-                                  currentName = text;
-                                },
-                                attribute: "name",
-                                decoration: InputDecoration(
-                                    labelText: "نام حیوان",
-                                    hintStyle: TextStyle(fontSize: 13),
-                                    labelStyle: TextStyle(fontSize: 13)),
-                                validators: [
-                                  FormBuilderValidators.numeric(),
-                                  FormBuilderValidators.max(70),
-                                ],
-                              ),
-                            ))
+                                  padding: EdgeInsets.symmetric(horizontal: 20),
+                                  child: FormBuilderTextField(
+                                    onChanged: (text) {
+                                      currentName = text;
+                                    },
+                                    attribute: "name",
+                                    decoration: InputDecoration(
+                                        labelText: "نام حیوان",
+                                        hintStyle: TextStyle(fontSize: 13),
+                                        labelStyle: TextStyle(fontSize: 13)),
+                                    validators: [
+                                      FormBuilderValidators.numeric(),
+                                      FormBuilderValidators.max(70),
+                                    ],
+                                  ),
+                                )) : Container()
                           ],
                         ),
                       ),
                       new Container(
-                        decoration: BoxDecoration(
+                        /* decoration: BoxDecoration(
                             border: Border.all(color: AppColors.main_color),
-                            borderRadius: BorderRadius.circular(5)),
+                            borderRadius: BorderRadius.circular(5)),*/
                         height: 100,
                         padding:
                             EdgeInsets.symmetric(vertical: 6, horizontal: 8),

@@ -50,7 +50,7 @@ class _CommentsPageState extends State<CommentsPage> {
                         setState(() {});
                         Helpers.showToast('نظر شما ارسال شد.');
                       } else {
-                        Helpers.errorToast();
+                        Helpers.showErrorToast();
                       }
                     }));
           } else {

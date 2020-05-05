@@ -54,7 +54,7 @@ class _ChatPageState extends State<ChatPage> {
                     return _buildMessageList();
                   } else if (loadedMessages != null) {
                     if (state is FailedLoadingChat) {
-                      Helpers.errorToast();
+                      Helpers.showErrorToast();
                       return Container();
                     }
                     return _buildMessageList();

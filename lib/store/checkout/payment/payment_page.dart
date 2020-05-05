@@ -12,7 +12,6 @@ import 'package:store/common/widgets/form_fields.dart';
 import 'package:store/store/checkout/checkout_bloc.dart';
 import 'package:store/store/checkout/checkout_event_state.dart';
 import 'package:store/store/checkout/coupon/coupon_repository.dart';
-import 'package:store/store/checkout/delivery/delivery_page.dart';
 import 'package:store/store/home/home_page.dart';
 import 'package:store/store/products/cart/cart_bloc.dart';
 import 'package:store/store/products/cart/cart_bloc_event.dart';
@@ -38,7 +37,6 @@ class _PaymentPageState extends State<PaymentPage> {
   bool launched = false;
   final BehaviorSubject<bool> couponOverlayVisibility =
   BehaviorSubject.seeded(false);
-
 
   @override
   void dispose() {
@@ -69,7 +67,6 @@ class _PaymentPageState extends State<PaymentPage> {
       }
     });
 
-
     return Stack(
       children: <Widget>[
         BlocBuilder(
@@ -78,22 +75,8 @@ class _PaymentPageState extends State<PaymentPage> {
 //        if (state is CheckoutPayment) {
             return Scaffold(
                 appBar: CustomAppBar(
-                  actions: <Widget>[
-                    IconButton(icon: Icon(Icons.arrow_back), onPressed: () {
-                      Navigator.popAndPushNamed(
-                          context, DeliveryPage.routeName);
-                    },)
-                  ],
-                  title: Text(
-                    'پرداخت',
-                    style: TextStyle(fontSize: 16, color: AppColors.main_color),
-                  ),
-                  leading: IconButton(
-                      icon: Icon(Icons.arrow_back),
-                      color: AppColors.main_color,
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      }),
+                  titleText: 'فاکتور نهایی',
+                  light: true,
                 ),
                 body: state is OrderPayment
                     ? Column(
@@ -275,7 +258,7 @@ class _PaymentPageState extends State<PaymentPage> {
             child: Container(
               decoration: BoxDecoration(
                   color: Colors.white,
-                  border: Border(top: BorderSide(color: AppColors.grey[300]))),
+                  border: Border(top: BorderSide(color: Colors.grey[300]))),
               child: Row(
                 children: <Widget>[
                   Expanded(
@@ -306,8 +289,7 @@ class _PaymentPageState extends State<PaymentPage> {
                               child: Align(
                                 alignment: Alignment.center,
                                 child: Text(
-                                  Price.parseFormatted(
-                                      state.toPayAmount),
+                                  Price.parseFormatted(state.toPayAmount),
                                   style: TextStyle(
                                       color: Colors.grey[900], fontSize: 14),
                                 ),
@@ -325,7 +307,6 @@ class _PaymentPageState extends State<PaymentPage> {
           GestureDetector(
             onTap: () async {
               _checkoutBloc.dispatch(ReadyForGateway());
-
 
               _launchSub ??= _checkoutBloc.state.listen((state) {
                 if (state is LaunchGateway) {

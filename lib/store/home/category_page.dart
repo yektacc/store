@@ -45,7 +45,7 @@ class _CategoryPageState extends State<CategoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        altBackground: widget.altColor,
+        altMainColor: widget.altColor,
         title: StreamBuilder<Identifier>(
           stream: _currentIdentifier,
           builder: (context, snapshot) {

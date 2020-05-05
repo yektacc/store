@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
@@ -32,7 +31,7 @@ class DeliveryPage extends StatefulWidget {
 }
 
 class _DeliveryPageState extends State<DeliveryPage> {
-  var selectedDayOfMonth = BehaviorSubject<List<DayOfMonth>>.seeded([]);
+  var selectedDayOfMonth = BehaviorSubject<List<PersianDayOfMonth>>.seeded([]);
   var selectedHourFrom = BehaviorSubject.seeded(-1);
   var selectedHourTo = BehaviorSubject<int>.seeded(-1);
   StreamSubscription checkoutSub;
@@ -80,8 +79,10 @@ class _DeliveryPageState extends State<DeliveryPage> {
         if (checkoutState is OrderWithDeliveryInf) {
           return Scaffold(
             appBar: CustomAppBar(
+              titleText: "ارسال",
               light: true,
-              leading: IconButton(
+              elevation: 0,
+              /*   leading: IconButton(
                 onPressed: () {
                   SchedulerBinding.instance.addPostFrameCallback((_) {
                     Navigator.of(context).pop();
@@ -91,11 +92,7 @@ class _DeliveryPageState extends State<DeliveryPage> {
                   Icons.arrow_back,
                   color: AppColors.main_color,
                 ),
-              ),
-              title: Text(
-                "ارسال",
-                style: TextStyle(color: AppColors.main_color),
-              ),
+              ),*/
             ),
             body: Column(
               children: <Widget>[
@@ -117,10 +114,10 @@ class _DeliveryPageState extends State<DeliveryPage> {
                       }),
                 ),
                 Container(
-                  height: 50,
+                  height: 60,
                   width: double.infinity,
                   padding: EdgeInsets.only(right: 12, top: 16, bottom: 16),
-                  color: Colors.grey[300],
+                  color: Colors.grey[100],
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[

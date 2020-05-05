@@ -22,9 +22,6 @@ class SortSelection extends StatefulWidget {
 }
 
 class _SortSelectionState extends State<SortSelection> {
-/*
-  BehaviorSubject<int> selectedTypeIndex = BehaviorSubject.seeded(-1);
-*/
 
   final List<String> sortingTitles = [
     "قیمت (صعودی)",

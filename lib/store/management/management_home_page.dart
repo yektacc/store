@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -5,11 +7,12 @@ import 'package:store/common/constants.dart';
 import 'package:store/common/loading_widget.dart';
 import 'package:store/common/widgets/app_widgets.dart';
 import 'package:store/data_layer/province/province_repository.dart';
-import 'package:store/store/management/management_login_bloc.dart';
 import 'package:store/store/management/management_login_event_state.dart';
+import 'package:store/store/management/manager_login_bloc.dart';
 import 'package:store/store/management/seller/shop_management_page.dart';
 import 'package:store/store/management/service/service_management_page.dart';
 
+import 'manager_login_page.dart';
 import 'model.dart';
 
 class ManagementHomePage extends StatefulWidget {
@@ -23,12 +26,19 @@ class ManagementHomePage extends StatefulWidget {
 
 class _ManagementHomePageState extends State<ManagementHomePage> {
   ManagerLoginBloc _managerLoginBloc;
+  StreamSubscription blocSub;
 
   @override
   Widget build(BuildContext context) {
-    if (_managerLoginBloc != null) {
+    if (_managerLoginBloc == null) {
       _managerLoginBloc = Provider.of<ManagerLoginBloc>(context);
     }
+
+    blocSub ??= _managerLoginBloc.state.listen((state) {
+      if (state is SMWaitingForLogin) {
+        Navigator.of(context).popAndPushNamed(ManagerLoginPage.routeName);
+      }
+    });
 
     return Container(
       child: Scaffold(
@@ -85,6 +95,40 @@ class _ManagementHomePageState extends State<ManagementHomePage> {
                                   .toList(),
                             ),
                           ),
+                          Container(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                GestureDetector(
+                                  child: Card(
+                                    child: Padding(
+                                      child: Row(
+                                        children: <Widget>[
+                                          Text(
+                                            'خروج از حساب',
+                                            style: TextStyle(color: Colors.red),
+                                          ),
+                                          Padding(
+                                            child: Icon(
+                                              Icons.exit_to_app,
+                                              color: Colors.red,
+                                            ),
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 5, vertical: 5),
+                                          )
+                                        ],
+                                      ),
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 7, horizontal: 9),
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    _managerLoginBloc.dispatch(LogoutManager());
+                                  },
+                                )
+                              ],
+                            ),
+                          )
                         ],
                       ),
                     )
@@ -96,6 +140,12 @@ class _ManagementHomePageState extends State<ManagementHomePage> {
             },
           )),
     );
+  }
+
+  @override
+  void dispose() {
+    blocSub.cancel();
+    super.dispose();
   }
 
   Widget _buildCenterItem(CenterIdentifier identifier) {
@@ -162,97 +212,4 @@ class _ManagementHomePageState extends State<ManagementHomePage> {
       ),
     );
   }
-
-/*  _showShopSelection(BuildContext context, List<ShopIdentifier> shops,
-      Function(ShopIdentifier) onShopTapped) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        var provinceRepo = Provider.of<ProvinceRepository>(context);
-
-        return new AlertDialog(
-          titlePadding: EdgeInsets.only(),
-          title: Column(
-            children: <Widget>[
-              Container(
-                width: double.infinity,
-                height: 65,
-                color: Colors.grey[200],
-                alignment: Alignment.center,
-                child: Text(
-                  'فروشگاه مورد نظر را انتخاب کنید',
-                  style: TextStyle(fontSize: 12),
-                ),
-              ),
-              new Container(
-                width: double.infinity,
-                child: Column(
-                  children: shops
-                      .map((shop) => Container(
-                            height: 60,
-                            child: Card(
-                              margin: EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 8),
-                              child: ListTile(
-                                title: FlatButton(
-                                  child: Container(
-                                    child: Row(
-                                      children: <Widget>[
-                                        Text(shop.name),
-                                        Expanded(
-                                            child: Container(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(provinceRepo
-                                              .getCityName(shop.cityId)),
-                                        ))
-                                      ],
-                                    ),
-                                    alignment: Alignment.center,
-                                  ),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    onShopTapped(shop);
-                                  },
-                                ),
-                              ),
-                            ),
-                          ))
-                      .toList(),
-                ),
-              )
-            ],
-          ),
-        );
-      },
-    );
-  }*/
 }
-
-//Widget _buildOrderListItem(ShopOrder order) {
-//  return Column(
-//    children: <Widget>[
-//      Container(
-//        margin: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-//        child: Container(
-//          child: Column(
-//            children: <Widget>[
-//              Container(
-//                height: 40,
-//                alignment: Alignment.centerRight,
-//                child: Text(order.quantity.toString()),
-//              ),
-//              Row(
-//                children: <Widget>[
-//                  Expanded(
-//                    child: Text('سفارش'),
-//                  )
-//                ],
-//              )
-//            ],
-//          ),
-//        ),
-//      ),
-//      Divider()
-//    ],
-//  );
-//}
