@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:store/data_layer/fcm/fcm_token_repository.dart';
 import 'package:store/services/centers/centers_list_page.dart';
+import 'package:store/services/centers/centers_page.dart';
 import 'package:store/services/centers/model.dart';
 import 'package:store/services/lost_pets/lost_pets_page.dart';
 import 'package:store/services/lost_pets/lost_pets_repository.dart';
@@ -12,8 +13,8 @@ import 'package:store/store/login_register/login/login_bloc.dart';
 import 'package:store/store/login_register/login/login_event_state.dart';
 import 'package:store/store/login_register/login_status/login_status_bloc.dart';
 import 'package:store/store/login_register/login_status/login_status_event_state.dart';
-import 'package:store/store/management/manager_login_bloc.dart';
 import 'package:store/store/management/management_login_event_state.dart';
+import 'package:store/store/management/manager_login_bloc.dart';
 
 class LandingPage extends StatefulWidget {
   @override
@@ -88,7 +89,6 @@ class _LandingPageState extends State<LandingPage> {
                     }
                   }
 
-                  print('attempting running it');
                   Provider.of<ManagerLoginBloc>(context)
                       .dispatch(InitiateManagerLogin());
 
@@ -108,7 +108,7 @@ class _LandingPageState extends State<LandingPage> {
                               onTap: () {
                                 Navigator.of(context).push(MaterialPageRoute(
                                     builder: (context) =>
-                                        CenterPage(CenterFetchType.CLINICS)));
+                                        CentersPage() /*CentersListPage(CenterFetchType.CLINICS)*/));
                               },
                               child: new Card(
                                 margin: EdgeInsets.symmetric(
@@ -168,7 +168,7 @@ class _LandingPageState extends State<LandingPage> {
                               onTap: () {
                                 Navigator.of(context).push(MaterialPageRoute(
                                     builder: (context) =>
-                                        CenterPage(
+                                        CentersListPage(
                                             CenterFetchType.PENSION_BARBER)));
                               },
                               child: new Card(
@@ -234,8 +234,7 @@ class _LandingPageState extends State<LandingPage> {
                         color: Colors.grey[100],
                         child: new GestureDetector(
                           onTap: () {
-                            Navigator.of(context)
-                                .pushNamed(HomePage.routeName);
+                            Navigator.of(context).pushNamed(HomePage.routeName);
                           },
                           child: new Container(
                               margin: EdgeInsets.only(top: 7, bottom: 7),

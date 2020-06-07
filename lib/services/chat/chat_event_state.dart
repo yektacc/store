@@ -33,6 +33,7 @@ class ChatLoaded extends ChatState {
   }
 }
 
+
 class FailedLoadingChat extends ChatState {
   @override
   String toString() {

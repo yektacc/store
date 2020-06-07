@@ -39,19 +39,25 @@ class InboxBloc extends Bloc<InboxEvent, InboxState> {
             newMessage = true;
           }
         });
-        yield InboxLoaded(makeChatBlocs(messages), newMessage);
+        yield InboxLoaded(_makeChatBlocs(messages), newMessage);
+      } else {
+        yield InboxLoadingFailed();
+      }
+    } else if (event is SendBroadcast) {
+      var success = await _chatRepository.requestBroadcastChat();
+      if (success) {
+        yield BroadcastSent();
       } else {
         yield InboxLoadingFailed();
       }
     }
   }
 
-  List<ChatBloc> makeChatBlocs(List<FullMessage> messages) {
+  List<ChatBloc> _makeChatBlocs(List<FullMessage> messages) {
     List<Chat> chats = [];
 
     messages.forEach((msg) {
       print(msg.toString());
-//      print(msg.st);
 
       bool sentByMe = false;
       if (_owner is ClientChatUser && msg.sender == 'user') {

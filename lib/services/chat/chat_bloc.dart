@@ -48,10 +48,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         var contactInfo = await _chatRepository.getContactInfo(other);
 
         yield ChatLoaded(
-            Chat(
-                messages.toList() /*.reversed.toList()*/, _chatRepository.owner,
-                other,
-                chatId),
+            Chat(messages.toList() /*.reversed.toList()*/,
+                _chatRepository.owner, other, chatId),
             contactInfo);
 
         print(messages);

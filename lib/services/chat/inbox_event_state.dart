@@ -47,3 +47,11 @@ class SendMessage extends InboxEvent {
 }*/
 
 class UpdateInbox extends InboxEvent {}
+
+class SendBroadcast extends InboxEvent {
+  final String message;
+
+  SendBroadcast(this.message);
+}
+
+class BroadcastSent extends InboxState {}

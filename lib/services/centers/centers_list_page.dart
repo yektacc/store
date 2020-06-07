@@ -14,21 +14,21 @@ import 'package:store/store/products/search/search_bloc.dart';
 import 'centers_bloc.dart';
 import 'model.dart';
 
-class CenterPage extends StatefulWidget {
+class CentersListPage extends StatefulWidget {
   static const String routeName = 'centerpage';
 
   final CenterFilterWidget filterWidget;
 
   final CenterFetchType type;
 
-  CenterPage(this.type)
+  CentersListPage(this.type)
       : this.filterWidget = CenterFilterWidget(CenterFilter(type));
 
   @override
-  _CenterPageState createState() => _CenterPageState();
+  _CentersListPageState createState() => _CentersListPageState();
 }
 
-class _CenterPageState extends State<CenterPage> {
+class _CentersListPageState extends State<CentersListPage> {
   GoogleMapController mapController;
   CentersBloc _centersBloc;
 
@@ -102,7 +102,12 @@ class _CenterPageState extends State<CenterPage> {
                           delegate: CentersSearchDelegate(widget.type),
                         );
                       },
-                    ),
+                    ), IconButton(
+                      icon: Icon(Icons.chat),
+                      onPressed: () {
+//                       Provider.of<InboxManager>(context).userInbox.dispatch(SendBroadcast());
+                      },
+                    )
                   ],
                   titleText: name,
                 ),

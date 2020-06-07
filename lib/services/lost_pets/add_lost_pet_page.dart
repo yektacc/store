@@ -400,10 +400,11 @@ class _FCRequestPageState extends State<FCRequestPage> {
                                 ),
                               ),
                             ),
-                            currentType.id == 3 || currentType.id == 1 ?
-                            Expanded(
+                            currentType.id == 3 || currentType.id == 1
+                                ? Expanded(
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 20),
+                                  padding:
+                                  EdgeInsets.symmetric(horizontal: 20),
                                   child: FormBuilderTextField(
                                     onChanged: (text) {
                                       currentName = text;
@@ -418,7 +419,8 @@ class _FCRequestPageState extends State<FCRequestPage> {
                                       FormBuilderValidators.max(70),
                                     ],
                                   ),
-                                )) : Container()
+                                ))
+                                : Container()
                           ],
                         ),
                       ),

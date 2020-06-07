@@ -37,7 +37,11 @@ class ChatRepository {
 
       var res = await _net.post(EndPoint.START_CHAT,
           cacheEnabled: false,
-          body: {'session_id': sessionId, 'srv_center_id': srvCenterId});
+          body: {
+            'session_id': sessionId,
+            'srv_center_id': srvCenterId,
+            'is_broadcast': '1'
+          });
 
       if (res is SuccessResponse) {
         var chatId = Map.of(res.data)['chat_id'];
@@ -46,9 +50,6 @@ class ChatRepository {
         Helpers.showErrorToast();
         return -1;
       }
-//      } else {
-//        return chatId;
-//      }
     } else {
       throw Exception("can't start a chat with no session id");
     }
@@ -88,10 +89,26 @@ class ChatRepository {
       'srv_center_id': srvCenterId,
       'sender': sender,
       'message': message.text,
-      'chat_id': chatId
+      'chat_id': chatId,
     });
 
     return res is SuccessResponse;
+  }
+
+  Future<bool> requestBroadcastChat() async {
+    if (sessionId != null) {
+      if (owner is ClientChatUser) {
+        var res = await _net.post(EndPoint.START_CHAT,
+            cacheEnabled: false,
+            body: {'session_id': sessionId, 'is_broadcast': '1'});
+
+        return res is SuccessResponse;
+      } else {
+        throw (Exception('the types arent valid for starting chat'));
+      }
+    } else {
+      throw Exception("can't start a chat with no session id");
+    }
   }
 
   Future<List<FullMessage>> getAllMessages() async {

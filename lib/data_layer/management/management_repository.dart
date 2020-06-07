@@ -182,7 +182,6 @@ class ManagementRepository {
   final key2 = 'sm_password';
 
   Future<ManagerUser> readManagerUser() async {
-    print('this function was called');
     WidgetsFlutterBinding.ensureInitialized();
 
     final prefs = await SharedPreferences.getInstance();
